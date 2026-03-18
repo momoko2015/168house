@@ -1,0 +1,23 @@
+{
+  "name": "property_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "python server.py",
+    "sync": "copy index.html www && copy app.js www && copy style.css www && copy utils.js www && copy manifest.json www && copy logo.png www && npx cap sync",
+    "build:android": "npm run sync && npx cap open android",
+    "build:ios": "npm run sync && npx cap open ios",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/ios": "^8.2.0"
+  }
+}

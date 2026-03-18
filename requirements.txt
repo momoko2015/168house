@@ -1,0 +1,3 @@
+gunicorn==21.2.0
+python-dotenv==1.0.0
+# Add any other libraries if needed, though this server is using built-in http.server

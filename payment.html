@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>升級樓盤 - 28精選樓盤</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="utils.js"></script>
+    <style>
+        .payment-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .payment-container {
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .payment-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .property-preview-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .property-preview-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .preview-content {
+            padding: 25px;
+            flex: 1;
+        }
+
+        .payment-form-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+        }
+
+        .card-element {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 0;
+            width: 100%;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .card-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            color: #94a3b8;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-btn:hover {
+            color: white;
+        }
+
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: #1a1a2e;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .check-icon {
+            font-size: 80px;
+            color: #4ade80;
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-background">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+    </div>
+
+    <a href="login.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> 返回控制台
+    </a>
+
+    <div class="payment-page">
+        <div class="payment-container">
+            <!-- Left: Property Info -->
+            <div class="property-preview-card">
+                <img id="propImage" src="" class="property-preview-img" alt="Property">
+                <div class="preview-content">
+                    <span style="background: rgba(255,215,0,0.1); color: #ffd700; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; display: inline-block;">
+                        <i class="fas fa-star"></i> 精選推廣
+                    </span>
+                    <h2 id="propTitle" style="margin-bottom: 10px;">正在載入樓盤資訊...</h2>
+                    <p id="propLoc" style="color: #94a3b8; margin-bottom: 25px;"><i class="fas fa-map-marker-alt"></i></p>
+                    
+                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <h4 style="margin-bottom: 15px; color: #cbd5e1;">服務詳情</h4>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+                            <span style="color: #94a3b8;">首頁置頂推廣</span>
+                            <span>30 天</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+                            <span style="color: #94a3b8;">黃金邊框 + 皇冠圖標</span>
+                            <span>已包含</span>
+                        </div>
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
+                            <span>總計</span>
+                            <span style="color: #ffd700;">HK$ 499.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Payment Form -->
+            <div class="payment-form-sidebar">
+                <h2 style="margin-bottom: 10px;">付款詳情</h2>
+                <p style="color: #94a3b8; margin-bottom: 35px; font-size: 0.9rem;">請輸入信用卡資訊以完成升級</p>
+
+                <form id="paymentForm">
+                    <div class="card-element">
+                        <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">持卡人姓名</label>
+                        <input type="text" class="card-input" placeholder="Name on Card" required>
+
+                        <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; display: block;">卡號</label>
+                        <input type="text" class="card-input" placeholder="0000 0000 0000 0000" required maxlength="19">
+
+                        <div class="card-row">
+                            <div style="flex: 1;">
+                                <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">有效日期</label>
+                                <input type="text" class="card-input" placeholder="MM / YY" required maxlength="5">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">CVC</label>
+                                <input type="password" class="card-input" placeholder="***" required maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-primary" style="width: 100%; height: 55px; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1a1a2e; font-weight: 800; font-size: 1.1rem; border: none;">
+                        確認支付 HK$ 499
+                    </button>
+                    
+                    <div class="secure-badge">
+                        <i class="fas fa-lock"></i> 加密連接 · 安全支付技術保障
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <i class="fas fa-check-circle check-icon"></i>
+        <h1 style="font-size: 2.5rem; margin-bottom: 15px;">支付成功！</h1>
+        <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 40px;">您的樓盤已成功升級並置頂。<br>系統將在 3 秒後返回控制台...</p>
+        <div class="loader" style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #4ade80; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const propId = urlParams.get('id');
+
+        async function initPage() {
+            if (!propId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(API_BASE + '/api/properties');
+                const props = await res.json();
+                const property = props.find(p => p.id == propId);
+
+                if (property) {
+                    document.getElementById('propImage').src = property.image;
+                    document.getElementById('propTitle').innerText = property.title.zh || property.title.en;
+                    document.getElementById('propLoc').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${property.location.zh || property.location.en}`;
+                }
+            } catch (err) {
+                console.error("Failed to load property info", err);
+            }
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在處理支付...';
+
+            // Simulate high-end payment gateway delay
+            setTimeout(async () => {
+                try {
+                    const res = await fetch(API_BASE + `/api/properties/${propId}/promote`, { method: 'POST' });
+                    if (res.ok) {
+                        document.getElementById('successOverlay').style.display = 'flex';
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 3500);
+                    } else {
+                        alert("推廣失敗，請稍後再試。");
+                        btn.disabled = false;
+                        btn.innerText = '確認支付 HK$ 499';
+                    }
+                } catch (err) {
+                    alert("網路錯誤，請檢查連接。");
+                    btn.disabled = false;
+                    btn.innerText = '確認支付 HK$ 499';
+                }
+            }, 2000);
+        });
+
+        initPage();
+    </script>
+</body>
+
+</html>

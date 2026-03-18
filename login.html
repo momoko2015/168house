@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Estates - User Login & Add Listing</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="utils.js"></script>
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px 40px;
+            background: radial-gradient(circle at top right, rgba(114, 50, 242, 0.15), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(64, 16, 163, 0.15), transparent 40%);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .auth-card h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .auth-card p {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: #94a3b8;
+        }
+
+        .toggle-auth a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            display: none;
+            max-width: 1200px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .add-listing-card {
+            padding: 30px;
+            border-radius: 16px;
+        }
+
+        .my-listings .listing-item {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .listing-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .listing-info h3 {
+            margin-bottom: 5px;
+        }
+
+        .listing-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-edit-mode {
+            background: linear-gradient(135deg, #ffd700, #ff8c00) !important;
+            color: #1a1a2e !important;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .feature-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .feature-checkbox input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        /* Mobile Bottom Nav */
+        @media (max-width: 768px) {
+            .dashboard-tabs {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(15px);
+                z-index: 1000;
+                margin: 0;
+                padding: 10px 0;
+                box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: space-around;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .tab-btn {
+                flex-direction: column;
+                font-size: 0.7rem;
+                gap: 5px;
+                padding: 5px;
+                background: transparent;
+                border: none;
+            }
+
+            .dashboard-container {
+                padding-bottom: 80px;
+            }
+        }
+
+        /* Inquiry Item Styles */
+        .inquiry-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .inquiry-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .inquiry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+        }
+
+        .inquiry-sender {
+            font-weight: 600;
+            color: var(--accent-hover);
+        }
+
+        .inquiry-date {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .inquiry-msg {
+            font-style: italic;
+            color: #cbd5e1;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+
+        .inquiry-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            align-items: center;
+        }
+
+        .inquiry-meta i {
+            margin-right: 5px;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="logo">88精選樓盤</div>
+        <ul class="nav-links" style="margin-left: auto;">
+            <li><a href="index.html">返回主頁</a></li>
+        </ul>
+    </nav>
+
+    <!-- Auth View -->
+    <div class="login-container" id="authView">
+        <div class="auth-card glass-dark">
+            <h2 id="formTitle">歡迎回來</h2>
+            <p id="formDesc">登入以管理您的物業及刊登資訊。</p>
+
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group" id="nameGroup" style="display: none;">
+                    <label>全名</label>
+                    <input type="text" id="nameInput" placeholder="例如：陳大文">
+                </div>
+                <div class="form-group">
+                    <label>電子郵件</label>
+                    <input type="email" id="emailInput" placeholder="example@mail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary submit-btn" id="actionBtn">登入</button>
+            </form>
+
+            <div class="toggle-auth">
+                <span id="toggleText">還沒有帳戶？ </span>
+                <a href="#" id="toggleLink" onclick="toggleMode(event)">立即註冊</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard View (Shown after login) -->
+    <div class="dashboard-container" id="dashboardView">
+        <div class="dashboard-header">
+            <div>
+                <h2>歡迎，<span id="userNameDisplay">用戶</span>!</h2>
+                <p>管理您的房地產組合及設置。</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-outline" onclick="window.location.href='index.html'"><i class="fas fa-home"></i>
+                    返回首頁</button>
+                <button class="btn-outline" onclick="logout()">登出 <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="dashboard-stat-box">
+                <h4>刊登中樓盤</h4>
+                <p class="stat-val" id="statListings">0</p>
+            </div>
+            <div class="dashboard-stat-box">
+                <h4>收藏夾物業</h4>
+                <p class="stat-val" id="statFavorites">0</p>
+            </div>
+            <div class="dashboard-stat-box">
+                <h4>累計詢盤</h4>
+                <p class="stat-val">12</p>
+            </div>
+            <div class="dashboard-stat-box">
+                <h4>帳戶狀態</h4>
+                <p class="stat-val" style="color: #ffd700;">尊貴會員</p>
+            </div>
+        </div>
+
+        <div class="dashboard-tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'listingsTab')"><i class="fas fa-list-ul"></i>
+                我的刊登</button>
+            <button class="tab-btn" onclick="switchTab(event, 'favoritesTab')"><i class="fas fa-heart"></i>
+                我的收藏</button>
+            <button class="tab-btn" onclick="switchTab(event, 'inquiriesTab')"><i class="fas fa-envelope-open-text"></i>
+                收件箱</button>
+            <button class="tab-btn" onclick="switchTab(event, 'profileTab')"><i class="fas fa-user-circle"></i>
+                個人資料</button>
+        </div>
+
+        <!-- My Listings Tab -->
+        <div id="listingsTab" class="tab-content active">
+            <div class="dashboard-grid">
+                <!-- Add Listing Form -->
+                <div class="add-listing-card glass">
+                    <h3><i class="fas fa-plus-circle"></i> 刊登新樓盤</h3>
+                    <p style="color: #94a3b8; margin-bottom: 20px; font-size: 0.9rem;">填寫以下資料以發佈您的物業資訊。</p>
+
+                    <form id="addListingForm" onsubmit="addListing(event)">
+                        <div class="form-group">
+                            <label>物業名稱</label>
+                            <input type="text" id="propTitle" placeholder="例如：現代海邊別墅" required>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>種類</label>
+                                <select id="propType" required>
+                                    <option value="rent">租盤</option>
+                                    <option value="sale">售盤</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>價格 (HK$)</label>
+                                <input type="text" id="propPrice" placeholder="例如：50000/月 或 12000000" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>地點</label>
+                            <input type="text" id="propLocation" placeholder="例如：尖沙咀, 九龍" required>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>房間</label>
+                                <input type="number" id="propBeds" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>廁所</label>
+                                <input type="number" id="propBaths" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>呎數</label>
+                                <input type="number" id="propSqft" min="0" required>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>圖片網址 (或下面上載)</label>
+                                <input type="url" id="propImage" placeholder="https://unsplash.com/...">
+                            </div>
+                            <div class="form-group">
+                                <label>影片網址 (YouTube/MP4)</label>
+                                <input type="url" id="propVideo" placeholder="https://youtube.com/...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>上載物業相片 (可選多張)</label>
+                            <input type="file" id="propFile" accept="image/*" multiple style="padding: 8px;"
+                                onchange="previewImagesSelected('propFile', 'imagePreview')">
+                            <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                            </div>
+                            <div id="uploadStatus"
+                                style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>地區區域</label>
+                            <select id="propArea" required>
+                                <option value="HK">香港 (Hong Kong)</option>
+                                <option value="China">中國內地 (Mainland China)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>物業特色</label>
+                            <div class="features-grid">
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景">
+                                    海景</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適">
+                                    寧靜舒適</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵">
+                                    鄰近地鐵</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀">
+                                    開揚景觀</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修">
+                                    高級裝修</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高">
+                                    實用率高</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">發佈樓盤</button>
+                    </form>
+                </div>
+
+                <!-- My Listings -->
+                <div class="my-listings">
+                    <h3><i class="fas fa-list"></i> 我的刊登中樓盤</h3>
+                    <div id="userListingsContainer" style="margin-top: 20px;">
+                        <!-- User generated listings go here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites Tab -->
+        <div id="favoritesTab" class="tab-content">
+            <h3 style="margin-bottom: 20px;">已收藏的物業</h3>
+            <div id="favoritesContainer" class="dashboard-grid">
+                <!-- Favorites go here -->
+            </div>
+        </div>
+
+        <!-- Inquiries Tab -->
+        <div id="inquiriesTab" class="tab-content">
+            <h3 style="margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> 收到的詢盤</h3>
+            <div id="inquiriesContainer">
+                <p style="color: #94a3b8;">正在載入詢盤...</p>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profileTab" class="tab-content">
+            <div class="add-listing-card glass" style="max-width: 800px; margin: 0 auto;">
+                <h3><i class="fas fa-user-cog"></i> 個人設定</h3>
+                <div class="profile-settings-grid" style="margin-top: 30px;">
+                    <div class="avatar-section">
+                        <img id="profileAvatarLarge"
+                            src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" class="avatar-large"
+                            alt="Avatar">
+                        <p style="font-size: 0.8rem; color: #94a3b8;">系統根據您的姓名自動生成頭像</p>
+                    </div>
+                    <div>
+                        <form onsubmit="updateProfile(event)">
+                            <div class="form-group">
+                                <label>用戶姓名</label>
+                                <input type="text" id="editName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>個人簡介</label>
+                                <textarea id="editBio" placeholder="介紹您的專業知識..." rows="4"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">儲存更變</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"
+        style="position: fixed; bottom: 20px; right: 20px; background: var(--accent-color); color: white; padding: 15px 25px; border-radius: 8px; display: none; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        資訊提示
+    </div>
+
+    <script>
+        // Client-side auth & listing logic with localStorage sync
+        let isSignUp = false;
+        let currentUser = null;
+
+        let userListings = [];
+        async function loadUserListings() {
+            try {
+                const response = await fetch(API_BASE + '/api/properties');
+                if (response.ok) {
+                    userListings = await response.json();
+                    document.getElementById('statListings').textContent = userListings.length;
+                    renderUserListings();
+                }
+            } catch (e) {
+                console.error("Could not load user properties from DB", e);
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function toggleMode(e) {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            document.getElementById('formTitle').textContent = isSignUp ? "建立新帳戶" : "歡迎回來";
+            document.getElementById('formDesc').textContent = isSignUp ? "加入我們以開始刊登您的物業。" : "登入以管理您的物業及刊登資訊。";
+            document.getElementById('nameGroup').style.display = isSignUp ? "block" : "none";
+            document.getElementById('actionBtn').textContent = isSignUp ? "註冊" : "登入";
+            document.getElementById('toggleText').textContent = isSignUp ? "已有帳戶？ " : "還沒有帳戶？ ";
+            document.getElementById('toggleLink').textContent = isSignUp ? "立即登入" : "立即註冊";
+            if (isSignUp) {
+                document.getElementById('nameInput').setAttribute('required', 'true');
+            } else {
+                document.getElementById('nameInput').removeAttribute('required');
+            }
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            const name = document.getElementById('nameInput').value || email.split('@')[0];
+            currentUser = { email, name };
+            localStorage.setItem('property_user', JSON.stringify(currentUser));
+            document.getElementById('userNameDisplay').textContent = name;
+            document.getElementById('authView').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'block';
+            loadUserListings();
+            showToast("Successfully logged in!");
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('property_user');
+            document.getElementById('authForm').reset();
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('authView').style.display = 'flex';
+            showToast("Logged out successfully.");
+        }
+
+        // Check for existing session
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('property_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('userNameDisplay').textContent = currentUser.name;
+                document.getElementById('editName').value = currentUser.name;
+                document.getElementById('profileAvatarLarge').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=7232f2&color=fff`;
+                document.getElementById('authView').style.display = 'none';
+                document.getElementById('dashboardView').style.display = 'block';
+                loadUserListings();
+                loadFavorites();
+            }
+        });
+
+        async function switchTab(e, tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            e.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'listingsTab') await loadUserListings();
+            if (tabId === 'favoritesTab') loadFavorites(); // Assuming loadFavorites is the correct function name
+            if (tabId === 'inquiriesTab') await loadInquiries();
+        }
+
+        async function loadInquiries() {
+            try {
+                const res = await fetch(API_BASE + '/api/inquiries');
+                if (res.ok) {
+                    userInquiries = await res.json();
+                    renderInquiries();
+                }
+            } catch (e) {
+                console.error("Load inquiries failed", e);
+            }
+        }
+
+        function renderInquiries() {
+            const container = document.getElementById('inquiriesContainer');
+            if (userInquiries.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">目前沒有收到詢盤。</p>';
+                return;
+            }
+
+            container.innerHTML = userInquiries.map(inq => `
+                <div class="inquiry-item">
+                    <div class="inquiry-header">
+                        <span class="inquiry-sender">${inq.name}</span>
+                        <span class="inquiry-date">${inq.date}</span>
+                    </div>
+                    <div class="inquiry-msg">"${inq.message}"</div>
+                    <div class="inquiry-meta">
+                        <span><i class="fas fa-home"></i> ${inq.property_title.zh}</span>
+                        <span><i class="fas fa-envelope"></i> ${inq.email}</span>
+                        ${inq.phone ? `<span><i class="fas fa-phone"></i> ${inq.phone}</span>` : ''}
+                    </div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <a href="mailto:${inq.email}?subject=RE: ${encodeURIComponent(inq.property_title.zh)}" class="btn-primary" style="font-size: 0.8rem; padding: 5px 15px;">回覆郵件</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function updateProfile(e) {
+            e.preventDefault();
+            const newName = document.getElementById('editName').value;
+            currentUser.name = newName;
+            localStorage.setItem('property_user', JSON.stringify(currentUser));
+            document.getElementById('userNameDisplay').textContent = newName;
+            document.getElementById('profileAvatarLarge').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=7232f2&color=fff`;
+            showToast("個人資料已更新");
+        }
+
+        async function loadFavorites() {
+            const favoritesIds = JSON.parse(localStorage.getItem('property_favorites') || '[]');
+            document.getElementById('statFavorites').textContent = favoritesIds.length;
+
+            if (favoritesIds.length === 0) {
+                document.getElementById('favoritesContainer').innerHTML = '<p style="color: #94a3b8; grid-column: 1/-1;">您的收藏夾正空空如也。</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(API_BASE + '/api/properties');
+                if (response.ok) {
+                    const allProps = await response.json();
+                    // We also need default properties here for a complete list if we were in a real app, 
+                    // but since defaultProps is in app.js, we'll just show DB ones for now or mock the rest.
+                    const favs = allProps.filter(p => favoritesIds.includes(p.id));
+
+                    document.getElementById('favoritesContainer').innerHTML = favs.length > 0
+                        ? favs.map(p => renderCompactProperty(p)).join('')
+                        : '<p style="color: #94a3b8; grid-column: 1/-1;">找不到對應的收藏樓盤。</p>';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderCompactProperty(p) {
+            const title = typeof p.title === 'object' ? p.title.zh : p.title;
+            const loc = typeof p.location === 'object' ? p.location.zh : p.location;
+            return `
+                <div class="add-listing-card glass" style="padding: 15px; display: flex; flex-direction: column; height: 100%;">
+                    <div style="position: relative;">
+                        <img src="${p.image}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 10px; margin-bottom: 12px;">
+                        <span style="position: absolute; top: 10px; left: 10px; background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem;">${p.type === 'rent' ? '租' : '售'}</span>
+                    </div>
+                    <h4 style="margin-bottom: 5px; font-size: 1rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</h4>
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 10px;"><i class="fas fa-map-marker-alt"></i> ${loc}</p>
+                    <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--accent-hover); font-weight: bold; font-size: 0.95rem;">${p.price}</span>
+                        <button class="btn-outline" style="padding: 5px 12px; font-size: 0.75rem;" onclick="window.location.href='index.html?id=${p.id}'">查看</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addListing(e) {
+            e.preventDefault();
+            const uploadStatus = document.getElementById('uploadStatus');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const preview = document.getElementById('imagePreview');
+
+            let imageUrl = document.getElementById('propImage').value;
+            let galleryUrls = [];
+            const fileInput = document.getElementById('propFile');
+
+            if (fileInput.files.length > 0) {
+                submitBtn.disabled = true;
+                try {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        const url = await uploadImage(fileInput.files[i], i + 1, fileInput.files.length);
+                        if (i === 0 && !imageUrl) {
+                            imageUrl = url;
+                        } else {
+                            galleryUrls.push(url);
+                        }
+                    }
+                    uploadStatus.textContent = "所有相片上傳成功！";
+                } catch (err) {
+                    showToast("相片上傳失敗，請重試。");
+                    uploadStatus.textContent = "";
+                    submitBtn.disabled = false;
+                    return;
+                }
+            }
+
+            if (!imageUrl) {
+                showToast("請提供圖片網址或上載相片。");
+                submitBtn.disabled = false;
+                return;
+            }
+
+            const titleValue = document.getElementById('propTitle').value;
+            const locValue = document.getElementById('propLocation').value;
+            const typeValue = document.getElementById('propType').value;
+
+            const priceInput = document.getElementById('propPrice').value;
+            let finalPrice = priceInput;
+            if (!priceInput.includes('HK$')) {
+                finalPrice = "HK$ " + priceInput + (typeValue === 'rent' ? '/mo' : '');
+            }
+
+            const selectedFeatures = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => cb.value).join(',');
+
+            const newListing = {
+                title: { en: titleValue, zh: titleValue },
+                location: { en: locValue, zh: locValue },
+                price: finalPrice,
+                type: typeValue,
+                beds: parseInt(document.getElementById('propBeds').value) || 0,
+                baths: parseInt(document.getElementById('propBaths').value) || 0,
+                sqft: parseInt(document.getElementById('propSqft').value) || 0,
+                image: imageUrl,
+                images: galleryUrls,
+                video: document.getElementById('propVideo').value,
+                area: document.getElementById('propArea').value,
+                features: selectedFeatures
+            };
+
+            try {
+                const res = await fetch(API_BASE + '/api/properties', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newListing)
+                });
+                if (res.ok) {
+                    await loadUserListings();
+                    document.getElementById('addListingForm').reset();
+                    preview.innerHTML = '';
+                    uploadStatus.textContent = "";
+                    showToast("樓盤成功發佈！");
+                } else {
+                    showToast("發佈出錯。");
+                }
+            } catch (e) {
+                showToast("連線錯誤。");
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        function renderUserListings() {
+            const container = document.getElementById('userListingsContainer');
+            if (userListings.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">您目前沒有已刊登的樓盤。</p>';
+                return;
+            }
+            container.innerHTML = userListings.map((listing, index) => {
+                const titleStr = typeof listing.title === 'object' ? listing.title.zh : listing.title;
+                const locStr = typeof listing.location === 'object' ? listing.location.zh : listing.location;
+                return `
+                <div class="listing-item">
+                    <img src="${listing.image}" alt="Property" style="${listing.is_premium ? 'border: 2px solid #ffd700;' : ''}">
+                    <div class="listing-info">
+                        <h3>${titleStr}</h3>
+                        <p style="color: #94a3b8; font-size: 0.9rem;">${locStr}</p>
+                        <p style="color: var(--accent-hover); font-weight: bold; margin-top: 5px;">${listing.price} <span style="font-size: 0.8rem; font-weight: normal; color: #fff; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; margin-left: 5px;">${listing.type === 'rent' ? '租' : '售'}</span></p>
+                    </div>
+                    <div class="listing-actions" style="display: flex; gap: 10px; align-items: center;">
+                        ${!listing.is_premium ? `
+                            <button class="btn-outline" style="border-color: #ffd700; color: #ffd700; font-size: 0.8rem; padding: 5px 10px; display: inline-flex; align-items: center; gap: 5px;" onclick="goToPayment(${listing.id})">
+                                <i class="fas fa-arrow-up"></i> 升級
+                            </button>
+                        ` : '<span style="color: #ffd700; font-size: 0.75rem; font-weight: bold;">(已置頂)</span>'}
+                        <a href="edit.html?id=${listing.id}" class="btn-icon" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; text-decoration: none;" title="Edit Listing">
+                            <i class="fas fa-edit" style="color: var(--accent-color);"></i>
+                        </a>
+                        <button class="btn-icon" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer;" onclick="deleteListing(${listing.id})" title="Delete Listing">
+                            <i class="fas fa-trash-alt" style="color: #ff4d4d;"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function goToPayment(id) {
+            console.log("Navigating to payment for property:", id);
+            window.location.href = `payment.html?id=${id}`;
+        }
+
+        async function deleteListing(id) {
+            if (confirm("您確定要刪除此樓盤嗎？")) {
+                try {
+                    const res = await fetch(API_BASE + '/api/properties/' + id, { method: 'DELETE' });
+                    if (res.ok) {
+                        await loadUserListings();
+                        showToast("樓盤已刪除。");
+                    }
+                } catch (e) {
+                    showToast("刪除樓盤出錯。");
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
