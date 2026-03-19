@@ -17,7 +17,7 @@
     <meta property="og:description" content="即時搜尋全港優質盤源，海量實拍相片及影片，搵屋快人一步。">
     <meta property="og:image" content="logo.png">
 
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=5">
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
@@ -76,30 +76,16 @@
         </ul>
     </nav>
 
-    <!-- Side Panel for Filters (Mobile) -->
-    <div class="side-panel" id="sidePanel">
-        <div class="panel-header">
-            <h3>Advanced Filters</h3>
-            <button id="closePanel"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="panel-content">
-            <!-- Content moving to main area on desktop -->
-        </div>
-    </div>
-
     <!-- Hero Section -->
     <header class="hero" id="home">
-        <div class="hero-overlay"></div>
         <div class="hero-content glass-dark">
             <span class="hero-badge" data-i18n="award-badge">Award Winning Agency</span>
             <h1 data-i18n="hero-title">Find Your Dream Home</h1>
             <p data-i18n="hero-desc" style="margin-bottom: 30px;">Premium properties for rent and sale in prime
                 locations.</p>
-            <div style="margin-bottom: 40px; display: flex; gap: 15px; justify-content: center;">
-                <a href="login.html" class="btn-primary" style="padding: 12px 25px; font-size: 1.1rem;"><i
-                        class="fas fa-plus-circle"></i> 刊登物業 (Post Property)</a>
-                <a href="#featured" class="btn-secondary" style="padding: 12px 25px; font-size: 1.1rem;"><i
-                        class="fas fa-search"></i> 即刻搜尋</a>
+            <div class="hero-action-buttons">
+                <a href="login.html" class="btn-primary"><i class="fas fa-plus-circle"></i> 刊登物業 (Post Property)</a>
+                <a href="#featured" class="btn-secondary"><i class="fas fa-search"></i> 即刻搜尋</a>
             </div>
 
             <div class="advanced-search-container glass">
@@ -205,7 +191,6 @@
                 </select>
             </div>
         </div>
-        </div>
 
         <div id="mapView" class="live-map-container" style="display: none;">
             <!-- Leaflet will inject the map here -->
@@ -213,6 +198,13 @@
 
         <div class="property-grid" id="propertyGrid">
             <!-- Properties will be injected here by JS -->
+        </div>
+
+        <div id="loadMoreContainer" style="text-align: center; margin-top: 40px; display: none;">
+            <button id="loadMoreBtn" class="btn-primary" style="padding: 12px 30px; border-radius: 25px;">
+                <i class="fas fa-spinner fa-spin" style="display: none; margin-right: 8px;"></i>
+                <span data-i18n="load-more">Load More Items</span>
+            </button>
         </div>
     </section>
 
@@ -372,7 +364,7 @@
 
 
     <script src="utils.js"></script>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=5"></script>
 </body>
 
 </html>
