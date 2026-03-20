@@ -1,8 +1,6 @@
-// Utility functions for Property App
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+const API_BASE = (window.location.hostname.includes('onrender.com') || window.location.hostname.includes('pythonanywhere.com') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
     ? '' 
-    : 'http://10.101.9.151:8000'; // Automatic fallback to local IP for mobile devices
-
+    : 'http://10.101.9.151:8000'; // Capacitor mobile app fallback
 async function uploadImage(file, currentCount, totalCount) {
     const uploadStatus = document.getElementById('uploadStatus');
     if (uploadStatus) {
