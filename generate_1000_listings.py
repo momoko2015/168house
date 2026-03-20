@@ -3,7 +3,7 @@ import sqlite3
 import random
 import json
 
-DB_FILE = 'c:/Users/lily/ai code/property_app/properties.db'
+DB_FILE = 'properties.db'
 
 # Data for generation
 districts = [
