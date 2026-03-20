@@ -452,7 +452,7 @@ function openPropertyDetails(propId) {
     }
 }
 
-let properties = [];
+let properties = [...defaultProperties];
 let filteredResults = [];
 
 async function fetchPropertiesFromDB() {
