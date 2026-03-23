@@ -8,6 +8,10 @@ const i18n = {
         "nav-rent": "Rent",
         "nav-buy": "Buy",
         "nav-contact": "Contact Us",
+        "nav-about": "About Us",
+        "footer-links": "Quick Links",
+        "footer-services": "Services",
+        "footer-listings": "Listings",
         "hero-title": "Find Your Dream Home",
         "hero-desc": "Premium properties for rent and sale in prime locations.",
         "search-placeholder": "Search by location, property type...",
@@ -49,7 +53,21 @@ const i18n = {
         "sort-rating": "Highest Rated",
         "sort-comments": "Most Commented",
         "items-per-page": "Show per page:",
-        "all": "All"
+        "all": "All",
+        "services-desc": "Finding your dream home has never been easier with our streamlined 3-step process.",
+        "step-1-desc": "Use our advanced search filters to find the perfect property that matches all your criteria.",
+        "step-2-desc": "Book a tour online or request a virtual 3D tour for any property you're interested in.",
+        "step-3-desc": "Complete the paperwork digitally and securely. Move into your new dream home.",
+        "mortgage-desc": "Estimate your monthly payments, including principal and interest, taxes, insurance, and HOA fees.",
+        "loan-amount": "Property Price ($)",
+        "interest-rate": "Interest Rate (%)",
+        "loan-term": "Loan Term (Years)",
+        "calculate": "Calculate Payment",
+        "monthly-payment": "Estimated Monthly Payment",
+        "down-payment-label": "Down Payment (%)",
+        "newsletter-title": "Subscribe to Our Newsletter",
+        "newsletter-desc": "Get the latest properties and market trends delivered directly to your inbox.",
+        "subscribe": "Subscribe"
     },
     zh: {
         "logo": "28精選樓盤",
@@ -57,6 +75,10 @@ const i18n = {
         "nav-rent": "搵屋租",
         "nav-buy": "買樓盤",
         "nav-contact": "搵我哋",
+        "nav-about": "關於我哋",
+        "footer-links": "快速連結",
+        "footer-services": "服務範疇",
+        "footer-listings": "旗下樓盤",
         "hero-title": "全香港最齊樓盤",
         "hero-desc": "最新成交、正嘢筍盤、第一次買樓首選。",
         "search-placeholder": "打屋苑名、邊區或者關鍵字",
@@ -126,7 +148,21 @@ const i18n = {
         "blog-title": "市場趨勢與建議",
         "read-more": "閱讀更多",
         "subscribe": "立即訂閱",
-        "mortgage-calc": "按揭計算機"
+        "mortgage-calc": "按揭計算機",
+        "services-desc": "由搵樓至成交，只需簡單三個步驟，助您輕鬆進駐理想家園。",
+        "step-1-desc": "善用多功能搜尋過濾器，精準鎖定符合您預算及要求的盤源。",
+        "step-2-desc": "透過網上預約即時睇樓，或索取物業 3D 虛擬導覽資料。",
+        "step-3-desc": "網上處理租約或買賣文件，安全快捷，即刻攞匙進駐。",
+        "mortgage-desc": "估算每月供款，包括本金、利息、印花稅及保險預算。",
+        "loan-amount": "物業成家價 ($)",
+        "interest-rate": "利率 (%)",
+        "loan-term": "還款期 (年)",
+        "calculate": "計算供款",
+        "monthly-payment": "預計每月供款",
+        "down-payment-label": "首期比例 (%)",
+        "newsletter-title": "訂閱我們的通訊",
+        "newsletter-desc": "第一時間獲取最新樓市動向及優質荀盤推介。",
+        "subscribe": "立即訂閱"
     }
 };
 
@@ -458,7 +494,7 @@ let filteredResults = [];
 async function fetchPropertiesFromDB() {
     try {
         // Fetch all properties for instant visibility
-        const response = await fetch(API_BASE + '/api/properties?limit=5000');
+        const response = await fetch(API_BASE + '/api/properties?limit=10000');
         if (response.ok) {
             const dbProps = await response.json();
 
@@ -466,6 +502,10 @@ async function fetchPropertiesFromDB() {
                 let validP = { ...p };
                 if (typeof validP.title === 'string') validP.title = { en: validP.title, zh: validP.title };
                 if (typeof validP.location === 'string') validP.location = { en: validP.location, zh: validP.location };
+                // Handle stats ensure they are numbers
+                validP.views = parseInt(validP.views) || 0;
+                validP.rating = parseFloat(validP.rating) || 0;
+                validP.comments_count = parseInt(validP.comments_count) || 0;
                 return validP;
             });
 
@@ -491,7 +531,7 @@ async function fetchPropertiesFromDB() {
     } finally {
         // Always try to render something to remove the spinner
         handleSearch();
-        
+
         // Update the property count display
         const propCounter = document.getElementById('propertyCount');
         if (propCounter) {
@@ -600,13 +640,13 @@ function renderProperties(props, append = false) {
     const grid = document.getElementById('propertyGrid');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     const loadMoreContainer = document.getElementById('loadMoreContainer');
-    
+
     if (!append) {
         grid.innerHTML = '';
         currentPage = 1;
     }
     const dict = i18n[currentLang];
-    
+
     if (props.length === 0) {
         grid.innerHTML = `<div class="no-results-container">
             <i class="fas fa-search-minus" style="font-size: 4rem; color: #334155; margin-bottom: 20px; display: block;"></i>
@@ -616,7 +656,7 @@ function renderProperties(props, append = false) {
         if (loadMoreContainer) loadMoreContainer.style.display = 'none';
         return;
     }
-    
+
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const paginatedProps = props.slice(start, end);
@@ -694,7 +734,8 @@ function renderProperties(props, append = false) {
                     </div>
                     ${prop.features ? `
                     <div class="property-tags" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px;">
-                        ${prop.features.split(',').map(f => `<span style="background: rgba(114, 50, 242, 0.1); color: var(--accent-color); font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(114, 50, 242, 0.2);">${f}</span>`).join('')}
+                        ${(prop.features.includes('|') ? prop.features.split('|')[currentLang === 'zh' ? 1 : 0] : prop.features)
+                        .split(',').map(f => `<span style="background: rgba(114, 50, 242, 0.1); color: var(--accent-color); font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(114, 50, 242, 0.2);">${f.trim()}</span>`).join('')}
                     </div>
                     ` : ''}
                     <div style="margin-top: 20px; display: flex; gap: 10px;" onclick="event.stopPropagation()">
@@ -733,7 +774,7 @@ const areaMappings = {
     "ml": ["mid levels", "mid-levels", "半山"],
     "stl": ["stanley", "赤柱"],
     "rb": ["repulse bay", "淺水灣"],
-    
+
     // Kowloon
     "mk": ["mong kok", "旺角"],
     "hh": ["hung hom", "紅磡"],
@@ -748,7 +789,7 @@ const areaMappings = {
     "lck": ["lai chi kok", "荔枝角"],
     "mf": ["mei foo", "美孚"],
     "kln": ["kowloon", "九龍"],
-    
+
     // New Territories & Islands
     "st": ["sha tin", "沙田"],
     "shatin": ["sha tin", "沙田"],
@@ -803,15 +844,15 @@ function handleSearch() {
         const matchesSearch = searchTerm === "" || searchTerms.some(term => {
             const t = term.toLowerCase();
             const nt = normalize(t);
-            return titleEn.includes(t) || titleZh.includes(t) || 
-                   locEn.includes(t) || locZh.includes(t) || 
-                   features.includes(t) ||
-                   normTitleEn.includes(nt) || normLocEn.includes(nt);
+            return titleEn.includes(t) || titleZh.includes(t) ||
+                locEn.includes(t) || locZh.includes(t) ||
+                features.includes(t) ||
+                normTitleEn.includes(nt) || normLocEn.includes(nt);
         });
 
         const matchesType = typeFilter === 'all' || prop.type === typeFilter;
         const matchesArea = areaFilter === 'all' || prop.area === areaFilter;
-        
+
         // Price filtering logic (extract number from string like "HK$ 15,000/mo")
         let matchesPrice = true;
         if (priceFilter !== 'all') {
@@ -865,7 +906,7 @@ function sortProperties(props) {
 function openGalleryModal(propId) {
     const property = properties.find(p => p.id == propId);
     if (!property) return;
-    
+
     // For now, gallery modal also opens the full details view which has the large image
     // In a mature app, this could be a dedicated slider
     openPropertyDetails(propId);
@@ -876,13 +917,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLanguage();
     checkProfile();
     startCounters(); // Start other counters immediately
-    
+
     // Set a loading state
     const grid = document.getElementById('propertyGrid');
     if (grid) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;"><i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--accent-color);"></i><p style="margin-top: 20px; font-weight: 600;">正在智能配對優質樓盤...</p></div>';
 
     // Fetch and render
-    fetchPropertiesFromDB(); 
+    fetchPropertiesFromDB();
 
     // Event listeners
     document.getElementById('loadMoreBtn')?.addEventListener('click', () => {

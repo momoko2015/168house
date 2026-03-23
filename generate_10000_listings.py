@@ -33,16 +33,17 @@ prefixes = [
 ]
 
 images = [
+    "https://images.unsplash.com/photo-1580587767303-941323ead182?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1598228723793-52759bba239c?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1502672260266-1c1e52504431?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=800&q=80"
+    "https://images.unsplash.com/photo-1600566753190-17f0bb2a6c3e?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?auto=format&fit=crop&w=800&q=80"
 ]
 
 features_pool = ["Sea View", "Near MTR", "Renovated", "Quiet", "High Floor", "Clubhouse", "Balcony", "Parking"]
@@ -65,36 +66,37 @@ def generate_listing():
     deal_type = random.choice(["rent", "sale"])
     
     if deal_type == "rent":
-        price_val = random.randint(15000, 150000)
+        price_val = random.randint(8000, 120000)
         price_str = f"HK$ {price_val:,}/mo"
     else:
-        price_val = random.randint(5000000, 200000000)
+        price_val = random.randint(3000000, 150000000)
         price_str = f"HK$ {price_val:,}"
         
     beds = random.randint(1, 5)
     baths = random.randint(1, 4)
-    sqft = random.randint(300, 4000)
+    sqft = random.randint(300, 4500)
     
-    # 3-4 random features
+    # 2-4 random features (Combine ZH and EN for easy splitting)
     num_f = random.randint(2, 4)
     f_indices = random.sample(range(len(features_pool)), num_f)
-    f_en = ", ".join([features_pool[i] for i in f_indices])
+    f_en = ",".join([features_pool[i] for i in f_indices])
     f_zh = ",".join([features_pool_zh[i] for i in f_indices])
+    combined_features = f_en + "|" + f_zh
     
     # Coordinates (Approx HK bounds)
-    lat = random.uniform(22.25, 22.45)
-    lng = random.uniform(113.9, 114.25)
+    lat = random.uniform(22.25, 22.48)
+    lng = random.uniform(113.9, 114.28)
     
-    # New stats
-    views = random.randint(50, 5000)
-    rating = round(random.uniform(3.5, 5.0), 1)
-    comments = random.randint(0, 50)
-    is_premium = 1 if random.random() < 0.05 else 0
+    # Random Stats
+    views = random.randint(100, 8000)
+    rating = round(random.uniform(3.8, 5.0), 1)
+    comments = random.randint(0, 120)
+    is_premium = 1 if random.random() < 0.08 else 0
     
     return (
         title_en, title_zh, district[0], district[1],
         price_str, prop_type, beds, baths, sqft,
-        random.choice(images), f_en + " | " + f_zh, "", "HK", lat, lng, 
+        random.choice(images), combined_features, "", "HK", lat, lng, 
         is_premium, views, rating, comments
     )
 
@@ -102,20 +104,25 @@ def bulk_insert(count=10000):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     
-    print(f"Generating {count} properties...")
-    # Clear existing to ensure all 10k match the new type schema
+    print(f"Generating {count} premium properties...")
+    # Clear existing to ensure clean slate
     c.execute('DELETE FROM properties')
     
-    listings = [generate_listing() for _ in range(count)]
-    
-    c.executemany('''INSERT INTO properties 
-                     (title_en, title_zh, location_en, location_zh, price, type, beds, baths, sqft, image, features, video, area, lat, lng, is_premium, views, rating, comments_count)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
-                   listings)
+    # Generate in batches to save memory
+    batch_size = 1000
+    for i in range(0, count, batch_size):
+        current_batch_size = min(batch_size, count - i)
+        listings = [generate_listing() for _ in range(current_batch_size)]
+        c.executemany('''INSERT INTO properties 
+                         (title_en, title_zh, location_en, location_zh, price, type, beds, baths, sqft, image, features, video, area, lat, lng, is_premium, views, rating, comments_count)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', 
+                       listings)
+        print(f"Generated {i + current_batch_size}/{count}...")
     
     conn.commit()
     conn.close()
-    print("Insertion complete!")
+    print("Insertion of 10,000 properties complete!")
+
 
 if __name__ == "__main__":
     bulk_insert(10000)
