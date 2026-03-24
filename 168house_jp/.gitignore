@@ -1,0 +1,13 @@
+node_modules/
+platforms/
+plugins/
+www/
+android/
+ios/
+*.db
+.env
+uploads/
+__pycache__/
+.vscode/
+.idea/
+*.log

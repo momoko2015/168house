@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Estates - 日本最大の不動産情報プラットフォーム</title>
+    <meta name="description"
+        content="Elite Estatesは、日本全土の賃貸および売買物件情報を網羅しています。都心の高級マンションから、静かな郊外の一戸建て、温泉付き別荘まで、理想の住まいを簡単に見つけることができます。">
+    <meta name="keywords" content="日本不動産, 賃貸, 売買, マンション, 一戸建て, 別荘, 不動産仲介">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="logo.png">
+    <meta name="theme-color" content="#7232f2">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://elite-estates.jp/">
+    <meta property="og:title" content="Elite Estates - 理想の住まいを日本で探す">
+    <meta property="og:description" content="日本全国の優良物件を即座に検索。豊富な写真と動画で、お部屋探しをよりスムーズに。">
+    <meta property="og:image" content="logo.png">
+
+    <link rel="stylesheet" href="style.css?v=5">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar glass">
+        <div class="top-bar-content">
+            <div class="contact-info">
+                <span><i class="fas fa-phone-alt"></i> +81 3-1234-5678</span>
+                <span><i class="fas fa-envelope"></i> support@elite-estates.jp</span>
+                <span><i class="fas fa-map-marker-alt"></i> 東京都新宿区西新宿2-8-1</span>
+            </div>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="logo" data-i18n="logo">Elite Estates</div>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="#home" class="active" data-i18n="nav-home">ホーム</a></li>
+            <li><a href="#featured" data-i18n="nav-rent">賃貸</a></li>
+            <li><a href="#featured" data-i18n="nav-buy">売買</a></li>
+            <li><a href="#services" data-i18n="footer-services">サービス</a></li>
+            <li><a href="#calculator" data-i18n="mortgage-calc">ローン計算</a></li>
+            <li><a href="#contact" class="btn-primary" data-i18n="nav-contact">お問い合わせ</a></li>
+            <li class="nav-actions">
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+                <button id="langToggle" class="btn-secondary" data-i18n="lang-toggle">粵語</button>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" alt="User"
+                        class="avatar">
+                    <div class="dropdown-menu">
+                        <a href="login.html"><i class="fas fa-sign-in-alt"></i> ログイン / 新規登録</a>
+                        <a href="login.html"><i class="fas fa-home"></i> 物件を掲載する</a>
+                        <a href="admin.html"
+                            style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 5px; padding-top: 10px; color: #ffd700;"><i
+                                class="fas fa-user-shield"></i> 管理者パネル</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero" id="home">
+        <div class="hero-content glass-dark">
+            <span class="hero-badge" data-i18n="award-badge">Award Winning Agency</span>
+            <h1 data-i18n="hero-title">Find Your Dream Home</h1>
+            <p data-i18n="hero-desc" style="margin-bottom: 30px;">Premium properties for rent and sale in prime
+                locations.</p>
+            <div class="hero-action-buttons">
+                <a href="login.html" class="btn-primary"><i class="fas fa-plus-circle"></i> 物件を掲載する (Post Property)</a>
+                <a href="#featured" class="btn-secondary"><i class="fas fa-search"></i> 物件を探す</a>
+            </div>
+
+            <div class="advanced-search-container glass">
+                <div class="search-tabs">
+                    <button class="search-tab active" data-type="all" data-i18n="tab-all">All</button>
+                    <button class="search-tab" data-type="rent" data-i18n="tab-rent">Rent</button>
+                    <button class="search-tab" data-type="sale" data-i18n="tab-buy">Buy</button>
+                    <button class="search-tab" data-type="commercial" data-i18n="tab-comm">Commercial</button>
+                </div>
+                <div class="search-bar">
+                    <div class="search-field">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Location, zip, or keywords"
+                            data-i18n-placeholder="search-placeholder">
+                    </div>
+                    <div class="search-field">
+                        <i class="fas fa-home"></i>
+                        <select id="typeFilter">
+                            <option value="all" data-i18n="filter-all">Property Type</option>
+                            <option value="apartment" data-i18n="prop-apt">Apartment</option>
+                            <option value="house" data-i18n="prop-house">House</option>
+                            <option value="villa" data-i18n="prop-villa">Villa</option>
+                            <option value="penthouse" data-i18n="prop-pent">Penthouse</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <i class="fas fa-globe"></i>
+                        <select id="areaFilter">
+                            <option value="all" data-i18n="region-all">All Regions</option>
+                            <option value="HK" data-i18n="region-hk">Hong Kong</option>
+                            <option value="China" data-i18n="region-china">Mainland China</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <i class="fas fa-dollar-sign"></i>
+                        <select id="priceFilter">
+                            <option value="all" data-i18n="any-price">Any Price</option>
+                            <option value="0-1000" data-i18n="under-1k">Under $1k/mo</option>
+                            <option value="1000-5000" data-i18n="1k-5k">$1k - $5k/mo</option>
+                            <option value="5000-plus" data-i18n="5k-plus">$5k+/mo OR Buy</option>
+                        </select>
+                    </div>
+                    <button class="btn-icon" id="advancedFilterBtn" title="More Filters"><i
+                            class="fas fa-sliders-h"></i></button>
+                    <button id="searchBtn" class="btn-primary" data-i18n="btn-search">搵樓</button>
+                </div>
+                <div class="expanded-filters" id="expandedFilters" style="display: none;">
+                    <div class="filter-group">
+                        <label>Bedrooms</label>
+                        <input type="number" id="bedsFilter" min="1" max="10" placeholder="Any">
+                    </div>
+                    <div class="filter-group">
+                        <label>Bathrooms</label>
+                        <input type="number" id="bathsFilter" min="1" max="10" placeholder="Any">
+                    </div>
+                    <div class="filter-group">
+                        <label>Min Size (sqft)</label>
+                        <input type="number" id="sqftFilter" min="100" placeholder="Any">
+                    </div>
+                    <div class="filter-checkboxes">
+                        <label><input type="checkbox" id="petsFilter"> Pets Allowed</label>
+                        <label><input type="checkbox" id="poolFilter"> Swimming Pool</label>
+                        <label><input type="checkbox" id="gymFilter"> Gym</label>
+                        <label><input type="checkbox" id="parkingFilter"> Parking</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Map View Toggle -->
+    <div class="view-toggles container">
+        <span class="view-label" data-i18n="view-as">View As:</span>
+        <button class="view-toggle-btn active" id="gridViewBtn"><i class="fas fa-th-large"></i> <span
+                data-i18n="grid">Grid</span></button>
+        <button class="view-toggle-btn" id="listViewBtn"><i class="fas fa-list"></i> <span
+                data-i18n="list">List</span></button>
+        <button class="view-toggle-btn" id="mapViewBtn"><i class="fas fa-map-marked-alt"></i> <span
+                data-i18n="map">Map</span></button>
+    </div>
+
+    <!-- Properties Grid -->
+    <section class="properties container" id="featured">
+        <div class="section-header">
+            <div>
+                <span class="sub-title">Discover</span>
+                <h2 class="section-title" data-i18n="section-featured">Featured Properties</h2>
+            </div>
+            <div class="sort-by">
+                <label data-i18n="sort-by">排序:</label>
+                <select id="sortSelect">
+                    <option value="default" data-i18n="sort-def">預設</option>
+                    <option value="price-low" data-i18n="sort-low">價錢: 由低至高</option>
+                    <option value="price-high" data-i18n="sort-high">價錢: 由高至低</option>
+                    <option value="newest" data-i18n="sort-new">最新刊登</option>
+                    <option value="oldest" data-i18n="sort-old">最舊刊登</option>
+                    <option value="sqft-high" data-i18n="sort-sqft-high">呎數: 由高至低</option>
+                    <option value="sqft-low" data-i18n="sort-sqft-low">呎數: 由低至高</option>
+                    <option value="views-high" data-i18n="sort-views">最多人睇</option>
+                    <option value="rating-high" data-i18n="sort-rating">最高評分</option>
+                    <option value="comments-high" data-i18n="sort-comments">最多評論</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="mapView" class="live-map-container" style="display: none;">
+            <!-- Leaflet will inject the map here -->
+        </div>
+
+        <div class="property-grid" id="propertyGrid">
+            <!-- Properties will be injected here by JS -->
+        </div>
+
+        <div id="loadMoreContainer" style="text-align: center; margin-top: 40px; display: none;">
+            <button id="loadMoreBtn" class="btn-primary" style="padding: 12px 30px; border-radius: 25px;">
+                <i class="fas fa-spinner fa-spin" style="display: none; margin-right: 8px;"></i>
+                <span data-i18n="load-more">Load More Items</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works glass-section" id="services">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="sub-title">Simple Process</span>
+                <h2 class="section-title" data-i18n="services-title">How It Works</h2>
+                <p class="section-desc" data-i18n="services-desc">Finding your dream home has never been easier with our
+                    streamlined 3-step
+                    process.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div class="step-icon"><i class="fas fa-search-location"></i></div>
+                    <h3 data-i18n="step-1-title">Search Properties</h3>
+                    <p data-i18n="step-1-desc">Use our advanced search filters to find the perfect property that matches
+                        all your criteria.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <div class="step-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3 data-i18n="step-2-title">Schedule a Visit</h3>
+                    <p data-i18n="step-2-desc">Book a tour online or request a virtual 3D tour for any property you're
+                        interested in.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <div class="step-icon"><i class="fas fa-key"></i></div>
+                    <h3 data-i18n="step-3-title">Get the Keys</h3>
+                    <p data-i18n="step-3-desc">Complete the paperwork digitally and securely. Move into your new dream
+                        home.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mortgage Calculator Section -->
+    <section class="calculator-section container" id="calculator">
+        <div class="calculator-grid">
+            <div class="calc-text">
+                <span class="sub-title">Finance Tools</span>
+                <h2 class="section-title" data-i18n="mortgage-calc">Mortgage Calculator</h2>
+                <p data-i18n="mortgage-desc">Estimate your monthly payments, including principal and interest, taxes,
+                    insurance, and HOA fees.</p>
+                <ul class="calc-features">
+                    <li><i class="fas fa-check-circle"></i> Real-time estimations</li>
+                    <li><i class="fas fa-check-circle"></i> Amortization schedule</li>
+                    <li><i class="fas fa-check-circle"></i> Compare interest rates</li>
+                </ul>
+            </div>
+            <div class="calc-card glass">
+                <div class="calc-input-group">
+                    <label data-i18n="loan-amount">Property Price ($)</label>
+                    <input type="number" id="calcPrice" value="5000000">
+                </div>
+                <div class="calc-input-group">
+                    <label data-i18n="down-payment-label">Down Payment (%)</label>
+                    <input type="number" id="calcDown" value="10" min="0" max="100">
+                </div>
+                <div class="calc-input-group">
+                    <label data-i18n="interest-rate">Interest Rate (%)</label>
+                    <input type="number" id="calcRate" value="4.1" step="0.1">
+                </div>
+                <div class="calc-input-group">
+                    <label data-i18n="loan-term">Loan Term (Years)</label>
+                    <select id="calcTerm">
+                        <option value="15">15 Years</option>
+                        <option value="20">20 Years</option>
+                        <option value="30" selected>30 Years</option>
+                    </select>
+                </div>
+                <button class="btn-primary w-100" id="calculateBtn" data-i18n="calculate">Calculate Payment</button>
+                <div class="calc-result" id="calcResult" style="display: none;">
+                    <h3 data-i18n="monthly-payment">Estimated Monthly Payment</h3>
+                    <div class="price" id="monthlyPrice">$0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Newsletter -->
+    <section class="newsletter glass">
+        <div class="container text-center">
+            <h2 data-i18n="newsletter-title">Subscribe to Our Newsletter</h2>
+            <p data-i18n="newsletter-desc">Get the latest properties and market trends delivered directly to your inbox.
+            </p>
+            <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed!');">
+                <input type="email" placeholder="Enter your email address" required>
+                <button type="submit" class="btn-primary" data-i18n="subscribe">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-top container">
+            <div class="footer-col brand-col">
+                <div class="logo">Elite Estates</div>
+                <p>あなたの理想の住まいを、日本全土から。</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer-links">クイックリンク</h4>
+                <ul>
+                    <li><a href="#" data-i18n="nav-home">ホーム</a></li>
+                    <li><a href="#" data-i18n="nav-about">私たちについて</a></li>
+                    <li><a href="#" data-i18n="footer-services">サービス内容</a></li>
+                    <li><a href="#" data-i18n="footer-listings">物件一覧</a></li>
+                    <li><a href="#" data-i18n="nav-contact">お問い合わせ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>物件種別</h4>
+                <ul>
+                    <li><a href="#">マンション</a></li>
+                    <li><a href="#">一戸建て</a></li>
+                    <li><a href="#">商業ビル</a></li>
+                    <li><a href="#">オフィス</a></li>
+                    <li><a href="#">駐車場・倉庫</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>連絡先</h4>
+                <ul class="contact-list">
+                    <li><i class="fas fa-map-marker-alt"></i> 東京都新宿区西新宿2-8-1</li>
+                    <li><i class="fas fa-phone-alt"></i> +81 3-1234-5678</li>
+                    <li><i class="fas fa-envelope"></i> support@elite-estates.jp</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 Elite Estates JP. All Rights Reserved.</p>
+                <div class="footer-policies">
+                    <a href="#">プライバシーポリシー</a>
+                    <a href="#">利用規約</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Property Modal -->
+    <div class="modal" id="propertyModal">
+        <div class="modal-content glass">
+            <span class="close-modal"><i class="fas fa-times"></i></span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+
+    <script src="utils.js?v=6"></script>
+    <script src="app.js?v=6"></script>
+</body>
+
+</html>

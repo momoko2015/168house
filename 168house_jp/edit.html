@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物件編集 - エリート・エステート</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="utils.js"></script>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .edit-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .edit-card {
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .feature-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .feature-checkbox input {
+            width: auto;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="logo">Elite Estates</div>
+        <ul class="nav-links" style="margin-left: auto;">
+            <li><a href="admin.html">管理画面に戻る</a></li>
+        </ul>
+    </nav>
+
+    <div class="edit-container">
+        <div class="edit-card glass">
+            <h3><i class="fas fa-edit"></i> 物件情報を編集</h3>
+            <p style="color: #94a3b8; margin-bottom: 30px;">物件情報を更新しましょう。</p>
+
+            <form id="editForm">
+                <div class="form-group">
+                    <label>物件名</label>
+                    <input type="text" id="propTitle" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>種別</label>
+                        <select id="propType" required>
+                            <option value="rent">賃貸</option>
+                            <option value="sale">売買</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>価格 (円)</label>
+                        <input type="text" id="propPrice" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>住所</label>
+                    <input type="text" id="propLocation" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>部屋数</label>
+                        <input type="number" id="propBeds" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>バスルーム</label>
+                        <input type="number" id="propBaths" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>面積 (平米)</label>
+                        <input type="number" id="propSqft" min="0" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>画像URL</label>
+                        <input type="url" id="propImage">
+                    </div>
+                    <div class="form-group">
+                        <label>動画URL</label>
+                        <input type="url" id="propVideo">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>新しい写真をアップロード (現在の写真が上書きされます。変更しない場合は空欄にしてください)</label>
+                    <input type="file" id="propFile" accept="image/*" multiple style="padding: 8px;"
+                        onchange="previewImagesSelected('propFile', 'imagePreview')">
+                    <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+                    <div id="uploadStatus" style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>エリア</label>
+                    <select id="propArea" required>
+                        <option value="HK">東京都心</option>
+                        <option value="China">郊外エリア</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>物件のこだわり</label>
+                    <div class="features-grid">
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="オーシャンビュー">
+                            オーシャンビュー</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="静かな環境">
+                            静かな環境</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="駅近"> 駅近</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="眺望良好"> 眺望良好</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級内装"> 高級内装</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="バリアフリー">
+                            バリアフリー</label>
+                    </div>
+                </div>
+
+        </div>
+        <!-- Premium Promotion CTA -->
+        <div id="premiumPromo"
+            style="display: none; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1)); border: 1px solid #ffd700; border-radius: 12px; padding: 20px; margin-top: 25px; animation: glow 2s ease-in-out infinite alternate;">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <i class="fas fa-crown" style="font-size: 2rem; color: #ffd700;"></i>
+                <div>
+                    <h4 style="color: #ffd700; margin-bottom: 5px;">プレミアム掲載にアップグレード</h4>
+                    <p style="font-size: 0.8rem; color: #cbd5e1;">物件を上位に表示し、より多くの注目を集めることができます。</p>
+                </div>
+            </div>
+            <button type="button" class="btn-primary"
+                style="width: 100%; margin-top: 15px; background: #ffd700; color: #1a1a2e; font-weight: bold; border: none;"
+                onclick="window.location.href='payment.html?id=' + propId">
+                今すぐアップグレード
+            </button>
+            <style>
+                @keyframes glow {
+                    from {
+                        box-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
+                    }
+
+                    to {
+                        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+                    }
+                }
+            </style>
+        </div>
+
+        <div class="btn-grid">
+            <button type="button" class="btn-outline" onclick="window.location.href='admin.html'">キャンセル</button>
+            <button type="submit" class="btn-primary">変更を保存</button>
+        </div>
+        </form>
+    </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">Message</div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const propId = urlParams.get('id');
+
+        if (!propId) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadProperty() {
+            try {
+                const response = await fetch(API_BASE + '/api/properties');
+                if (response.ok) {
+                    const properties = await response.json();
+                    const prop = properties.find(p => p.id == propId);
+
+                    if (prop) {
+                        document.getElementById('propTitle').value = typeof prop.title === 'object' ? (prop.title.ja || prop.title.en) : prop.title;
+                        document.getElementById('propLocation').value = typeof prop.location === 'object' ? (prop.location.ja || prop.location.en) : prop.location;
+
+                        let cleanedPrice = prop.price.replace('¥ ', '').replace('/月', '').replace('HK$ ', '').replace('/mo', '').replace(/,/g, '');
+                        document.getElementById('propPrice').value = cleanedPrice;
+
+                        document.getElementById('propType').value = prop.type;
+                        document.getElementById('propBeds').value = prop.beds;
+                        document.getElementById('propBaths').value = prop.baths;
+                        document.getElementById('propSqft').value = prop.sqft;
+                        document.getElementById('propImage').value = prop.image;
+                        document.getElementById('propVideo').value = prop.video || '';
+                        document.getElementById('propArea').value = prop.area || 'HK';
+
+                        // Pre-fill features
+                        if (prop.features) {
+                            const featList = prop.features.split(',');
+                            document.querySelectorAll('input[name="feature"]').forEach(cb => {
+                                if (featList.includes(cb.value)) cb.checked = true;
+                            });
+                        }
+
+                        // Show/Hide premium promo
+                        if (!prop.is_premium) {
+                            document.getElementById('premiumPromo').style.display = 'block';
+                        }
+
+                        // Keep track of current gallery
+                        window.currentGallery = prop.images || [];
+                    } else {
+                        alert("物件が見つかりませんでした");
+                        window.location.href = 'admin.html';
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        document.getElementById('editForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const uploadStatus = document.getElementById('uploadStatus');
+
+            let imageUrl = document.getElementById('propImage').value;
+            let galleryUrls = window.currentGallery || [];
+            const fileInput = document.getElementById('propFile');
+
+            if (fileInput.files.length > 0) {
+                submitBtn.disabled = true;
+                try {
+                    let newUploads = [];
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        const url = await uploadImage(fileInput.files[i], i + 1, fileInput.files.length);
+                        newUploads.push(url);
+                    }
+                    imageUrl = newUploads[0];
+                    galleryUrls = newUploads.slice(1);
+                    uploadStatus.textContent = "所有新相片上傳成功！";
+                } catch (err) {
+                    showToast("相片上傳失敗，請重試。");
+                    uploadStatus.textContent = "";
+                    submitBtn.disabled = false;
+                    return;
+                }
+            }
+
+            const typeValue = document.getElementById('propType').value;
+            const priceInput = document.getElementById('propPrice').value;
+            let finalPrice = priceInput;
+            if (!priceInput.includes('HK$')) {
+                finalPrice = "HK$ " + priceInput + (typeValue === 'rent' ? '/mo' : '');
+            }
+
+            const selectedFeatures = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => cb.value).join(',');
+
+            const updatedListing = {
+                title: { en: document.getElementById('propTitle').value, zh: document.getElementById('propTitle').value },
+                location: { en: document.getElementById('propLocation').value, zh: document.getElementById('propLocation').value },
+                price: finalPrice,
+                type: typeValue,
+                beds: parseInt(document.getElementById('propBeds').value) || 0,
+                baths: parseInt(document.getElementById('propBaths').value) || 0,
+                sqft: parseInt(document.getElementById('propSqft').value) || 0,
+                image: imageUrl,
+                images: galleryUrls,
+                video: document.getElementById('propVideo').value,
+                area: document.getElementById('propArea').value,
+                features: selectedFeatures
+            };
+
+            try {
+                const res = await fetch(API_BASE + `/api/properties/${propId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedListing)
+                });
+                if (res.ok) {
+                    showToast("更新成功しました！戻っています...");
+                    setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
+                } else {
+                    showToast("更新に失敗しました。");
+                }
+            } catch (e) {
+                showToast("通信エラーが発生しました。");
+            } finally {
+                submitBtn.disabled = false;
+            }
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.style.display = 'none';
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        loadProperty();
+    </script>
+</body>
+
+</html>
