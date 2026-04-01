@@ -43,7 +43,6 @@ def init_db():
                   image_path TEXT,
                   FOREIGN KEY(property_id) REFERENCES properties(id))''')
     
-    # Ensure columns exist 
     c.execute("PRAGMA table_info(properties)")
     columns = [row[1] for row in c.fetchall()]
     if 'video' not in columns: c.execute("ALTER TABLE properties ADD COLUMN video TEXT")
@@ -53,6 +52,9 @@ def init_db():
     if 'views' not in columns: c.execute("ALTER TABLE properties ADD COLUMN views INTEGER DEFAULT 0")
     if 'rating' not in columns: c.execute("ALTER TABLE properties ADD COLUMN rating REAL DEFAULT 0.0")
     if 'comments_count' not in columns: c.execute("ALTER TABLE properties ADD COLUMN comments_count INTEGER DEFAULT 0")
+    if 'created_at' not in columns: 
+        c.execute("ALTER TABLE properties ADD COLUMN created_at TEXT")
+        c.execute("UPDATE properties SET created_at = datetime('now') WHERE created_at IS NULL")
     
     c.execute("PRAGMA table_info(inquiries)")
     inq_columns = [row[1] for row in c.fetchall()]
@@ -102,6 +104,15 @@ def get_properties():
     offset = int(request.args.get('offset', 0))
     
     conn = get_db_connection()
+    c = conn.cursor()
+    
+    # Auto-delete expired listings: Free (14 days), Premium/Paid (90 days)
+    c.execute('''DELETE FROM property_images WHERE property_id IN (
+        SELECT id FROM properties WHERE (is_premium = 0 AND created_at < datetime('now', '-14 days')) OR (is_premium = 1 AND created_at < datetime('now', '-90 days'))
+    )''')
+    c.execute('''DELETE FROM properties WHERE (is_premium = 0 AND created_at < datetime('now', '-14 days')) OR (is_premium = 1 AND created_at < datetime('now', '-90 days'))''')
+    conn.commit()
+
     rows = conn.execute('SELECT * FROM properties ORDER BY is_premium DESC, id DESC LIMIT ? OFFSET ?', (limit, offset)).fetchall()
     
     prop_ids = [row['id'] for row in rows]
