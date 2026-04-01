@@ -609,20 +609,35 @@ function updateLanguage() {
 }
 
 function toggleFavorite(e, id) {
-    e.stopPropagation(); // Don't open modal if we have one
-    let favorites = JSON.parse(localStorage.getItem('property_favorites') || '[]');
-    const index = favorites.indexOf(id);
+    e.stopPropagation();
+    const numId = Number(id);
+    let favorites = JSON.parse(localStorage.getItem('property_favorites') || '[]').map(Number);
+    const index = favorites.indexOf(numId);
 
     if (index > -1) {
         favorites.splice(index, 1);
         showToast("已從收藏夾移除");
     } else {
-        favorites.push(id);
+        favorites.push(numId);
         showToast("已加入收藏夾");
+        const btn = e.currentTarget;
+        btn.style.transform = 'scale(1.4)';
+        setTimeout(() => { btn.style.transform = ''; }, 300);
     }
 
     localStorage.setItem('property_favorites', JSON.stringify(favorites));
-    handleSearch(); // Re-render to update heart icon
+    
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        const btnId = Number(btn.getAttribute('data-prop-id'));
+        if (btnId) { // Safety check
+            const isFav = favorites.includes(btnId);
+            btn.classList.toggle('active', isFav);
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = isFav ? 'fas fa-heart' : 'far fa-heart';
+            }
+        }
+    });
 }
 
 function showToast(msg) {
@@ -682,8 +697,8 @@ function renderProperties(props, append = false) {
 
     paginatedProps.forEach(prop => {
         const card = document.createElement('div');
-        const favorites = JSON.parse(localStorage.getItem('property_favorites') || '[]');
-        const isFavorited = favorites.includes(prop.id);
+        const favorites = JSON.parse(localStorage.getItem('property_favorites') || '[]').map(Number);
+        const isFavorited = favorites.includes(Number(prop.id));
 
         if (currentView === 'list') {
             card.className = `property-list-item ${prop.is_premium ? 'premium' : ''}`;
@@ -698,7 +713,7 @@ function renderProperties(props, append = false) {
                 <div class="info-item" style="color: #cbd5e1; font-size: 0.9rem;"><i class="fas fa-expand-arrows-alt"></i> ${prop.sqft} ${dict["sqft"]}</div>
                 <div class="actions-area" style="display: flex; gap: 8px;">
                      <button class="btn-outline" style="padding: 5px 12px; font-size: 0.75rem; border-radius: 6px;" onclick="openPropertyDetails(${prop.id})">${currentLang === 'zh' ? '詳情' : 'Details'}</button>
-                     <button class="favorite-btn ${isFavorited ? 'active' : ''}" style="position:static; padding: 5px; background:transparent;" onclick="toggleFavorite(event, ${prop.id})">
+                     <button class="favorite-btn ${isFavorited ? 'active' : ''}" data-prop-id="${prop.id}" style="position:static; padding: 5px; background:transparent;" onclick="toggleFavorite(event, ${prop.id})">
                         <i class="fa${isFavorited ? 's' : 'r'} fa-heart"></i>
                     </button>
                 </div>
@@ -710,7 +725,7 @@ function renderProperties(props, append = false) {
                     <img src="${prop.image}" alt="${prop.title[currentLang]}" class="property-image">
                     
                     <span class="property-badge">${prop.type === 'rent' ? dict["badge-rent"] : dict["badge-sale"]}</span>
-                    <button class="favorite-btn ${isFavorited ? 'active' : ''}" onclick="toggleFavorite(event, ${prop.id})">
+                    <button class="favorite-btn ${isFavorited ? 'active' : ''}" data-prop-id="${prop.id}" onclick="toggleFavorite(event, ${prop.id})">
                         <i class="fa${isFavorited ? 's' : 'r'} fa-heart"></i>
                     </button>
                     <div class="property-media-actions">
