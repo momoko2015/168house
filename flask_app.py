@@ -77,6 +77,13 @@ def init_db():
     inq_columns = [row[1] for row in c.fetchall()]
     if 'is_read' not in inq_columns: c.execute("ALTER TABLE inquiries ADD COLUMN is_read INTEGER DEFAULT 0")
     
+    # NEW ZILLOW-LIKE COLUMNS
+    if 'year_built' not in columns: c.execute("ALTER TABLE properties ADD COLUMN year_built INTEGER DEFAULT 2000")
+    if 'tax_annual' not in columns: c.execute("ALTER TABLE properties ADD COLUMN tax_annual REAL DEFAULT 0.0")
+    if 'walk_score' not in columns: c.execute("ALTER TABLE properties ADD COLUMN walk_score INTEGER DEFAULT 80")
+    if 'transit_score' not in columns: c.execute("ALTER TABLE properties ADD COLUMN transit_score INTEGER DEFAULT 75")
+    if 'price_history' not in columns: c.execute("ALTER TABLE properties ADD COLUMN price_history TEXT") # JSON list
+    
     conn.commit()
     conn.close()
 
@@ -276,7 +283,12 @@ def get_properties():
             'is_premium': row['is_premium'],
             'views': row['views'],
             'rating': row['rating'],
-            'comments_count': row['comments_count']
+            'comments_count': row['comments_count'],
+            'year_built': row.get('year_built', 2022),
+            'tax_annual': row.get('tax_annual', 5000),
+            'walk_score': row.get('walk_score', 85),
+            'transit_score': row.get('transit_score', 78),
+            'price_history': row.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]')
         })
     conn.close()
     return jsonify(properties)
