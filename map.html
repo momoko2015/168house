@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>88Loft - 互動地圖搵樓 | Map Search</title>
+    <link rel="stylesheet" href="style.css?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+
+    <!-- Marker Clustering Plugin -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin="anonymous" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: #0b0f1a;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .map-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            background: #0f172a;
+        }
+
+        #mapFull {
+            flex: 1;
+            height: 100vh;
+            width: 100%;
+            z-index: 1;
+            background: #111827;
+        }
+
+        .side-panel {
+            width: 450px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: 10px 0 50px rgba(0,0,0,0.5);
+        }
+
+        .map-header {
+            padding: 30px 25px;
+            background: rgba(30, 41, 59, 0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Mobile specific adjustments - more solid for usability */
+        @media (max-width: 900px) {
+            .side-panel {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .map-container {
+                flex-direction: column;
+            }
+            .side-panel {
+                width: 100%;
+                height: 45vh;
+                order: 2;
+                border-right: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            #mapFull {
+                height: 55vh;
+                order: 1;
+            }
+        }
+
+        .search-box-map {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-top: 15px;
+        }
+
+        .search-box-map input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            padding: 5px 10px;
+            outline: none;
+        }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .map-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .map-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .map-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .map-card-info {
+            padding: 12px;
+        }
+
+        .map-card-price {
+            color: var(--accent-hover);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .map-card-title {
+            font-size: 0.95rem;
+            margin: 5px 0;
+            color: #fff;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(114, 50, 242, 0.4);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .side-panel {
+                width: 100%;
+                position: absolute;
+                bottom: 0;
+                height: 40%;
+                transform: translateY(0);
+            }
+
+            .map-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="map-container">
+        <div class="side-panel">
+            <div class="map-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
+                        <img src="logo.png" alt="88Loft Logo" style="height: 30px; border-radius: 5px;">
+                        <h2 style="margin: 0; font-weight: 800;">88loft <span style="color: var(--accent-color);">MAP</span></h2>
+                    </div>
+                    <span id="mapCounter"
+                        style="font-size: 0.8rem; background: var(--accent-color); padding: 3px 10px; border-radius: 20px;">0
+                        Results</span>
+                </div>
+                <div class="search-box-map">
+                    <i class="fas fa-search" style="color: var(--accent-color);"></i>
+                    <input type="text" id="mapSearchInput" placeholder="Search area, property...">
+                </div>
+                <div class="search-box-map" style="margin-top: 10px;">
+                    <i class="fas fa-globe" style="color: var(--accent-color);"></i>
+                    <select id="mapCountrySelect" style="background: transparent; border: none; color: white; flex: 1; padding: 5px 10px; outline: none; appearance: auto;">
+                        <option value="all" style="color: black;">All Countries / Global</option>
+                        <option value="hk" style="color: black;">Hong Kong</option>
+                        <option value="jp" style="color: black;">Japan</option>
+                        <option value="usa" style="color: black;">USA</option>
+                    </select>
+                </div>
+            </div>
+            <div class="results-list" id="mapResults">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+        <div id="mapFull"></div>
+        <a href="index.html" class="back-btn"><i class="fas fa-home"></i> 回到首頁</a>
+    </div>
+
+    <!-- Modal for details (reused) -->
+    <div class="modal" id="propertyModal">
+        <div class="modal-content glass">
+            <span class="close-modal"><i class="fas fa-times"></i></span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="utils.js?v=9"></script>
+    <script src="app.js?v=9"></script>
+    <script>
+        // Global variables for map
+        let map = null;
+        let clusterGroup = null;
+        let currentMarkers = [];
+
+        // Helper to get translated strings safely from app.js data
+        const getMapTitle = (p) => {
+            if (typeof p.title === 'string') return p.title;
+            const lang = typeof currentLang !== 'undefined' ? currentLang : 'zh';
+            return p.title[lang] || p.title['en'] || p.title['zh'] || 'Property';
+        };
+
+        const getMapLocation = (p) => {
+            if (typeof p.location === 'string') return p.location;
+            const lang = typeof currentLang !== 'undefined' ? currentLang : 'zh';
+            return p.location[lang] || p.location['en'] || p.location['zh'] || 'Location';
+        };
+
+        async function startMap() {
+            try {
+                // Initialize Leaflet immediately
+                initMapApp();
+                
+                console.log("Fetching properties for map...");
+                // Limit to 1000 for mapping to keep it performant
+                const resp = await fetch(API_BASE + '/api/properties?limit=1000');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    window.allMapProperties = data;
+                    console.log("Map rendering " + window.allMapProperties.length + " markers.");
+                    updateMapResults(window.allMapProperties);
+                } else {
+                    console.error("API Fetch Failed");
+                }
+
+                document.getElementById('mapSearchInput').addEventListener('input', applyMapFilters);
+                document.getElementById('mapCountrySelect').addEventListener('change', applyMapFilters);
+                
+                setTimeout(() => { map.invalidateSize(); }, 500);
+
+            } catch (e) {
+                console.error("Map Start Error:", e);
+            }
+        }
+
+        function initMapApp() {
+            if (map) return;
+            // Target the map container
+            const container = L.DomUtil.get('mapFull');
+            if (container != null) { container._leaflet_id = null; }
+
+            map = L.map('mapFull', { zoomControl: false }).setView([22.3193, 114.1694], 11);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            // Primary: CARTO dark tiles
+            const cartoTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CARTO',
+                maxZoom: 19,
+                crossOrigin: true
+            });
+
+            // Fallback: OpenStreetMap (works in iframe sandboxes where CARTO may fail)
+            const osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19,
+                crossOrigin: true
+            });
+
+            // Try CARTO first; on any tile error, switch to OSM
+            let cartoFailed = false;
+            cartoTiles.on('tileerror', function() {
+                if (!cartoFailed) {
+                    cartoFailed = true;
+                    console.warn('CARTO tiles failed, switching to OpenStreetMap fallback');
+                    map.removeLayer(cartoTiles);
+                    osmTiles.addTo(map);
+                }
+            });
+            cartoTiles.addTo(map);
+
+            clusterGroup = L.markerClusterGroup({
+                chunkedLoading: true,
+                maxClusterRadius: 40,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false
+            });
+            map.addLayer(clusterGroup);
+            console.log("Leaflet initialized.");
+        }
+
+        // Run map start as soon as DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startMap);
+        } else {
+            startMap();
+        }
+
+        function applyMapFilters() {
+            const term = document.getElementById('mapSearchInput').value.toLowerCase().trim();
+            const country = document.getElementById('mapCountrySelect').value;
+            let filtered = window.allMapProperties || [];
+
+            if (country === 'hk') {
+                filtered = filtered.filter(p => {
+                    const lat = parseFloat(p.lat);
+                    const lng = parseFloat(p.lng);
+                    const inHK = (lat > 22.0 && lat < 22.6 && lng > 113.7 && lng < 114.6);
+                    return inHK || (p.area && p.area.toUpperCase().includes('HK'));
+                });
+            } else if (country === 'jp') {
+                filtered = filtered.filter(p => {
+                    const lat = parseFloat(p.lat);
+                    const lng = parseFloat(p.lng);
+                    const inJP = (lat > 30 && lat < 46 && lng > 128 && lng < 147);
+                    return inJP || (p.area && (p.area.toUpperCase().includes('JP') || p.area.toUpperCase().includes('JAPAN')));
+                });
+            } else if (country === 'usa') {
+                filtered = filtered.filter(p => {
+                    const lat = parseFloat(p.lat);
+                    const lng = parseFloat(p.lng);
+                    const inUS = (lat > 24 && lat < 50 && lng < -65 && lng > -125);
+                    return inUS || (p.area && (p.area.toUpperCase().includes('US') || p.area.toUpperCase().includes('USA')));
+                });
+            }
+
+            if (term) {
+                filtered = filtered.filter(p => {
+                    const title = getMapTitle(p).toLowerCase();
+                    const loc = getMapLocation(p).toLowerCase();
+                    return title.includes(term) || loc.includes(term);
+                });
+            }
+
+            updateMapResults(filtered);
+        }
+
+        function updateMapResults(props) {
+            const list = document.getElementById('mapResults');
+            if (!list) return;
+            
+            list.innerHTML = '';
+            document.getElementById('mapCounter').innerText = `${props.length} Results`;
+
+            if (!clusterGroup) return;
+            clusterGroup.clearLayers();
+            currentMarkers = [];
+            
+            const displayLimit = 50;
+
+            props.forEach((p, index) => {
+                const lat = parseFloat(p.lat);
+                const lng = parseFloat(p.lng);
+
+                if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+                    const title = getMapTitle(p);
+                    const loc = getMapLocation(p);
+
+                    // Add to list if under limit
+                    if (index < displayLimit) {
+                        const card = document.createElement('div');
+                        card.className = 'map-card';
+                        card.innerHTML = `
+                            <img src="${p.image || ''}" 
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'><rect fill=\'%231e293b\' width=\'400\' height=\'200\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%2394a3b8\' font-size=\'14\''>No Photo</text></svg>'">
+                            <div class="map-card-info">
+                                <div class="map-card-price">${p.price}</div>
+                                <div class="map-card-title">${title}</div>
+                                <div style="font-size: 0.75rem; color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> ${loc}</div>
+                                <button class="btn-primary" style="margin-top: 10px; width: 100%; border-radius: 8px; padding: 8px; font-size: 0.8rem;" 
+                                        onclick="event.stopPropagation(); openPropertyDetails(${p.id})">
+                                    <i class="fas fa-info-circle"></i> 詳情
+                                </button>
+                            </div>
+                        `;
+                        card.onclick = () => {
+                            map.setView([lat, lng], 16);
+                            marker.openPopup();
+                        };
+                        list.appendChild(card);
+                    }
+
+                    // Create marker
+                    const marker = L.marker([lat, lng], { id: p.id });
+                    marker.bindPopup(`
+                        <div style="width: 220px; color: #000; overflow: hidden; border-radius: 12px;">
+                            <img src="${p.image}" style="width: 100%; height: 120px; object-fit: cover;">
+                            <div style="padding: 12px; background: #fff;">
+                                <h5 style="margin: 0; font-size: 1rem; color: #1e293b;">${title}</h5>
+                                <p style="color: #7232f2; font-weight: 800; font-size: 1.1rem; margin: 8px 0;">${p.price}</p>
+                                <button onclick="openPropertyDetails(${p.id})" 
+                                        style="width: 100%; border: none; background: #7232f2; color:#fff; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                    查看詳情
+                                </button>
+                            </div>
+                        </div>
+                    `, { className: 'glass-popup' });
+                    
+                    currentMarkers.push(marker);
+                }
+            });
+
+            clusterGroup.addLayers(currentMarkers);
+            
+            if (currentMarkers.length > 0 && props.length < 100) {
+                try {
+                    map.fitBounds(clusterGroup.getBounds().pad(0.1));
+                } catch (e) {}
+            }
+        }
+
+        // Run map start on windows load to ensure full element layout
+        window.addEventListener('load', startMap);
+    </script>
+
+</body>
+
+</html>

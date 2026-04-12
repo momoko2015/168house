@@ -1,16 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-HK">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>升級樓盤 - 28精選樓盤</title>
+    <title>升級樓盤 - 88Loft精選樓盤</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script src="utils.js"></script>
+    <script src="utils.js?v=9"></script>
     <style>
         .payment-page {
             min-height: 100vh;
@@ -139,8 +141,13 @@
         }
 
         @keyframes scaleIn {
-            from { transform: scale(0); }
-            to { transform: scale(1); }
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
         }
     </style>
 </head>
@@ -161,23 +168,29 @@
             <div class="property-preview-card">
                 <img id="propImage" src="" class="property-preview-img" alt="Property">
                 <div class="preview-content">
-                    <span style="background: rgba(255,215,0,0.1); color: #ffd700; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; display: inline-block;">
+                    <span
+                        style="background: rgba(255,215,0,0.1); color: #ffd700; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; display: inline-block;">
                         <i class="fas fa-star"></i> 精選推廣
                     </span>
                     <h2 id="propTitle" style="margin-bottom: 10px;">正在載入樓盤資訊...</h2>
-                    <p id="propLoc" style="color: #94a3b8; margin-bottom: 25px;"><i class="fas fa-map-marker-alt"></i></p>
-                    
-                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <p id="propLoc" style="color: #94a3b8; margin-bottom: 25px;"><i class="fas fa-map-marker-alt"></i>
+                    </p>
+
+                    <div
+                        style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
                         <h4 style="margin-bottom: 15px; color: #cbd5e1;">服務詳情</h4>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
                             <span style="color: #94a3b8;">首頁置頂推廣</span>
                             <span>30 天</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
                             <span style="color: #94a3b8;">黃金邊框 + 皇冠圖標</span>
                             <span>已包含</span>
                         </div>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
+                        <div
+                            style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
                             <span>總計</span>
                             <span style="color: #ffd700;">HK$ 499.00</span>
                         </div>
@@ -192,28 +205,33 @@
 
                 <form id="paymentForm">
                     <div class="card-element">
-                        <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">持卡人姓名</label>
+                        <label
+                            style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">持卡人姓名</label>
                         <input type="text" class="card-input" placeholder="Name on Card" required>
 
-                        <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; display: block;">卡號</label>
+                        <label
+                            style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; display: block;">卡號</label>
                         <input type="text" class="card-input" placeholder="0000 0000 0000 0000" required maxlength="19">
 
                         <div class="card-row">
                             <div style="flex: 1;">
-                                <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">有效日期</label>
+                                <label
+                                    style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">有效日期</label>
                                 <input type="text" class="card-input" placeholder="MM / YY" required maxlength="5">
                             </div>
                             <div style="flex: 1;">
-                                <label style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">CVC</label>
+                                <label
+                                    style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">CVC</label>
                                 <input type="password" class="card-input" placeholder="***" required maxlength="3">
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" id="submitBtn" class="btn-primary" style="width: 100%; height: 55px; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1a1a2e; font-weight: 800; font-size: 1.1rem; border: none;">
+                    <button type="submit" id="submitBtn" class="btn-primary"
+                        style="width: 100%; height: 55px; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1a1a2e; font-weight: 800; font-size: 1.1rem; border: none;">
                         確認支付 HK$ 499
                     </button>
-                    
+
                     <div class="secure-badge">
                         <i class="fas fa-lock"></i> 加密連接 · 安全支付技術保障
                     </div>
@@ -227,7 +245,9 @@
         <i class="fas fa-check-circle check-icon"></i>
         <h1 style="font-size: 2.5rem; margin-bottom: 15px;">支付成功！</h1>
         <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 40px;">您的樓盤已成功升級並置頂。<br>系統將在 3 秒後返回控制台...</p>
-        <div class="loader" style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #4ade80; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div class="loader"
+            style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #4ade80; border-radius: 50%; animation: spin 1s linear infinite;">
+        </div>
     </div>
 
     <script>

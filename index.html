@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>168HOUSE - 香港最齊、最快、最準樓盤資訊平台</title>
-    <meta name="description" content="168HOUSE 為您提供全港最齊全的租屋及買樓資訊。無論是特色天台屋、海景別墅、還是交通方便的市中心單位，我們都能助您輕鬆搵屋。">
-    <meta name="keywords" content="香港樓盤, 租屋, 買樓, 168HOUSE, 地產代理, 網上搵屋">
+    <title>88loft - 香港最齊、最快、最準樓盤資訊平台</title>
+    <meta name="description" content="88loft 為您提供全港最齊全的租屋及買樓資訊。無論是特色天台屋、海景別墅、還是交通方便的市中心單位，我們都能助您輕鬆搵屋。">
+    <meta name="keywords" content="香港樓盤, 租屋, 買樓, 88loft, 地產代理, 網上搵屋">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="logo.png">
     <meta name="theme-color" content="#7232f2">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://168house.hk/">
-    <meta property="og:title" content="168HOUSE - 搵屋租屋首選">
+    <meta property="og:title" content="88loft - 搵屋租屋首選">
     <meta property="og:description" content="即時搜尋全港優質盤源，海量實拍相片及影片，搵屋快人一步。">
     <meta property="og:image" content="logo.png">
 
@@ -49,10 +49,17 @@
 
     <!-- Navigation -->
     <nav class="navbar glass">
-        <div class="logo" data-i18n="logo">Elite Estates</div>
+        <div class="logo-container" style="display: flex; align-items: center;">
+            <img src="logo.png" alt="88loft logo" style="height: 40px; margin-right: 12px; border-radius: 8px;">
+            <div class="logo" data-i18n="logo" style="display: none;">88loft</div>
+            <span
+                style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(45deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">88loft</span>
+        </div>
         <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
         <ul class="nav-links">
             <li><a href="#home" class="active" data-i18n="nav-home">主頁</a></li>
+            <li><a href="map.html" style="color: var(--accent-hover);"><i class="fas fa-map-marked-alt"></i> 地圖
+                    (Map)</a></li>
             <li><a href="#featured" data-i18n="nav-rent">租盤</a></li>
             <li><a href="#featured" data-i18n="nav-buy">售盤</a></li>
             <li><a href="#services">專業服務</a></li>
@@ -60,7 +67,15 @@
             <li><a href="#contact" class="btn-primary" data-i18n="nav-contact">聯絡我們</a></li>
             <li class="nav-actions">
                 <button id="themeToggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
-                <button id="langToggle" class="btn-secondary" data-i18n="lang-toggle">粵語</button>
+                <div class="lang-switcher-container">
+                    <button id="langToggle" class="btn-secondary" style="min-width: 100px;">繁體中文</button>
+                    <div class="lang-dropdown">
+                        <div onclick="changeLanguage('zh')">繁體中文</div>
+                        <div onclick="changeLanguage('cn')">简体中文</div>
+                        <div onclick="changeLanguage('en')">English</div>
+                        <div onclick="changeLanguage('ja')">日本語</div>
+                    </div>
+                </div>
                 <div class="user-profile">
                     <img src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" alt="User"
                         class="avatar">
@@ -79,7 +94,6 @@
     <!-- Hero Section -->
     <header class="hero" id="home">
         <div class="hero-content glass-dark">
-            <span class="hero-badge" data-i18n="award-badge">Award Winning Agency</span>
             <h1 data-i18n="hero-title">Find Your Dream Home</h1>
             <p data-i18n="hero-desc" style="margin-bottom: 30px;">Premium properties for rent and sale in prime
                 locations.</p>
@@ -166,6 +180,10 @@
                 data-i18n="list">List</span></button>
         <button class="view-toggle-btn" id="mapViewBtn"><i class="fas fa-map-marked-alt"></i> <span
                 data-i18n="map">Map</span></button>
+        <a href="map.html" class="view-toggle-btn"
+            style="background: rgba(114, 50, 242, 0.1); color: var(--accent-hover); border: 1px dashed var(--accent-hover); margin-left: auto;">
+            <i class="fas fa-expand"></i> <span data-i18n="full-map">Full Screen Map (Zillow Style)</span>
+        </a>
     </div>
 
     <!-- Properties Grid -->
@@ -303,58 +321,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer" id="contact">
-        <div class="footer-top container">
-            <div class="footer-col brand-col">
-                <div class="logo">168HOUSE</div>
-                <p>168HOUSE</p>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h4 data-i18n="footer-links">快速連結</h4>
-                <ul>
-                    <li><a href="#" data-i18n="nav-home">主頁</a></li>
-                    <li><a href="#" data-i18n="nav-about">關於我們</a></li>
-                    <li><a href="#" data-i18n="footer-services">服務範疇</a></li>
-                    <li><a href="#" data-i18n="footer-listings">旗下樓盤</a></li>
-                    <li><a href="#" data-i18n="nav-contact">聯絡我們</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>物業種類</h4>
-                <ul>
-                    <li><a href="#">住宅公寓</a></li>
-                    <li><a href="#">獨立別墅</a></li>
-                    <li><a href="#">商業大廈</a></li>
-                    <li><a href="#">辦公室</a></li>
-                    <li><a href="#">車位存儲</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>聯絡資料</h4>
-                <ul class="contact-list">
-                    <li><i class="fas fa-map-marker-alt"></i> 香港尖沙咀廣東道100號</li>
-                    <li><i class="fas fa-phone-alt"></i> +852 9430 1551</li>
-                    <li><i class="fas fa-envelope"></i> help@168HOUSE.hk</li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container">
-                <p>&copy; 2026 168HOUSE. 版權所有。</p>
-                <div class="footer-policies">
-                    <a href="#">私隱條例</a>
-                    <a href="#">服務條款</a>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Property Modal -->
     <div class="modal" id="propertyModal">
@@ -365,8 +331,8 @@
     </div>
 
 
-    <script src="utils.js?v=6"></script>
-    <script src="app.js?v=6"></script>
+    <script src="utils.js?v=9"></script>
+    <script src="app.js?v=9"></script>
 </body>
 
 </html>

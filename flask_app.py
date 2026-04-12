@@ -95,13 +95,39 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# CORS headers (Since original had Access-Control-Allow-Origin: *)
+# Allowed origins for CORS and embedding
+ALLOWED_ORIGINS = [
+    'https://www.88loft.com',
+    'https://88loft.com',
+    'http://www.88loft.com',
+    'http://88loft.com',
+    'https://momoko2015.pythonanywhere.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    origin = request.headers.get('Origin', '')
+    # Allow the specific requesting origin if it's in our list, else fall back to wildcard for APIs
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Vary'] = 'Origin'
+    else:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    # Allow the app to be embedded in Wix iframes from 88loft.com
+    response.headers['X-Frame-Options'] = 'ALLOWALL'
+    response.headers['Content-Security-Policy'] = (
+        "frame-ancestors 'self' https://www.88loft.com https://88loft.com "
+        "https://*.wix.com https://*.wixsite.com https://*.editorx.com"
+    )
     return response
+
+# Handle OPTIONS preflight requests globally via after_request; no separate route needed.
+# serve_static below handles OPTIONS for static files via methods=['GET','HEAD','OPTIONS'].
 
 # Standard Pages
 @app.route('/')
@@ -169,7 +195,7 @@ def send_reset_email(to_email, reset_token):
           </div>
           <p>此連結將在 15 分鐘後過期。如果您沒有提出此請求，請忽略此電郵。</p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 Elite Estates 168House</p>
+          <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 88loft</p>
         </div>
       </body>
     </html>
@@ -264,31 +290,32 @@ def get_properties():
 
     properties = []
     for row in rows:
+        row_dict = dict(row)
         properties.append({
-            'id': row['id'],
-            'title': {'en': row['title_en'], 'zh': row['title_zh']},
-            'location': {'en': row['location_en'], 'zh': row['location_zh']},
-            'price': row['price'],
-            'type': row['type'],
-            'beds': row['beds'],
-            'baths': row['baths'],
-            'sqft': row['sqft'],
-            'image': row['image'],
-            'images': images_by_prop.get(row['id'], []),
-            'features': row['features'],
-            'video': row['video'],
-            'area': row['area'],
-            'lat': row['lat'],
-            'lng': row['lng'],
-            'is_premium': row['is_premium'],
-            'views': row['views'],
-            'rating': row['rating'],
-            'comments_count': row['comments_count'],
-            'year_built': row.get('year_built', 2022),
-            'tax_annual': row.get('tax_annual', 5000),
-            'walk_score': row.get('walk_score', 85),
-            'transit_score': row.get('transit_score', 78),
-            'price_history': row.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]')
+            'id': row_dict['id'],
+            'title': {'en': row_dict['title_en'], 'zh': row_dict['title_zh']},
+            'location': {'en': row_dict['location_en'], 'zh': row_dict['location_zh']},
+            'price': row_dict['price'],
+            'type': row_dict['type'],
+            'beds': row_dict['beds'],
+            'baths': row_dict['baths'],
+            'sqft': row_dict['sqft'],
+            'image': row_dict['image'],
+            'images': images_by_prop.get(row_dict['id'], []),
+            'features': row_dict['features'],
+            'video': row_dict['video'],
+            'area': row_dict['area'],
+            'lat': row_dict['lat'],
+            'lng': row_dict['lng'],
+            'is_premium': row_dict['is_premium'],
+            'views': row_dict['views'],
+            'rating': row_dict['rating'],
+            'comments_count': row_dict['comments_count'],
+            'year_built': row_dict.get('year_built', 2022),
+            'tax_annual': row_dict.get('tax_annual', 5000),
+            'walk_score': row_dict.get('walk_score', 85),
+            'transit_score': row_dict.get('transit_score', 78),
+            'price_history': row_dict.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]')
         })
     conn.close()
     return jsonify(properties)
@@ -455,6 +482,35 @@ def upload_file():
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
+# Helper to serialize a property row to a dict
+def serialize_property(row):
+    row_dict = dict(row)
+    return {
+        'id': row_dict['id'],
+        'title': {'en': row_dict.get('title_en', ''), 'zh': row_dict.get('title_zh', '')},
+        'location': {'en': row_dict.get('location_en', ''), 'zh': row_dict.get('location_zh', '')},
+        'price': row_dict.get('price', ''),
+        'type': row_dict.get('type', ''),
+        'beds': row_dict.get('beds', 0),
+        'baths': row_dict.get('baths', 0),
+        'sqft': row_dict.get('sqft', 0),
+        'image': row_dict.get('image', ''),
+        'features': row_dict.get('features', ''),
+        'video': row_dict.get('video', ''),
+        'area': row_dict.get('area', 'HK'),
+        'lat': row_dict.get('lat'),
+        'lng': row_dict.get('lng'),
+        'is_premium': row_dict.get('is_premium', 0),
+        'views': row_dict.get('views', 0),
+        'rating': row_dict.get('rating', 0.0),
+        'comments_count': row_dict.get('comments_count', 0),
+        'year_built': row_dict.get('year_built', 2022),
+        'tax_annual': row_dict.get('tax_annual', 0.0),
+        'walk_score': row_dict.get('walk_score', 80),
+        'transit_score': row_dict.get('transit_score', 75),
+        'price_history': row_dict.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]')
+    }
+
 # NEW ENRICHED BACKEND FUNCTIONS
 @app.route('/api/properties/similar/<int:prop_id>')
 def get_similar_properties(prop_id):
@@ -497,8 +553,10 @@ def get_stats_summary():
         "by_type": {c['type']: c['count'] for c in counts}
     })
 
-@app.route('/<path:path>')
+@app.route('/<path:path>', methods=['GET', 'HEAD', 'OPTIONS'])
 def serve_static(path):
+    if request.method == 'OPTIONS':
+        return app.make_default_options_response()
     if os.path.exists(os.path.join(app.root_path, path)):
         return send_from_directory('.', path)
     return abort(404)
