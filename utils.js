@@ -8,7 +8,7 @@ const API_BASE = (() => {
         return ''; // Relative URLs work fine here
     }
     if (_host.includes('88loft.com') || _host.includes('wix.com') || _host.includes('wixsite.com') || _host.includes('editorx.com')) {
-        return 'https://momoko2015.pythonanywhere.com'; // Absolute URL required for Wix embed
+        return 'https://hkproperty.pythonanywhere.com'; // Absolute URL required for Wix embed
     }
     return 'http://10.101.9.151:8000'; // Capacitor mobile app fallback
 })();

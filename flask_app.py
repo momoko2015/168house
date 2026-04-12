@@ -101,7 +101,7 @@ ALLOWED_ORIGINS = [
     'https://88loft.com',
     'http://www.88loft.com',
     'http://88loft.com',
-    'https://momoko2015.pythonanywhere.com',
+    'https://hkproperty.pythonanywhere.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
