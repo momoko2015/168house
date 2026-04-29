@@ -89,14 +89,6 @@
         </div>
         <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
         <ul class="nav-links">
-            <li style="margin-bottom: 10px;">
-                <select style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 8px; font-size: 0.9rem; cursor: pointer; outline: none;" onchange="changeLanguage(this.value)">
-                    <option value="ja" style="color: black;">🌐 日本語 (JP)</option>
-                    <option value="zh" style="color: black;">🌐 繁體中文 (HK)</option>
-                    <option value="cn" style="color: black;">🌐 简体中文 (CN)</option>
-                    <option value="en" style="color: black;">🌐 English (US)</option>
-                </select>
-            </li>
             <li><a href="#home" class="active" data-i18n="nav-home">主頁</a></li>
             <li><a href="/map.html" style="color: var(--accent-hover);"><i class="fas fa-map-marked-alt"></i> 地圖搵樓
                     (Map)</a></li>
@@ -104,7 +96,15 @@
             <li><a href="#featured" data-i18n="nav-buy">售盤</a></li>
             <li><a href="#services">減價盤</a></li>
             <li><a href="#calculator">按揭計算</a></li>
-            <li><a href="https://www.88loft.com/login.html" class="btn-primary" data-i18n="nav-contact" style="margin-left: 10px;">聯絡我們</a></li>
+            <li style="margin-top: 10px; margin-bottom: 10px;">
+                <select style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 8px; font-size: 0.9rem; cursor: pointer; outline: none;" onchange="changeLanguage(this.value)">
+                    <option value="ja" style="color: black;">🌐 日本語 (JP)</option>
+                    <option value="zh" style="color: black;">🌐 繁體中文 (HK)</option>
+                    <option value="cn" style="color: black;">🌐 简体中文 (CN)</option>
+                    <option value="en" style="color: black;">🌐 English (US)</option>
+                </select>
+            </li>
+            <li><a href="https://www.88loft.com/login.html" class="btn-primary" data-i18n="nav-contact" style="margin-left: 10px; margin-top: 5px;">聯絡我們</a></li>
         </ul>
     </nav>
 
