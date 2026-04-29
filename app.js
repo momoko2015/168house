@@ -1081,6 +1081,24 @@ function handleSearch() {
         else if (tabType === 'sale') matchesTab = prop.type === 'sale';
         else if (tabType === 'commercial') matchesTab = prop.type === 'commercial' || features.includes('工商');
 
+        // Country filtering based on current page
+        const path = window.location.pathname.toLowerCase();
+        let matchesCountry = true;
+        if (path.includes('jp.html')) {
+            const jpKw = ['tokyo', 'osaka', 'kyoto', 'japan', '東京', '大阪', '京都', '区', '千代田', '中央', '港区', '新宿', '文京', '台東', '墨田', '江東', '品川', '目黒', '大田', '世田谷', '渋谷', '中野', '杉並', '豊島', '北区', '荒川', '板橋', '練馬', '足立', '葛飾', '江戸川'];
+            matchesCountry = jpKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()) || (prop.area && prop.area.toLowerCase().includes(kw)));
+        } else if (path.includes('usa.html')) {
+            const usaKw = ['usa', 'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new hampshire', 'new jersey', 'new mexico', 'new york', 'north carolina', 'north dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode island', 'south carolina', 'south dakota', 'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington', 'west virginia', 'wisconsin', 'wyoming', ' al', ' ak', ' az', ' ar', ' ca', ' co', ' ct', ' de', ' fl', ' ga', ' hi', ' id', ' il', ' in', ' ia', ' ks', ' ky', ' la', ' me', ' md', ' ma', ' mi', ' mn', ' ms', ' mo', ' mt', ' ne', ' nv', ' nh', ' nj', ' nm', ' ny', ' nc', ' nd', ' oh', ' ok', ' or', ' pa', ' ri', ' sc', ' sd', ' tn', ' tx', ' ut', ' vt', ' va', ' wa', ' wv', ' wi', ' wy'];
+            matchesCountry = usaKw.some(kw => locZh.includes(kw) || locEn.includes(kw) || (prop.area && prop.area.toLowerCase() === kw.trim().toLowerCase()));
+        } else if (path.includes('cn.html')) {
+            const cnKw = ['china', '北京', '上海', '天津', '重庆', '广东', '深圳', '广州', '浙江', '杭州', '江苏', '南京', '四川', '成都', '福建', '厦门', '山东', '湖北', '武汉', '陕西', '西安', 'beijing', 'shanghai', 'shenzhen'];
+            matchesCountry = cnKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()) || (prop.area && prop.area.toLowerCase().includes(kw)));
+        } else {
+            // Assume HK for index.html or anything else
+            const hkKw = ['hong kong', 'hk', '香港', '九龍', '新界', 'kowloon', 'new territories', '中西區', '灣仔', '東區', '南區', '油尖旺', '深水埗', '九龍城', '黃大仙', '觀塘', '葵青', '荃灣', '屯門', '元朗', '北區', '大埔', '沙田', '西貢', '離島'];
+            matchesCountry = hkKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()) || (prop.area && prop.area.toLowerCase().includes(kw))) || (!locZh && !locEn && !prop.area); // Include items without location info
+        }
+
         // Area filtering
         let matchesArea = true;
         if (areaFilter !== 'all') {
@@ -1107,7 +1125,7 @@ function handleSearch() {
         const numPrice = parseInt((prop.price || '').toString().replace(/[^0-9]/g, '')) || 0;
         matchesPrice = numPrice >= priceMinVal && numPrice <= priceMaxVal;
 
-        return matchesSearch && matchesTab && matchesArea && matchesType && matchesPrice;
+        return matchesSearch && matchesTab && matchesCountry && matchesArea && matchesType && matchesPrice;
     });
 
     // Apply sorting
@@ -1241,37 +1259,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (filters) filters.style.display = filters.style.display === 'none' ? 'block' : 'none';
     });
 
-    document.getElementById('mapViewBtn').addEventListener('click', () => {
+    document.getElementById('mapViewBtn')?.addEventListener('click', () => {
         currentView = 'map';
         document.getElementById('propertyGrid').style.display = 'none';
         document.getElementById('mapView').style.display = 'block';
-        document.getElementById('mapViewBtn').classList.add('active');
-        document.getElementById('gridViewBtn').classList.remove('active');
-        document.getElementById('listViewBtn').classList.remove('active');
+        document.getElementById('mapViewBtn')?.classList.add('active');
+        document.getElementById('gridViewBtn')?.classList.remove('active');
+        document.getElementById('listViewBtn')?.classList.remove('active');
         initMap(properties);
     });
 
-    document.getElementById('gridViewBtn').addEventListener('click', () => {
+    document.getElementById('gridViewBtn')?.addEventListener('click', () => {
         currentView = 'grid';
         const grid = document.getElementById('propertyGrid');
-        grid.style.display = 'grid';
-        grid.classList.remove('list-view');
-        document.getElementById('mapView').style.display = 'none';
-        document.getElementById('gridViewBtn').classList.add('active');
-        document.getElementById('listViewBtn').classList.remove('active');
-        document.getElementById('mapViewBtn').classList.remove('active');
+        if(grid) {
+            grid.style.display = 'grid';
+            grid.classList.remove('list-view');
+        }
+        const mv = document.getElementById('mapView');
+        if(mv) mv.style.display = 'none';
+        document.getElementById('gridViewBtn')?.classList.add('active');
+        document.getElementById('listViewBtn')?.classList.remove('active');
+        document.getElementById('mapViewBtn')?.classList.remove('active');
         renderProperties(filteredResults);
     });
 
     document.getElementById('listViewBtn')?.addEventListener('click', () => {
         currentView = 'list';
         const grid = document.getElementById('propertyGrid');
-        grid.style.display = 'flex';
-        grid.classList.add('list-view');
-        document.getElementById('mapView').style.display = 'none';
-        document.getElementById('listViewBtn').classList.add('active');
-        document.getElementById('gridViewBtn').classList.remove('active');
-        document.getElementById('mapViewBtn').classList.remove('active');
+        if(grid) {
+            grid.style.display = 'flex';
+            grid.classList.add('list-view');
+        }
+        const mv = document.getElementById('mapView');
+        if(mv) mv.style.display = 'none';
+        document.getElementById('listViewBtn')?.classList.add('active');
+        document.getElementById('gridViewBtn')?.classList.remove('active');
+        document.getElementById('mapViewBtn')?.classList.remove('active');
         renderProperties(filteredResults);
     });
 
