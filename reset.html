@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>88Loft - Reset Password</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/utils.js"></script>
+    <style>
+        .reset-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+        .reset-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            text-align: center;
+        }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <div class="reset-card glass">
+            <h2 style="font-size: 1.8rem; margin-bottom: 10px;">Reset Your Password</h2>
+            <p style="color: #94a3b8; margin-bottom: 30px;" id="statusText">Set a new secure password for your account.</p>
+
+            <div id="resetForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="resetEmail" readonly style="opacity: 0.6;">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Verification Token</label>
+                    <input type="text" id="resetToken" placeholder="6-digit code">
+                </div>
+                <button class="btn-primary" style="width: 100%;" onclick="submitReset()">Update Password</button>
+            </div>
+
+            <div id="successView" style="display: none;">
+                <i class="fas fa-check-circle" style="font-size: 3rem; color: #4ade80; margin-bottom: 20px;"></i>
+                <p>Password updated successfully!</p>
+                <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="window.location.href='/login.html'">Login Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        const token = urlParams.get('token');
+
+        if (email) document.getElementById('resetEmail').value = email;
+        if (token) document.getElementById('resetToken').value = token;
+
+        async function submitReset() {
+            const password = document.getElementById('newPassword').value;
+            const tokenVal = document.getElementById('resetToken').value;
+            const emailVal = document.getElementById('resetEmail').value;
+
+            if (!password || !tokenVal) return alert("Please fill all fields.");
+
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailVal, token: tokenVal, password: password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('resetForm').style.display = 'none';
+                    document.getElementById('successView').style.display = 'block';
+                } else {
+                    alert(data.message || "Reset failed");
+                }
+            } catch (err) {
+                alert("Error connecting to server.");
+            }
+        }
+    </script>
+</body>
+</html>

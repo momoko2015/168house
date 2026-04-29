@@ -1,450 +1,554 @@
 <!DOCTYPE html>
-<html lang="zh" data-theme="dark">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>88Loft - 互動地圖搵樓 | Map Search</title>
-    <link rel="stylesheet" href="style.css?v=6">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Leaflet Maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-
-    <!-- Marker Clustering Plugin -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin="anonymous" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
+    <title>88loft Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
-        body,
-        html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background: #0b0f1a;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .map-container {
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: #000; color: #fff;}
+        #wrapper { display: flex; height: 100vh; flex-direction: column; }
+        #header { padding: 15px 20px; background: #111; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #7232f2; }
+        #map { flex: 1; width: 100%; }
+        #header h2 { margin: 0; font-size: 1.2rem; }
+        #dataStatus { font-size: 0.9rem; color: yellow; }
+        .back-btn { color: white; background: #7232f2; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-size: 0.9rem; }
+        .back-btn:hover { background: #5a20cc; }
+        
+        /* Compact Top Search Bar */
+        #topSearchBar {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 50px;
+            z-index: 1000;
             display: flex;
-            height: 100vh;
-            width: 100vw;
-            position: relative;
-            background: #0f172a;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 300px;
+            box-sizing: border-box;
         }
-
-        #mapFull {
+        .search-input-wrapper {
             flex: 1;
-            height: 100vh;
-            width: 100%;
-            z-index: 1;
-            background: #111827;
-        }
-
-        .side-panel {
-            width: 450px;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            z-index: 10;
-            box-shadow: 10px 0 50px rgba(0,0,0,0.5);
-        }
-
-        .map-header {
-            padding: 30px 25px;
-            background: rgba(30, 41, 59, 0.4);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .results-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        /* Mobile specific adjustments - more solid for usability */
-        @media (max-width: 900px) {
-            .side-panel {
-                width: 350px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .map-container {
-                flex-direction: column;
-            }
-            .side-panel {
-                width: 100%;
-                height: 45vh;
-                order: 2;
-                border-right: none;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            #mapFull {
-                height: 55vh;
-                order: 1;
-            }
-        }
-
-        .search-box-map {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
             display: flex;
             align-items: center;
-            padding: 10px 15px;
-            margin-top: 15px;
+            gap: 8px;
+            background: rgba(0,0,0,0.05);
+            padding: 8px 15px;
+            border-radius: 40px;
         }
-
-        .search-box-map input {
-            background: transparent;
+        .search-input-wrapper i { color: #555; }
+        .search-input-wrapper input {
             border: none;
-            color: white;
-            flex: 1;
-            padding: 5px 10px;
+            background: transparent;
+            width: 100%;
             outline: none;
+            color: #333;
+            font-size: 1rem;
         }
-
-        .results-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-        }
-
-        .map-card {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            transition: transform 0.2s;
+        .toggle-filters-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 40px;
+            font-weight: bold;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+        .toggle-filters-btn:hover { background: #f0f0f0; }
 
-        .map-card:hover {
-            border-color: var(--accent-color);
+        /* Filter Modal */
+        #filterModal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+        .filter-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .filter-modal-header h3 { margin: 0; font-size: 1.3rem; color: #1e1b4b; font-weight: 700; }
+        .close-modal { background: none; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1.2rem; cursor: pointer; color: #64748b; padding: 4px 12px; }
+        .filter-modal-content {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .filter-section-title { font-weight: 700; font-size: 1.05rem; color: #0f172a; margin-bottom: 5px; border-top: 1px solid #f1f5f9; padding-top: 15px; display: flex; align-items: center; gap: 8px; }
+        .badge { background: #fbcfe8; color: #831843; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+        .filter-row { display: flex; gap: 15px; }
+        .filter-col { flex: 1; }
+        .filter-group label, .filter-col label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #334155; }
+        .filter-group select, .filter-group input, .filter-col select {
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; outline: none; background: #fff; color: #334155;
+            appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475569%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;
+        }
+        .filter-modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .filter-modal-footer .clear-btn { background: none; border: none; color: #4338ca; font-weight: 700; cursor: pointer; padding: 10px; text-decoration: underline; font-size: 1rem; }
+        .filter-modal-footer .apply-btn { background: #8b5cf6; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; flex: 1; font-size: 1rem; transition: background 0.2s; }
+        .filter-modal-footer .apply-btn:hover { background: #7c3aed; }
+
+        
+        /* Recommendations Panel Desktop Base */
+        #recommendationsPanel {
+            position: absolute;
+            top: 150px;
+            right: 20px;
+            width: 300px;
+            bottom: 20px;
+            background: rgba(17, 24, 39, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #recommendationsPanel h3 {
+            margin: 0 0 15px 0;
+            color: #fff;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        .rec-card {
+            display: flex;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+            text-decoration: none;
+            color: white;
+        }
+        .rec-card:hover {
+            background: rgba(114, 50, 242, 0.2);
             transform: translateY(-2px);
         }
-
-        .map-card img {
-            width: 100%;
-            height: 150px;
+        .rec-card img {
+            width: 80px;
+            height: 60px;
+            border-radius: 6px;
             object-fit: cover;
         }
-
-        .map-card-info {
-            padding: 12px;
+        .rec-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 170px;
+        }
+        .rec-info .price {
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin: 0;
         }
 
-        .map-card-price {
-            color: var(--accent-hover);
-            font-weight: 800;
-            font-size: 1.2rem;
-        }
-
-        .map-card-title {
-            font-size: 0.95rem;
-            margin: 5px 0;
-            color: #fff;
-        }
-
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            background: var(--accent-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            box-shadow: 0 4px 15px rgba(114, 50, 242, 0.4);
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .side-panel {
-                width: 100%;
-                position: absolute;
-                bottom: 0;
-                height: 40%;
-                transform: translateY(0);
+        @media(max-width: 1024px) {
+            #topSearchBar { 
+                top: auto; 
+                bottom: 120px; /* Right above the recommendations panel */
+                left: 50%;
+                transform: translateX(-50%);
+                width: 95%; 
+                max-width: 100%;
+                padding: 6px 8px; 
             }
+            .search-input-wrapper { padding: 6px 12px; }
+            .toggle-filters-btn { padding: 8px 12px; font-size: 0.9rem; }
+            #filterModal { top: 60px; transform: translateX(-50%); max-height: calc(100vh - 80px); width: 95%; }
 
-            .map-container {
-                flex-direction: column;
+            /* Mobile Recommendations Panel (Bottom Horizontal Scroll) */
+            #recommendationsPanel {
+                display: flex;
+                flex-direction: row;
+                position: absolute;
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                width: 100%;
+                height: 110px;
+                background: rgba(17, 24, 39, 0.95);
+                border-radius: 12px 12px 0 0;
+                border-top: 1px solid rgba(255,255,255,0.2);
+                border-left: none;
+                border-right: none;
+                border-bottom: none;
+                padding: 10px;
+                box-sizing: border-box;
+                overflow-x: auto;
+                overflow-y: hidden;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            }
+            #recommendationsPanel h3 { display: none; }
+            #recList {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                width: max-content;
+            }
+            .rec-card {
+                width: 240px;
+                margin-bottom: 0;
+                flex-shrink: 0;
             }
         }
     </style>
 </head>
-
 <body>
-    <div class="map-container">
-        <div class="side-panel">
-            <div class="map-header">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
-                        <img src="logo.png" alt="88Loft Logo" style="height: 30px; border-radius: 5px;">
-                        <h2 style="margin: 0; font-weight: 800;">88loft <span style="color: var(--accent-color);">MAP</span></h2>
-                    </div>
-                    <span id="mapCounter"
-                        style="font-size: 0.8rem; background: var(--accent-color); padding: 3px 10px; border-radius: 20px;">0
-                        Results</span>
+
+<div id="wrapper">
+    <div id="header">
+        <h2>88loft 🗺️ Interactive Map</h2>
+        <span id="dataStatus">Loading data...</span>
+        <a href="index.html" class="back-btn">← Back Home</a>
+    </div>
+    
+    <div id="topSearchBar">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="mapKeywordFilter" placeholder="Search location, title..." onkeyup="if(event.key === 'Enter') applyFilters()">
+        </div>
+        <button class="toggle-filters-btn" onclick="toggleFilterModal()">
+            <i class="fas fa-sliders-h"></i> Filters
+        </button>
+    </div>
+
+    <!-- Hidden Filter Modal -->
+    <div id="filterModal" style="display: none;">
+        <div class="filter-modal-header">
+            <h3>Filter your results</h3>
+            <button onclick="toggleFilterModal()" class="close-modal">✕</button>
+        </div>
+        <div class="filter-modal-content">
+            <div class="filter-group">
+                <label>Radius</label>
+                <select id="mapAreaFilter">
+                    <option value="">This area only</option>
+                    <option value="HK">Hong Kong</option>
+                    <option value="JP">Japan</option>
+                    <option value="CN">China</option>
+                    <option value="USA">USA</option>
+                    <option value="Kowloon">Kowloon</option>
+                    <option value="New Territories">New Territories</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Property Type</label>
+                <select id="mapTypeFilter">
+                    <option value="">Any</option>
+                    <option value="rent">Rent</option>
+                    <option value="buy">Buy</option>
+                </select>
+            </div>
+
+            <div class="filter-section-title">Bedrooms</div>
+            <div class="filter-row">
+                <div class="filter-col">
+                    <label>Min beds</label>
+                    <select id="mapMinBeds">
+                        <option value="0">No min</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4+</option>
+                    </select>
                 </div>
-                <div class="search-box-map">
-                    <i class="fas fa-search" style="color: var(--accent-color);"></i>
-                    <input type="text" id="mapSearchInput" placeholder="Search area, property...">
-                </div>
-                <div class="search-box-map" style="margin-top: 10px;">
-                    <i class="fas fa-globe" style="color: var(--accent-color);"></i>
-                    <select id="mapCountrySelect" style="background: transparent; border: none; color: white; flex: 1; padding: 5px 10px; outline: none; appearance: auto;">
-                        <option value="all" style="color: black;">All Countries / Global</option>
-                        <option value="hk" style="color: black;">Hong Kong</option>
-                        <option value="jp" style="color: black;">Japan</option>
-                        <option value="usa" style="color: black;">USA</option>
+                <div class="filter-col">
+                    <label>Max beds</label>
+                    <select id="mapMaxBeds">
+                        <option value="99">No max</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4+</option>
                     </select>
                 </div>
             </div>
-            <div class="results-list" id="mapResults">
-                <!-- Cards injected here -->
+
+            <div class="filter-section-title">Bathrooms</div>
+            <div class="filter-row">
+                <div class="filter-col">
+                    <label>Min baths</label>
+                    <select id="mapMinBaths">
+                        <option value="0">No min</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <div class="filter-col">
+                    <label>Max baths</label>
+                    <select id="mapMaxBaths">
+                        <option value="99">No max</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
             </div>
+
+            <div class="filter-section-title">Floor Area (sq ft) <span class="badge">New</span></div>
+            <div class="filter-group">
+                <label>Min size</label>
+                <select id="mapSizeFilter">
+                    <option value="0">No min</option>
+                    <option value="500">500 sq ft</option>
+                    <option value="1000">1000 sq ft</option>
+                    <option value="1500">1500 sq ft</option>
+                    <option value="2000">2000 sq ft</option>
+                </select>
+            </div>
+            
+            <div class="filter-section-title">Budget</div>
+            <div class="filter-group">
+                <label>Max Price</label>
+                <input type="number" id="mapPriceFilter" placeholder="e.g. 50000">
+            </div>
+
         </div>
-        <div id="mapFull"></div>
-        <a href="index.html" class="back-btn"><i class="fas fa-home"></i> 回到首頁</a>
+        <div class="filter-modal-footer">
+            <button class="clear-btn" onclick="clearFilters()">Clear filters</button>
+            <button class="apply-btn" onclick="applyFiltersAndClose()">See properties</button>
+        </div>
     </div>
 
-    <!-- Modal for details (reused) -->
-    <div class="modal" id="propertyModal">
-        <div class="modal-content glass">
-            <span class="close-modal"><i class="fas fa-times"></i></span>
-            <div id="modalBody"></div>
-        </div>
+    <div id="recommendationsPanel">
+        <h3>🔥 Recommended for You</h3>
+        <div id="recList"></div>
     </div>
 
-    <!-- Scripts -->
-    <script src="utils.js?v=9"></script>
-    <script src="app.js?v=9"></script>
-    <script>
-        // Global variables for map
-        let map = null;
-        let clusterGroup = null;
-        let currentMarkers = [];
+    <div id="map"></div>
+</div>
 
-        // Helper to get translated strings safely from app.js data
-        const getMapTitle = (p) => {
-            if (typeof p.title === 'string') return p.title;
-            const lang = typeof currentLang !== 'undefined' ? currentLang : 'zh';
-            return p.title[lang] || p.title['en'] || p.title['zh'] || 'Property';
-        };
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin="" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin=""/>
 
-        const getMapLocation = (p) => {
-            if (typeof p.location === 'string') return p.location;
-            const lang = typeof currentLang !== 'undefined' ? currentLang : 'zh';
-            return p.location[lang] || p.location['en'] || p.location['zh'] || 'Location';
-        };
+<script>
+    // 1. Initialize Map
+    const map = L.map('map').setView([22.3193, 114.1694], 11);
 
-        async function startMap() {
-            try {
-                // Initialize Leaflet immediately
-                initMapApp();
+    // 2. Standard OSM tiles - very reliable
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. Marker cluster group (shows numbers when zoomed out)
+    const clusterGroup = L.markerClusterGroup({ chunkedLoading: true });
+    map.addLayer(clusterGroup);
+
+    let allProperties = [];
+
+    // 4. Fetch and plot properties
+    async function loadProperties() {
+        try {
+            const res = await fetch('/api/properties?limit=2000');
+            if (!res.ok) {
+                document.getElementById('dataStatus').innerText = 'API Error: ' + res.status;
+                document.getElementById('dataStatus').style.color = 'red';
+                return;
+            }
+
+            allProperties = await res.json();
+            applyFilters(); // Initial plot
+
+        } catch (e) {
+            document.getElementById('dataStatus').innerText = 'Error: ' + e.message;
+            document.getElementById('dataStatus').style.color = 'red';
+            console.error(e);
+        }
+    }
+
+    function toggleFilterModal() {
+        const modal = document.getElementById('filterModal');
+        modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function clearFilters() {
+        document.getElementById('mapTypeFilter').value = '';
+        document.getElementById('mapPriceFilter').value = '';
+        document.getElementById('mapAreaFilter').value = '';
+        document.getElementById('mapMinBeds').value = '0';
+        document.getElementById('mapMaxBeds').value = '99';
+        document.getElementById('mapMinBaths').value = '0';
+        document.getElementById('mapMaxBaths').value = '99';
+        document.getElementById('mapSizeFilter').value = '0';
+        applyFilters();
+    }
+
+    function applyFiltersAndClose() {
+        applyFilters();
+        toggleFilterModal();
+    }
+
+    function applyFilters() {
+        const keyword = document.getElementById('mapKeywordFilter').value.toLowerCase();
+        const typeFilter = document.getElementById('mapTypeFilter').value.toLowerCase();
+        const maxPrice = parseInt(document.getElementById('mapPriceFilter').value) || 0;
+        const areaFilter = document.getElementById('mapAreaFilter').value.toLowerCase();
+        
+        const minBeds = parseInt(document.getElementById('mapMinBeds').value) || 0;
+        const maxBeds = parseInt(document.getElementById('mapMaxBeds').value) || 99;
+        
+        const minBaths = parseInt(document.getElementById('mapMinBaths').value) || 0;
+        const maxBaths = parseInt(document.getElementById('mapMaxBaths').value) || 99;
+        
+        const sizeFilter = parseInt(document.getElementById('mapSizeFilter').value) || 0;
+
+        clusterGroup.clearLayers();
+        const markers = [];
+        let count = 0;
+        let matchedProperties = [];
+
+        allProperties.forEach(p => {
+            if (p.lat && p.lng) {
+                // Apply logic
+                const pBeds = parseInt(p.beds) || 0;
+                const pBaths = parseInt(p.baths) || 0;
+                const pSqft = parseInt(p.sqft) || 0;
                 
-                console.log("Fetching properties for map...");
-                // Limit to 1000 for mapping to keep it performant
-                const resp = await fetch(API_BASE + '/api/properties?limit=1000');
-                if (resp.ok) {
-                    const data = await resp.json();
-                    window.allMapProperties = data;
-                    console.log("Map rendering " + window.allMapProperties.length + " markers.");
-                    updateMapResults(window.allMapProperties);
-                } else {
-                    console.error("API Fetch Failed");
-                }
-
-                document.getElementById('mapSearchInput').addEventListener('input', applyMapFilters);
-                document.getElementById('mapCountrySelect').addEventListener('change', applyMapFilters);
+                let matches = true;
                 
-                setTimeout(() => { map.invalidateSize(); }, 500);
-
-            } catch (e) {
-                console.error("Map Start Error:", e);
-            }
-        }
-
-        function initMapApp() {
-            if (map) return;
-            // Target the map container
-            const container = L.DomUtil.get('mapFull');
-            if (container != null) { container._leaflet_id = null; }
-
-            map = L.map('mapFull', { zoomControl: false }).setView([22.3193, 114.1694], 11);
-            L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-            // Primary: CARTO dark tiles
-            const cartoTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; CARTO',
-                maxZoom: 19,
-                crossOrigin: true
-            });
-
-            // Fallback: OpenStreetMap (works in iframe sandboxes where CARTO may fail)
-            const osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 19,
-                crossOrigin: true
-            });
-
-            // Try CARTO first; on any tile error, switch to OSM
-            let cartoFailed = false;
-            cartoTiles.on('tileerror', function() {
-                if (!cartoFailed) {
-                    cartoFailed = true;
-                    console.warn('CARTO tiles failed, switching to OpenStreetMap fallback');
-                    map.removeLayer(cartoTiles);
-                    osmTiles.addTo(map);
+                if (pBeds < minBeds || pBeds > maxBeds) matches = false;
+                if (pBaths < minBaths || pBaths > maxBaths) matches = false;
+                if (sizeFilter > 0 && pSqft < sizeFilter) matches = false;
+                
+                if (typeFilter !== '') {
+                    const pt = (p.type || '').toLowerCase();
+                    if (typeFilter === 'rent' && pt !== 'rent') matches = false;
+                    if (typeFilter === 'buy' && pt !== 'buy' && pt !== 'sell' && pt !== 'sale') matches = false;
                 }
-            });
-            cartoTiles.addTo(map);
+                
+                if (maxPrice > 0 && p.price) {
+                    const priceNum = parseInt(String(p.price).replace(/[^0-9]/g, ''));
+                    if (priceNum > maxPrice) matches = false;
+                }
+                
+                const locZh = (p.location && p.location.zh) ? p.location.zh.toLowerCase() : '';
+                const locEn = (p.location && p.location.en) ? p.location.en.toLowerCase() : '';
+                const pArea = (p.area) ? p.area.toLowerCase() : '';
+                const titleZh = (p.title && p.title.zh) ? p.title.zh.toLowerCase() : '';
+                const titleEn = (p.title && p.title.en) ? p.title.en.toLowerCase() : '';
+                const desc = (p.description) ? String(p.description).toLowerCase() : '';
 
-            clusterGroup = L.markerClusterGroup({
-                chunkedLoading: true,
-                maxClusterRadius: 40,
-                spiderfyOnMaxZoom: true,
-                showCoverageOnHover: false
-            });
-            map.addLayer(clusterGroup);
-            console.log("Leaflet initialized.");
-        }
-
-        // Run map start as soon as DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', startMap);
-        } else {
-            startMap();
-        }
-
-        function applyMapFilters() {
-            const term = document.getElementById('mapSearchInput').value.toLowerCase().trim();
-            const country = document.getElementById('mapCountrySelect').value;
-            let filtered = window.allMapProperties || [];
-
-            if (country === 'hk') {
-                filtered = filtered.filter(p => {
-                    const lat = parseFloat(p.lat);
-                    const lng = parseFloat(p.lng);
-                    const inHK = (lat > 22.0 && lat < 22.6 && lng > 113.7 && lng < 114.6);
-                    return inHK || (p.area && p.area.toUpperCase().includes('HK'));
-                });
-            } else if (country === 'jp') {
-                filtered = filtered.filter(p => {
-                    const lat = parseFloat(p.lat);
-                    const lng = parseFloat(p.lng);
-                    const inJP = (lat > 30 && lat < 46 && lng > 128 && lng < 147);
-                    return inJP || (p.area && (p.area.toUpperCase().includes('JP') || p.area.toUpperCase().includes('JAPAN')));
-                });
-            } else if (country === 'usa') {
-                filtered = filtered.filter(p => {
-                    const lat = parseFloat(p.lat);
-                    const lng = parseFloat(p.lng);
-                    const inUS = (lat > 24 && lat < 50 && lng < -65 && lng > -125);
-                    return inUS || (p.area && (p.area.toUpperCase().includes('US') || p.area.toUpperCase().includes('USA')));
-                });
-            }
-
-            if (term) {
-                filtered = filtered.filter(p => {
-                    const title = getMapTitle(p).toLowerCase();
-                    const loc = getMapLocation(p).toLowerCase();
-                    return title.includes(term) || loc.includes(term);
-                });
-            }
-
-            updateMapResults(filtered);
-        }
-
-        function updateMapResults(props) {
-            const list = document.getElementById('mapResults');
-            if (!list) return;
-            
-            list.innerHTML = '';
-            document.getElementById('mapCounter').innerText = `${props.length} Results`;
-
-            if (!clusterGroup) return;
-            clusterGroup.clearLayers();
-            currentMarkers = [];
-            
-            const displayLimit = 50;
-
-            props.forEach((p, index) => {
-                const lat = parseFloat(p.lat);
-                const lng = parseFloat(p.lng);
-
-                if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
-                    const title = getMapTitle(p);
-                    const loc = getMapLocation(p);
-
-                    // Add to list if under limit
-                    if (index < displayLimit) {
-                        const card = document.createElement('div');
-                        card.className = 'map-card';
-                        card.innerHTML = `
-                            <img src="${p.image || ''}" 
-                                 onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'><rect fill=\'%231e293b\' width=\'400\' height=\'200\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%2394a3b8\' font-size=\'14\''>No Photo</text></svg>'">
-                            <div class="map-card-info">
-                                <div class="map-card-price">${p.price}</div>
-                                <div class="map-card-title">${title}</div>
-                                <div style="font-size: 0.75rem; color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> ${loc}</div>
-                                <button class="btn-primary" style="margin-top: 10px; width: 100%; border-radius: 8px; padding: 8px; font-size: 0.8rem;" 
-                                        onclick="event.stopPropagation(); openPropertyDetails(${p.id})">
-                                    <i class="fas fa-info-circle"></i> 詳情
-                                </button>
-                            </div>
-                        `;
-                        card.onclick = () => {
-                            map.setView([lat, lng], 16);
-                            marker.openPopup();
-                        };
-                        list.appendChild(card);
+                if (areaFilter) {
+                    if (!locZh.includes(areaFilter) && !locEn.includes(areaFilter) && !pArea.includes(areaFilter)) {
+                        matches = false;
                     }
-
-                    // Create marker
-                    const marker = L.marker([lat, lng], { id: p.id });
-                    marker.bindPopup(`
-                        <div style="width: 220px; color: #000; overflow: hidden; border-radius: 12px;">
-                            <img src="${p.image}" style="width: 100%; height: 120px; object-fit: cover;">
-                            <div style="padding: 12px; background: #fff;">
-                                <h5 style="margin: 0; font-size: 1rem; color: #1e293b;">${title}</h5>
-                                <p style="color: #7232f2; font-weight: 800; font-size: 1.1rem; margin: 8px 0;">${p.price}</p>
-                                <button onclick="openPropertyDetails(${p.id})" 
-                                        style="width: 100%; border: none; background: #7232f2; color:#fff; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                                    查看詳情
-                                </button>
-                            </div>
-                        </div>
-                    `, { className: 'glass-popup' });
-                    
-                    currentMarkers.push(marker);
                 }
-            });
+                
+                if (keyword) {
+                    if (!locZh.includes(keyword) && !locEn.includes(keyword) && !pArea.includes(keyword) && !titleZh.includes(keyword) && !titleEn.includes(keyword) && !desc.includes(keyword)) {
+                        matches = false;
+                    }
+                }
 
-            clusterGroup.addLayers(currentMarkers);
-            
-            if (currentMarkers.length > 0 && props.length < 100) {
-                try {
-                    map.fitBounds(clusterGroup.getBounds().pad(0.1));
-                } catch (e) {}
+                if (matches) {
+                    matchedProperties.push(p);
+                    const title = (p.title && p.title.zh) ? p.title.zh : ((p.title && p.title.en) ? p.title.en : 'Property');
+                    const img = p.image ? p.image : '';
+
+                    const marker = L.marker([parseFloat(p.lat), parseFloat(p.lng)]);
+
+                    marker.bindPopup(`
+                        <div style="width:200px; font-family:sans-serif;">
+                            ${img ? `<img src="${img}" style="width:100%;height:110px;object-fit:cover;border-radius:4px;margin-bottom:8px;" onerror="this.style.display='none'">` : ''}
+                            <b style="font-size:0.95rem;">${title}</b><br>
+                            <span style="color:#7232f2;font-weight:bold;">${p.price}</span><br>
+                            <small style="color:#888;">Property #${String(p.id).padStart(5,'0')}</small><br><br>
+                            <a href="property.html?id=${p.id}" 
+                               style="display:block;background:#7232f2;color:white;text-align:center;padding:8px;border-radius:5px;text-decoration:none;font-weight:bold;">
+                               查看詳情 (View Detail)
+                            </a>
+                        </div>
+                    `);
+
+                    markers.push(marker);
+                    count++;
+                }
             }
+        });
+
+        clusterGroup.addLayers(markers);
+
+        // Auto fit bounds when searching
+        if (markers.length > 0 && (areaFilter !== '' || keyword !== '' || minBeds > 0 || maxBeds < 99 || minBaths > 0 || maxBaths < 99 || sizeFilter > 0)) {
+            map.fitBounds(clusterGroup.getBounds(), { padding: [30, 30], maxZoom: 16 });
         }
 
-        // Run map start on windows load to ensure full element layout
-        window.addEventListener('load', startMap);
-    </script>
+        renderRecommendations(matchedProperties);
+
+        document.getElementById('dataStatus').innerText = count + ' properties loaded ✓';
+        document.getElementById('dataStatus').style.color = 'lime';
+    }
+    
+    function renderRecommendations(properties) {
+        const recList = document.getElementById('recList');
+        if (!properties || properties.length === 0) {
+            recList.innerHTML = '<p style="color:#888; font-size:0.9rem; padding: 10px;">No properties found.</p>';
+            return;
+        }
+        
+        // Take top 10 recommended (we can randomize or sort by premium)
+        const sorted = properties.sort((a,b) => (b.is_premium?1:0) - (a.is_premium?1:0));
+        const topRecs = sorted.slice(0, 10);
+        
+        recList.innerHTML = topRecs.map(p => {
+            const title = (p.title && p.title.zh) ? p.title.zh : ((p.title && p.title.en) ? p.title.en : 'Property');
+            const img = p.image ? p.image : 'https://via.placeholder.com/80x60?text=No+Image';
+            return `
+                <a href="property.html?id=${p.id}" class="rec-card" target="_blank">
+                    <img src="${img}" onerror="this.src='https://via.placeholder.com/80x60?text=No+Image'">
+                    <div class="rec-info">
+                        <h4>${title}</h4>
+                        <p class="price">${p.price}</p>
+                    </div>
+                </a>
+            `;
+        }).join('');
+    }
+
+    loadProperties();
+</script>
 
 </body>
-
 </html>

@@ -1,16 +1,18 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新增樓盤 - 188Loft精選樓盤</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="utils.js?v=9"></script>
+    <script src="/utils.js?v=11"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body {
             background: #0f172a;
@@ -90,6 +92,77 @@
             width: auto;
             cursor: pointer;
         }
+
+        /* Custom File Upload Styling */
+        .custom-file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .file-upload-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ffd700;
+        }
+
+        .file-upload-label i {
+            color: #ffd700;
+            font-size: 1.2rem;
+        }
+
+        #propFile {
+            display: none;
+        }
+        #mapPicker {
+            height: 300px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 5px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #fff;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
 
@@ -97,24 +170,43 @@
     <!-- Navigation -->
     <nav class="navbar glass">
         <div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
-            <img src="logo.png" alt="88loft logo" style="height: 35px; border-radius: 5px;">
+            <img src="/logo.png" alt="88loft logo" style="height: 35px; border-radius: 5px;">
             <span style="font-size: 1.4rem; font-weight: 800; color: white;">88loft</span>
         </div>
         <ul class="nav-links" style="margin-left: auto;">
-            <li><a href="admin.html">返回控制台</a></li>
+            <li><a href="/admin.html">返回控制台</a></li>
         </ul>
     </nav>
 
     <div class="edit-container">
         <div class="edit-card glass">
             <h3><i class="fas fa-plus-circle"></i> 新增樓盤</h3>
-            <p style="color: #94a3b8; margin-bottom: 30px;">發佈您的最新物業資訊。</p>
-
+            <p style="color: #94a3b8; margin-bottom: 30px;">填寫資料以發佈您的樓盤。</p>
             <form id="addForm">
                 <div class="form-group">
-                    <label>物業名稱 (中英兼備)</label>
-                    <input type="text" id="propTitleZh" placeholder="例如: 沙田中心" required style="margin-bottom: 10px;">
-                    <input type="text" id="propTitleEn" placeholder="e.g. Shatin Centre" required>
+                    <label>區域 (Country/Region)</label>
+                    <select id="propArea" required style="border: 2px solid #ffd700; background: rgba(255, 215, 0, 0.1); color: #fff; font-weight: bold; padding: 12px; border-radius: 10px;">
+                        <option value="HK">香港 (Hong Kong)</option>
+                        <option value="JP">日本 (Japan)</option>
+                        <option value="USA">美國 (USA)</option>
+                        <option value="China">中國內地 (China)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="lblTitle">物業名稱 (Property Title)</label>
+                    <input type="text" id="propTitleZh" placeholder="例如：西九龍 凱旋門 高層單位" required>
+                    <input type="hidden" id="propTitleCN">
+                    <input type="hidden" id="propTitleEn">
+                    <input type="hidden" id="propTitleJP">
+                </div>
+
+                <div class="form-group">
+                    <label id="lblLocation">地點 (Location)</label>
+                    <input type="text" id="propLocationZh" placeholder="例如：尖沙咀 柯士甸道" required>
+                    <input type="hidden" id="propLocationCN">
+                    <input type="hidden" id="propLocationEn">
+                    <input type="hidden" id="propLocationJP">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -126,67 +218,85 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>價格 (HK$)</label>
+                        <label>價格 (Price)</label>
                         <input type="text" id="propPrice" placeholder="例如: 15,000 / 12,000,000" required>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>地點 (中英兼備)</label>
-                    <input type="text" id="propLocationZh" placeholder="地區，例如: 沙田" required
-                        style="margin-bottom: 10px;">
-                    <input type="text" id="propLocationEn" placeholder="Area, e.g. Sha Tin" required>
-                </div>
-
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div class="form-group">
-                        <label>房間</label>
+                        <label>房間 (Beds)</label>
                         <input type="number" id="propBeds" min="0" value="1" required>
                     </div>
                     <div class="form-group">
-                        <label>廁所</label>
+                        <label>廁所 (Baths)</label>
                         <input type="number" id="propBaths" min="0" value="1" required>
                     </div>
                     <div class="form-group">
-                        <label>呎數</label>
+                        <label>呎數 (Sqft)</label>
                         <input type="number" id="propSqft" min="0" value="500" required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>圖片網址 (可選複數上載)</label>
+                    <label>圖片網址 (Image URL)</label>
                     <input type="url" id="propImageUrl" placeholder="https://unsplash.com/...">
                 </div>
 
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>緯度 (Latitude) - 可手動輸入</label>
+                        <input type="number" id="propLat" name="lat" step="any" placeholder="22.3193" oninput="syncMapFromInputs()">
+                    </div>
+                    <div class="form-group">
+                        <label>經度 (Longitude) - 可手動輸入</label>
+                        <input type="number" id="propLng" name="lng" step="any" placeholder="114.1694" oninput="syncMapFromInputs()">
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label>上載相片</label>
-                    <input type="file" id="propFile" accept="image/*" multiple style="padding: 8px;"
-                        onchange="previewImagesSelected('propFile', 'imagePreview')">
+                    <label>在地圖上確認位置 (Confirm on Map)</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button type="button" class="btn-outline" onclick="lookupAddress()" style="flex: 1; padding: 10px; font-size: 0.85rem;">
+                            <i class="fas fa-search-location"></i> 根據地點定位 (Locate by Address)
+                        </button>
+                    </div>
+                    <div id="mapPicker" style="height: 300px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>上載相片 (Upload Photos)</label>
+                    <div class="custom-file-upload">
+                        <input type="file" id="propFile" accept="image/*" multiple 
+                            onchange="previewImagesSelected('propFile', 'imagePreview')">
+                        <label for="propFile" class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>選擇檔案 / Choose Files</span>
+                        </label>
+                    </div>
                     <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
-                    <div id="uploadStatus" style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;">
-                    </div>
+                    <div id="uploadStatus" style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;"></div>
                 </div>
 
                 <div class="form-group">
-                    <label>區域</label>
-                    <select id="propArea" required>
-                        <option value="HK">香港 (HK)</option>
-                        <option value="China">中國內地 (China)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>物業特色</label>
+                    <label>物業特色 (Features)</label>
                     <div class="features-grid">
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景"> 海景</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適"> 寧靜舒適</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵"> 鄰近地鐵</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀"> 開揚景觀</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修"> 高級裝修</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高"> 實用率高</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景"> 🌊 海景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="山景"> ⛰️ 山景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="園景"> 🌳 園景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀"> 🏙️ 開揚景觀</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵"> 🚇 鄰近地鐵</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="住客泳池"> 🏊 住客泳池</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="健身設施"> 🏋️ 健身設施</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="停車位"> 🚗 停車位</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="住客會所"> 🏠 住客會所</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修"> ✨ 高級裝修</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高"> 📏 實用率高</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適"> 🤫 寧靜舒適</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="連露台"> 🌿 連露台</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="連天台"> 🌤️ 連天台</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寵物友善"> 🐾 寵物友善</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="穿梭巴士"> 🚌 穿梭巴士</label>
                     </div>
                 </div>
-
                 <div class="btn-grid">
                     <button type="button" class="btn-outline" onclick="window.location.href='admin.html'">取消</button>
                     <button type="submit" class="btn-primary" id="submitBtn">發佈物業</button>
@@ -199,6 +309,190 @@
     <div class="toast" id="toast">Message</div>
 
     <script>
+        // Map Picker Initialization
+        let pickerMap, pickerMarker;
+        
+        function initMapPicker() {
+            const defaultPos = [22.3193, 114.1694]; // HK center
+            pickerMap = L.map('mapPicker').setView(defaultPos, 13);
+            
+            // Using CARTO Voyager tiles - more reliable and faster
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(pickerMap);
+
+            pickerMarker = L.marker(defaultPos, {
+                draggable: true
+            }).addTo(pickerMap);
+
+            pickerMarker.on('dragend', function(e) {
+                const pos = pickerMarker.getLatLng();
+                updateCoords(pos.lat, pos.lng, true);
+                reverseGeocode(pos.lat, pos.lng);
+            });
+
+            pickerMap.on('click', function(e) {
+                pickerMarker.setLatLng(e.latlng);
+                updateCoords(e.latlng.lat, e.latlng.lng, true);
+                reverseGeocode(e.latlng.lat, e.latlng.lng);
+            });
+            
+            updateCoords(defaultPos[0], defaultPos[1], true);
+            setTimeout(() => pickerMap.invalidateSize(), 500);
+        }
+
+        function updateCoords(lat, lng, updateInputs = true) {
+            if (updateInputs) {
+                document.getElementById('propLat').value = parseFloat(lat).toFixed(6);
+                document.getElementById('propLng').value = parseFloat(lng).toFixed(6);
+            }
+        }
+
+        function syncMapFromInputs() {
+            const lat = parseFloat(document.getElementById('propLat').value);
+            const lng = parseFloat(document.getElementById('propLng').value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const pos = [lat, lng];
+                pickerMarker.setLatLng(pos);
+                pickerMap.panTo(pos);
+            }
+        }
+
+        async function lookupAddress() {
+            const area = document.getElementById('propArea').value;
+            const location = document.getElementById('propLocationZh').value;
+            if (!location) return showToast("請先輸入地點 (Please input location first)");
+
+            const query = `${location}, ${area === 'HK' ? 'Hong Kong' : area}`;
+            showToast("正在定位... (Locating...)");
+
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    pickerMap.setView([lat, lon], 16);
+                    pickerMarker.setLatLng([lat, lon]);
+                    updateCoords(lat, lon);
+                    showToast("定位成功！ (Location found!)");
+                } else {
+                    showToast("找不到該地點，請手動在地圖上選取。 (Location not found, please pick manually)");
+                }
+            } catch (err) {
+                showToast("定位服務出錯。 (Geocoding error)");
+            }
+        }
+
+        async function reverseGeocode(lat, lng) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                const data = await res.json();
+                if (data && data.display_name) {
+                    let shortAddr = data.display_name.split(',').slice(0, 3).join(',').trim();
+                    document.getElementById('propLocationZh').value = shortAddr;
+                }
+            } catch (e) { console.error("Reverse geocode failed", e); }
+        }
+
+        // Address Suggestions Logic
+        let suggestionTimeout = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            const locInput = document.getElementById('propLocationZh');
+            if (!locInput) return;
+            
+            // Create suggestions container
+            const suggContainer = document.createElement('div');
+            suggContainer.id = 'addressSuggestions';
+            suggContainer.className = 'suggestions-dropdown';
+            suggContainer.style.cssText = 'display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; z-index: 1000; max-height: 200px; overflow-y: auto; margin-top: 5px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);';
+            locInput.parentElement.style.position = 'relative';
+            locInput.parentElement.appendChild(suggContainer);
+
+            locInput.addEventListener('input', function(e) {
+                const val = e.target.value.trim();
+                clearTimeout(suggestionTimeout);
+                if (val.length < 3) {
+                    suggContainer.style.display = 'none';
+                    return;
+                }
+
+                suggestionTimeout = setTimeout(async () => {
+                    const area = document.getElementById('propArea').value;
+                    const query = `${val}, ${area === 'HK' ? 'Hong Kong' : area}`;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+                        const data = await res.json();
+                        if (data && data.length > 0) {
+                            suggContainer.innerHTML = data.map(item => `
+                                <div class="suggestion-item" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff; font-size: 0.9rem;" 
+                                     onclick="selectSuggestion('${item.display_name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lon})">
+                                    ${item.display_name}
+                                </div>
+                            `).join('');
+                            suggContainer.style.display = 'block';
+                        } else {
+                            suggContainer.style.display = 'none';
+                        }
+                    } catch (e) { suggContainer.style.display = 'none'; }
+                }, 500);
+            });
+        });
+
+        function selectSuggestion(displayName, lat, lng) {
+            document.getElementById('propLocationZh').value = displayName.split(',').slice(0, 3).join(',').trim();
+            document.getElementById('addressSuggestions').style.display = 'none';
+            if (pickerMap) {
+                pickerMap.setView([lat, lng], 16);
+                pickerMarker.setLatLng([lat, lng]);
+                updateCoords(lat, lng);
+            }
+        }
+
+        window.selectSuggestion = selectSuggestion; // Expose to global for onclick
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            const sugg = document.getElementById('addressSuggestions');
+            if (sugg && !e.target.closest('.form-group')) {
+                sugg.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initMapPicker);
+
+        document.getElementById('propArea')?.addEventListener('change', (e) => {
+            const region = e.target.value;
+            const titleLbl = document.getElementById('lblTitle');
+            const locLbl = document.getElementById('lblLocation');
+            const titleInput = document.getElementById('propTitleZh');
+            const locInput = document.getElementById('propLocationZh');
+
+            if (region === 'JP') {
+                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - JP)";
+                if (locLbl) locLbl.innerText = "地點 (Location - JP)";
+                if (titleInput) titleInput.placeholder = "例：東京 渋谷区 高級マンション";
+                if (locInput) locInput.placeholder = "例：東京都渋谷区...";
+            } else if (region === 'USA') {
+                if (titleLbl) titleLbl.innerText = "Property Title (English)";
+                if (locLbl) locLbl.innerText = "Location (English)";
+                if (titleInput) titleInput.placeholder = "e.g. Luxury Apartment in Manhattan";
+                if (locInput) locInput.placeholder = "e.g. 5th Ave, New York";
+            } else if (region === 'China') {
+                if (titleLbl) titleLbl.innerText = "物业名称 (Property Title - CN)";
+                if (locLbl) locLbl.innerText = "地点 (Location - CN)";
+                if (titleInput) titleInput.placeholder = "例如：上海 浦东新区 豪宅";
+                if (locInput) locInput.placeholder = "例如：上海市浦东新区...";
+            } else {
+                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - HK)";
+                if (locLbl) locLbl.innerText = "地點 (Location - HK)";
+                if (titleInput) titleInput.placeholder = "例如：西九龍 凱旋門 高層單位";
+                if (locInput) locInput.placeholder = "例如：尖沙咀 柯士甸道";
+            }
+        });
+
         document.getElementById('addForm').onsubmit = async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -228,10 +522,16 @@
             }
 
             const typeValue = document.getElementById('propType').value;
+            const areaValue = document.getElementById('propArea').value;
+            let currency = "HK$ ";
+            if (areaValue === 'JP') currency = "¥ ";
+            else if (areaValue === 'USA') currency = "$ ";
+            else if (areaValue === 'China') currency = "¥ ";
+
             const priceInput = document.getElementById('propPrice').value;
             let finalPrice = priceInput;
-            if (!priceInput.includes('HK$')) {
-                finalPrice = "HK$ " + priceInput + (typeValue === 'rent' ? '/mo' : '');
+            if (!priceInput.includes('$') && !priceInput.includes('¥')) {
+                finalPrice = currency + priceInput + (typeValue === 'rent' ? '/mo' : '');
             }
 
             const selectedFeaturesVal = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => cb.value).join(',');
@@ -247,9 +547,34 @@
             const selectedFeaturesEn = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => featureMap[cb.value] || cb.value).join(',');
             const combinedFeatures = selectedFeaturesEn + "|" + selectedFeaturesVal;
 
+            const titleZh = document.getElementById('propTitleZh').value;
+            const titleEn = document.getElementById('propTitleEn').value;
+            const titleCN = document.getElementById('propTitleCN').value || titleZh;
+            const titleJP = document.getElementById('propTitleJP').value || titleEn;
+
+            const locZh = document.getElementById('propLocationZh').value;
+            const locEn = document.getElementById('propLocationEn').value;
+            const locCN = document.getElementById('propLocationCN').value || locZh;
+            const locJP = document.getElementById('propLocationJP').value || locEn;
+
+            let latVal = parseFloat(document.getElementById('propLat').value);
+            let lngVal = parseFloat(document.getElementById('propLng').value);
+
+            if (!latVal || !lngVal) {
+                try {
+                    const query = `${locZh}, ${areaValue === 'HK' ? 'Hong Kong' : areaValue}`;
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+                    const geoData = await geoRes.json();
+                    if (geoData && geoData.length > 0) {
+                        latVal = parseFloat(geoData[0].lat);
+                        lngVal = parseFloat(geoData[0].lon);
+                    }
+                } catch (e) { console.error("Final geocoding attempt failed", e); }
+            }
+
             const newListing = {
-                title: { en: document.getElementById('propTitleEn').value, zh: document.getElementById('propTitleZh').value },
-                location: { en: document.getElementById('propLocationEn').value, zh: document.getElementById('propLocationZh').value },
+                title: { en: titleEn, zh: titleZh, cn: titleCN, jp: titleJP },
+                location: { en: locEn, zh: locZh, cn: locCN, jp: locJP },
                 price: finalPrice,
                 type: typeValue,
                 beds: parseInt(document.getElementById('propBeds').value) || 0,
@@ -260,8 +585,8 @@
                 video: "",
                 area: document.getElementById('propArea').value,
                 features: combinedFeatures,
-                lat: 22.3 + (Math.random() * 0.1),
-                lng: 114.1 + (Math.random() * 0.1)
+                lat: latVal || 0,
+                lng: lngVal || 0
             };
 
             try {

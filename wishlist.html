@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>88loft - 我的收藏心水盤</title>
+    <meta name="description" content="查看您在88loft儲存的心水樓盤。">
+    <link rel="stylesheet" href="/style.css?v=10">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background: #0d0f17; color: #e2e8f0; min-height: 100vh; }
+        .page-header {
+            background: rgba(17,24,39,0.95); backdrop-filter: blur(15px);
+            padding: 18px 5%; display: flex; align-items: center; gap: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100;
+        }
+        .wishlist-container { max-width: 1300px; margin: 50px auto; padding: 0 5% 80px; }
+        .wishlist-hero {
+            background: linear-gradient(135deg, rgba(114,50,242,0.15), rgba(64,16,163,0.1));
+            border: 1px solid rgba(114,50,242,0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .wishlist-hero h1 { font-size: 2.2rem; font-weight: 800; }
+        .wishlist-hero p { color: #94a3b8; margin-top: 8px; }
+        .wishlist-count { background: var(--accent-color); color: white; border-radius: 12px; padding: 12px 24px; font-weight: 700; font-size: 1.1rem; }
+        .wishlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        .empty-wishlist {
+            text-align: center; padding: 100px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.08);
+            border-radius: 20px;
+        }
+        .empty-wishlist i { font-size: 4rem; color: #334155; margin-bottom: 20px; display: block; }
+        .empty-wishlist h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .empty-wishlist p { color: #64748b; margin-bottom: 25px; }
+        .wishlist-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .wishlist-card:hover { border-color: var(--accent-color); transform: translateY(-6px); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .wishlist-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .wishlist-card-body { padding: 20px; }
+        .wishlist-card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+        .wishlist-card-loc { color: #64748b; font-size: 0.85rem; margin-bottom: 12px; }
+        .wishlist-card-price { font-size: 1.4rem; font-weight: 800; color: #8e54f5; margin-bottom: 12px; }
+        .wishlist-card-feats { display: flex; gap: 16px; font-size: 0.82rem; color: #94a3b8; margin-bottom: 16px; }
+        .wishlist-card-actions { display: flex; gap: 10px; }
+        .btn-view { flex: 1; background: linear-gradient(135deg, #7232f2, #4010a3); color: white; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity 0.2s; }
+        .btn-view:hover { opacity: 0.9; }
+        .btn-remove { width: 42px; height: 42px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-remove:hover { background: rgba(248,113,113,0.2); }
+        .badge-type { position: absolute; top: 12px; left: 12px; background: var(--accent-color); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+        .sort-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .sort-bar label { color: #94a3b8; font-size: 0.85rem; }
+        .sort-bar select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; outline: none; cursor: pointer; }
+        .clear-all-btn { margin-left: auto; background: transparent; border: 1px solid rgba(248,113,113,0.3); color: #f87171; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .clear-all-btn:hover { background: rgba(248,113,113,0.1); }
+        @media(max-width: 600px) { .wishlist-hero { padding: 25px; } .wishlist-hero h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <a href="/index.html" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+        <img src="/logo.png" alt="88loft" style="height:36px; border-radius:6px;">
+        <span style="font-size:1.3rem; font-weight:800; background:linear-gradient(45deg,#fff,#94a3b8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">88loft</span>
+    </a>
+    <a href="/index.html" style="background:#7232f2; color:white; padding:8px 18px; border-radius:20px; font-weight:600; font-size:0.9rem; text-decoration:none; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-arrow-left"></i> 返回首頁
+    </a>
+    <a href="/try.html" style="background:rgba(255,255,255,0.08); color:#94a3b8; padding:8px 18px; border-radius:20px; text-decoration:none; font-size:0.9rem;">
+        <i class="fas fa-map-marked-alt"></i> 地圖
+    </a>
+</div>
+
+<div class="wishlist-container">
+    <div class="wishlist-hero">
+        <div>
+            <h1>❤️ 我的心水收藏</h1>
+            <p>您儲存的所有心水樓盤，一目了然</p>
+        </div>
+        <div class="wishlist-count" id="wishlistCountBadge">0 個樓盤</div>
+    </div>
+
+    <div class="sort-bar" id="sortBar" style="display:none;">
+        <label>排序方式：</label>
+        <select id="wishlistSort" onchange="renderWishlist()">
+            <option value="default">預設順序</option>
+            <option value="price-asc">價格：低至高</option>
+            <option value="price-desc">價格：高至低</option>
+            <option value="beds-desc">房間數：多至少</option>
+            <option value="sqft-desc">面積：大至小</option>
+        </select>
+        <button class="clear-all-btn" onclick="clearAllFavs()"><i class="fas fa-trash-alt"></i> 清除所有收藏</button>
+    </div>
+
+    <div id="wishlistGrid" class="wishlist-grid"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000' : 'https://www.88loft.com';
+
+function parseCurrency(str) {
+    if (!str) return 0;
+    const nums = str.replace(/[^0-9.]/g, '');
+    return parseFloat(nums) || 0;
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function getFavorites() {
+    return JSON.parse(localStorage.getItem('property_favorites') || '[]').map(Number);
+}
+
+let allWishlistProps = [];
+
+async function loadWishlist() {
+    const favIds = getFavorites();
+    const countBadge = document.getElementById('wishlistCountBadge');
+    if (countBadge) countBadge.textContent = favIds.length + ' 個樓盤';
+
+    if (favIds.length === 0) {
+        renderEmpty();
+        return;
+    }
+
+    document.getElementById('sortBar').style.display = 'flex';
+    document.getElementById('wishlistGrid').innerHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding:60px; color:#94a3b8;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#7232f2;"></i><br><br>載入心水盤...
+        </div>`;
+
+    try {
+        const res = await fetch(API_BASE + '/api/properties?limit=10000');
+        if (!res.ok) throw new Error('API error');
+        const allProps = await res.json();
+        allWishlistProps = allProps.filter(p => favIds.includes(Number(p.id)));
+        renderWishlist();
+    } catch(e) {
+        document.getElementById('wishlistGrid').innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:60px; color:#f87171;">
+                <i class="fas fa-exclamation-circle" style="font-size:2rem;"></i><br><br>載入失敗，請重試。
+            </div>`;
+    }
+}
+
+function renderWishlist() {
+    const sortVal = document.getElementById('wishlistSort')?.value || 'default';
+    let props = [...allWishlistProps];
+
+    if (sortVal === 'price-asc') props.sort((a,b) => parseCurrency(a.price) - parseCurrency(b.price));
+    else if (sortVal === 'price-desc') props.sort((a,b) => parseCurrency(b.price) - parseCurrency(a.price));
+    else if (sortVal === 'beds-desc') props.sort((a,b) => (b.beds||0) - (a.beds||0));
+    else if (sortVal === 'sqft-desc') props.sort((a,b) => (b.sqft||0) - (a.sqft||0));
+
+    if (props.length === 0) { renderEmpty(); return; }
+
+    const grid = document.getElementById('wishlistGrid');
+    grid.innerHTML = props.map(p => {
+        const title = p.title?.zh || p.title?.en || p.title || '樓盤';
+        const loc = p.location?.zh || p.location?.en || p.location || '';
+        const img = p.image || 'https://via.placeholder.com/300x200?text=No+Photo';
+        const typeLabel = p.type === 'rent' ? '租盤' : '售盤';
+        return `
+            <div class="wishlist-card" id="wcard-${p.id}">
+                <span class="badge-type">${typeLabel}</span>
+                <img src="${img}" alt="${title}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Photo'">
+                <div class="wishlist-card-body">
+                    <div class="wishlist-card-title">${title}</div>
+                    <div class="wishlist-card-loc"><i class="fas fa-map-marker-alt" style="color:#7232f2; margin-right:4px;"></i>${loc}</div>
+                    <div class="wishlist-card-price">${p.price}</div>
+                    <div class="wishlist-card-feats">
+                        <span><i class="fas fa-bed"></i> ${p.beds} 房</span>
+                        <span><i class="fas fa-bath"></i> ${p.baths} 廁</span>
+                        <span><i class="fas fa-expand-arrows-alt"></i> ${p.sqft} 呎</span>
+                    </div>
+                    <div class="wishlist-card-actions">
+                        <a href="/property.html?id=${p.id}" class="btn-view"><i class="fas fa-eye"></i> 查看詳情</a>
+                        <button class="btn-remove" title="移出收藏" onclick="removeFromWishlist(${p.id})"><i class="fas fa-heart-broken"></i></button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderEmpty() {
+    document.getElementById('wishlistGrid').innerHTML = `
+        <div class="empty-wishlist" style="grid-column:1/-1">
+            <i class="far fa-heart"></i>
+            <h3>收藏夾暫時係空嘅</h3>
+            <p>瀏覽樓盤，點擊 ❤️ 將心水盤加入收藏！</p>
+            <a href="/index.html" style="background:#7232f2; color:white; padding:12px 28px; border-radius:10px; text-decoration:none; font-weight:700; display:inline-block;">
+                <i class="fas fa-search"></i> 去搵盤
+            </a>
+        </div>`;
+    document.getElementById('sortBar').style.display = 'none';
+}
+
+function removeFromWishlist(id) {
+    let favs = getFavorites().filter(f => f !== Number(id));
+    localStorage.setItem('property_favorites', JSON.stringify(favs));
+    const card = document.getElementById('wcard-' + id);
+    if (card) { card.style.transform = 'scale(0.9)'; card.style.opacity = '0'; setTimeout(() => { allWishlistProps = allWishlistProps.filter(p => p.id !== id); renderWishlist(); }, 300); }
+    const countBadge = document.getElementById('wishlistCountBadge');
+    if (countBadge) countBadge.textContent = favs.length + ' 個樓盤';
+    showToast('已從收藏夾移除');
+}
+
+function clearAllFavs() {
+    if (!confirm('確定清除所有收藏嗎？')) return;
+    localStorage.setItem('property_favorites', '[]');
+    allWishlistProps = [];
+    renderEmpty();
+    const countBadge = document.getElementById('wishlistCountBadge');
+    if (countBadge) countBadge.textContent = '0 個樓盤';
+    showToast('收藏夾已清空');
+}
+
+loadWishlist();
+</script>
+
+</body>
+</html>

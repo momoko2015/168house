@@ -1,160 +1,361 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elite Estates - User Login & Add Listing</title>
-    <link rel="stylesheet" href="style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="utils.js?v=9"></script>
+    <script src="/utils.js?v=11"></script>
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Facebook SDK -->
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({ appId: '706773323651974', cookie: true, xfbml: true, version: 'v19.0' });
+        };
+    </script>
+    <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
+    
+    <!-- Leaflet for Map Picker -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        body {
+            background-color: #0f172a;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
         .login-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 100px 20px 40px;
-            background: radial-gradient(circle at top right, rgba(114, 50, 242, 0.15), transparent 40%),
-                radial-gradient(circle at bottom left, rgba(64, 16, 163, 0.15), transparent 40%);
+            padding: 120px 20px 60px;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(114, 50, 242, 0.1), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 85, 0.08), transparent 50%),
+                #0f172a;
+            position: relative;
         }
+
+        /* Ambient glowing circles */
+        .glow-circle {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .glow-1 { top: 10%; left: 10%; background: #7232f2; }
+        .glow-2 { bottom: 10%; right: 10%; background: #ff0055; }
 
         .auth-card {
             width: 100%;
-            max-width: 500px;
-            padding: 40px;
-            border-radius: 20px;
+            max-width: 460px;
+            padding: 50px 40px;
+            border-radius: 24px;
             position: relative;
-            z-index: 9999;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .auth-card h2 {
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2rem;
+            margin-bottom: 8px;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .auth-card p {
             text-align: center;
             color: #94a3b8;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+            font-size: 0.95rem;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            position: relative;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            padding-left: 4px;
         }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
+        .form-group input {
             width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
             font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #ff0055;
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 0 4px rgba(255, 0, 85, 0.1);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             font-size: 1.1rem;
-            margin-top: 10px;
+            font-weight: 700;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #ff0055, #7232f2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(114, 50, 242, 0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(114, 50, 242, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
         }
 
         .toggle-auth {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
             color: #94a3b8;
+            font-size: 0.95rem;
         }
 
         .toggle-auth a {
-            color: var(--accent-color);
+            color: #ff0055;
             text-decoration: none;
+            font-weight: 700;
+            margin-left: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .toggle-auth a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* Social Buttons */
+        .social-login-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .social-btn {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
             font-weight: 600;
-        }
-
-        /* Dashboard Styles */
-        .dashboard-container {
-            display: none;
-            max-width: 1200px;
-            margin: 100px auto;
-            padding: 20px;
-        }
-
-        .dashboard-header {
+            cursor: pointer;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            justify-content: center;
+            gap: 14px;
+            transition: all 0.2s;
         }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
+        .social-btn:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
         }
+        .social-btn i { font-size: 1.2rem; }
+        .social-btn-google { border-color: rgba(234,67,53,0.2); }
+        .social-btn-google:hover { border-color: #ea4335; }
+        .social-btn-facebook { border-color: rgba(24,119,242,0.2); }
+        .social-btn-facebook:hover { border-color: #1877f2; }
 
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .add-listing-card {
-            padding: 30px;
-            border-radius: 16px;
-        }
-
-        .my-listings .listing-item {
+        .or-divider {
             display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .or-divider::before, .or-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .link-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .link-btn:hover { color: #fff; }
+
+        /* Navbar adjustment */
+        .navbar {
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        /* Dashboard Listing Item Refinement */
+        .listing-item {
+            display: flex;
+            align-items: center;
             gap: 20px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
             margin-bottom: 15px;
-            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .listing-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-color);
+            transform: translateX(5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
         .listing-item img {
             width: 100px;
             height: 100px;
-            border-radius: 8px;
             object-fit: cover;
+            border-radius: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .listing-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .listing-info {
+            flex-grow: 1;
         }
 
         .listing-info h3 {
-            margin-bottom: 5px;
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .listing-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #94a3b8 !important;
         }
 
         .listing-actions {
-            margin-left: auto;
             display: flex;
             gap: 10px;
+            flex-shrink: 0;
         }
 
-        .btn-edit-mode {
-            background: linear-gradient(135deg, #ffd700, #ff8c00) !important;
-            color: #1a1a2e !important;
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-view-live {
+            background: rgba(114, 50, 242, 0.15);
+            color: var(--accent-hover);
+            border: 1px solid var(--accent-color);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-view-live:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Map & Suggestions Styles */
+        #mapPicker {
+            height: 300px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 5px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #fff;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .features-grid {
@@ -173,112 +374,98 @@
             cursor: pointer;
         }
 
-        .feature-checkbox input {
-            width: auto;
-            cursor: pointer;
+        .custom-file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
         }
 
-        /* Mobile Bottom Nav */
-        @media (max-width: 768px) {
-            .dashboard-tabs {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: rgba(15, 23, 42, 0.95);
-                backdrop-filter: blur(15px);
-                z-index: 1000;
-                margin: 0;
-                padding: 10px 0;
-                box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
-                display: flex;
-                justify-content: space-around;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .tab-btn {
-                flex-direction: column;
-                font-size: 0.7rem;
-                gap: 5px;
-                padding: 5px;
-                background: transparent;
-                border: none;
-            }
-
-            .dashboard-container {
-                padding-bottom: 80px;
-            }
-        }
-
-        /* Inquiry Item Styles */
-        .inquiry-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-        }
-
-        .inquiry-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
-
-        .inquiry-header {
+        .file-upload-label {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 10px;
-        }
-
-        .inquiry-sender {
-            font-weight: 600;
-            color: var(--accent-hover);
-        }
-
-        .inquiry-date {
-            font-size: 0.85rem;
-            color: #94a3b8;
-        }
-
-        .inquiry-msg {
-            font-style: italic;
-            color: #cbd5e1;
-            margin: 10px 0;
-            line-height: 1.4;
-        }
-
-        .inquiry-meta {
-            display: flex;
-            gap: 15px;
-            font-size: 0.85rem;
-            color: #94a3b8;
             align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
         }
 
-        .inquiry-meta i {
-            margin-right: 5px;
-            color: var(--accent-color);
+        .file-upload-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ffd700;
+        }
+
+        #propFile {
+            display: none;
         }
     </style>
 </head>
 
 <body>
+    <!-- Background Elements -->
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+
     <!-- Navigation -->
     <nav class="navbar glass">
-        <div class="logo">88精選樓盤</div>
+        <div class="logo">88loft精選</div>
         <ul class="nav-links" style="margin-left: auto;">
-            <li><a href="index.html">返回主頁</a></li>
+            <li><a href="/">返回主頁</a></li>
         </ul>
     </nav>
 
     <!-- Auth View -->
     <div class="login-container" id="authView">
-        <div class="auth-card glass-dark">
-            <h2 id="formTitle">歡迎回來</h2>
-            <p id="formDesc">登入以管理您的物業及刊登資訊。</p>
+        <div class="auth-card">
+            <div style="text-align:center; margin-bottom: 35px;">
+                <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:15px;">
+                    <img src="/logo.png" alt="88loft" style="height:44px; border-radius:10px; box-shadow: 0 4px 15px rgba(114, 50, 242, 0.3);">
+                    <span style="font-size:1.8rem; font-weight:800; letter-spacing:-1px;">88loft</span>
+                </div>
+                <h2 id="formTitle">歡迎回來</h2>
+                <p id="formDesc">登入以管理您的物業及刊登資訊。</p>
+            </div>
+
+            <!-- Social Login Buttons -->
+            <div class="social-login-section" id="socialLoginSection">
+                <div id="tokenDOM" style="color: #10b981; font-size: 0.85rem; word-break: break-all; margin-bottom: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; display: none;"></div>
+                <!-- Google -->
+                <button class="social-btn social-btn-google" id="googleBtn" onclick="loginWithGoogle()">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z"/>
+                        <path fill="#34A853" d="M16.04 18.013C14.956 18.647 13.546 19.09 12 19.09c-3.033 0-5.606-1.94-6.634-4.66l-4.052 3.128C3.252 21.325 7.311 24 12 24c2.951 0 5.752-1.08 7.84-3.027l-3.8-2.96z"/>
+                        <path fill="#4A90D9" d="M19.84 20.973C22.012 18.95 23.454 15.9 23.454 12c0-.706-.085-1.39-.241-2.045H12v4.5h6.436c-.29 1.52-1.09 2.776-2.224 3.6l3.628 2.918z"/>
+                        <path fill="#FBBC05" d="M5.366 14.43A7.156 7.156 0 0 1 4.909 12c0-.864.159-1.693.434-2.462L1.24 6.65A11.94 11.94 0 0 0 0 12c0 1.916.45 3.73 1.248 5.34l4.118-2.91z"/>
+                    </svg>
+                    <span class="social-btn-text">以 Google 繼續</span>
+                    <i class="fas fa-spinner fa-spin social-btn-loader"></i>
+                </button>
+
+                <!-- Facebook -->
+                <button class="social-btn social-btn-facebook" id="facebookBtn" onclick="loginWithFacebook()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+                        <path d="M24 12.073C24 5.445 18.627 0 12 0S0 5.445 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.234 2.686.234v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+                    </svg>
+                    <span class="social-btn-text">以 Facebook 繼續</span>
+                    <i class="fas fa-spinner fa-spin social-btn-loader"></i>
+                </button>
+
+                <!-- Apple (UI only — requires Apple developer account) -->
+                <button class="social-btn social-btn-apple" id="appleBtn" onclick="loginWithApple()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/>
+                    </svg>
+                    <span class="social-btn-text">以 Apple 繼續</span>
+                    <i class="fas fa-spinner fa-spin social-btn-loader"></i>
+                </button>
+            </div>
+
+            <div class="or-divider" id="orDivider">或以電郵登入</div>
 
             <form id="authForm">
                 <div class="form-group" id="nameGroup" style="display: none;">
@@ -315,11 +502,17 @@
     <div class="dashboard-container" id="dashboardView">
         <div class="dashboard-header">
             <div>
-                <h2>歡迎，<span id="userNameDisplay">用戶</span>!</h2>
-                <p>管理您的房地產組合及設置。</p>
+                <span id="userNameDisplay" style="display: none;">用戶</span>
+                <div id="dashboardTokenDOM" style="color: #10b981; font-size: 0.85rem; word-break: break-all; margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; display: none;"></div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-outline" onclick="window.location.href='index.html'"><i class="fas fa-home"></i>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="langSelector" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; cursor: pointer;" onchange="changeLanguage(this.value)">
+                    <option value="zh" style="color: black;">繁體中文 (Traditional Chinese)</option>
+                    <option value="cn" style="color: black;">简体中文 (Simplified Chinese)</option>
+                    <option value="en" style="color: black;">English</option>
+                    <option value="jp" style="color: black;">日本語 (Japanese)</option>
+                </select>
+                <button class="btn-outline" onclick="window.location.href='/index.html'"><i class="fas fa-home"></i>
                     返回首頁</button>
                 <button class="btn-outline" onclick="logout()">登出 <i class="fas fa-sign-out-alt"></i></button>
             </div>
@@ -365,92 +558,120 @@
 
                     <form id="addListingForm" onsubmit="addListing(event)">
                         <div class="form-group">
-                            <label>物業名稱</label>
-                            <input type="text" id="propTitle" placeholder="例如：現代海邊別墅" required>
+                            <label>地區區域 (Region)</label>
+                            <select id="propArea" required style="border: 2px solid var(--accent-color); background: rgba(114, 50, 242, 0.1);">
+                                <option value="HK">香港 (Hong Kong)</option>
+                                <option value="JP">日本 (Japan)</option>
+                                <option value="USA">美國 (USA)</option>
+                                <option value="China">中國內地 (Mainland China)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label id="lblTitle">物業名稱 (Property Title)</label>
+                            <input type="text" id="propTitle" placeholder="例如：西九龍 凱旋門 高層單位" required>
+                            <input type="hidden" id="propTitleCN">
+                            <input type="hidden" id="propTitleEN">
+                            <input type="hidden" id="propTitleJP">
+                        </div>
+
+                        <div class="form-group">
+                            <label id="lblLocation">地點 (Location)</label>
+                            <input type="text" id="propLocation" placeholder="例如：尖沙咀 柯士甸道" required>
+                            <div id="addressSuggestions" class="suggestions-dropdown" style="display: none;"></div>
+                            <input type="hidden" id="propLocationCN">
+                            <input type="hidden" id="propLocationEN">
+                            <input type="hidden" id="propLocationJP">
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="form-group">
-                                <label>種類</label>
+                                <label>種類 (Type)</label>
                                 <select id="propType" required>
-                                    <option value="rent">租盤</option>
-                                    <option value="sale">售盤</option>
+                                    <option value="rent">租盤 (Rent)</option>
+                                    <option value="sale">售盤 (Sale)</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>價格 (HK$)</label>
-                                <input type="text" id="propPrice" placeholder="例如：50000/月 或 12000000" required>
+                                <label>價格 (Price)</label>
+                                <input type="text" id="propPrice" placeholder="例如：50000" required>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>地點</label>
-                            <input type="text" id="propLocation" placeholder="例如：尖沙咀, 九龍" required>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                             <div class="form-group">
-                                <label>房間</label>
+                                <label>房間 (Beds)</label>
                                 <input type="number" id="propBeds" min="0" required>
                             </div>
                             <div class="form-group">
-                                <label>廁所</label>
+                                <label>廁所 (Baths)</label>
                                 <input type="number" id="propBaths" min="0" required>
                             </div>
                             <div class="form-group">
-                                <label>呎數</label>
+                                <label>呎數 (Sqft)</label>
                                 <input type="number" id="propSqft" min="0" required>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="form-group">
-                                <label>圖片網址 (或下面上載)</label>
-                                <input type="url" id="propImage" placeholder="https://unsplash.com/...">
+                                <label>緯度 (Latitude)</label>
+                                <input type="number" id="propLat" step="any" placeholder="22.3193">
                             </div>
                             <div class="form-group">
-                                <label>影片網址 (YouTube/MP4)</label>
-                                <input type="url" id="propVideo" placeholder="https://youtube.com/...">
+                                <label>經度 (Longitude)</label>
+                                <input type="number" id="propLng" step="any" placeholder="114.1694">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>上載物業相片 (可選多張)</label>
-                            <input type="file" id="propFile" accept="image/*" multiple style="padding: 8px;"
-                                onchange="previewImagesSelected('propFile', 'imagePreview')">
-                            <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                            <label>在地圖上確認位置 (Map View)</label>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <button type="button" class="btn-outline" onclick="lookupAddress()" style="flex: 1; padding: 10px; font-size: 0.85rem;">
+                                    <i class="fas fa-search-location"></i> 定位地點 (Locate)
+                                </button>
                             </div>
-                            <div id="uploadStatus"
-                                style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;"></div>
+                            <div id="mapPicker" style="height: 300px; width: 100%; border-radius: 12px; margin-top: 10px;"></div>
                         </div>
 
                         <div class="form-group">
-                            <label>地區區域</label>
-                            <select id="propArea" required>
-                                <option value="HK">香港 (Hong Kong)</option>
-                                <option value="China">中國內地 (Mainland China)</option>
-                            </select>
+                            <label>影片網址 (Video URL - YouTube/Vimeo/MP4)</label>
+                            <input type="url" id="propVideo" placeholder="https://youtube.com/watch?v=...">
                         </div>
 
                         <div class="form-group">
-                            <label>物業特色</label>
+                            <label>圖片網址 (Image URL)</label>
+                            <input type="url" id="propImage" placeholder="https://...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>上載物業相片 (Upload Photos)</label>
+                            <div class="custom-file-upload">
+                                <input type="file" id="propFile" accept="image/*" multiple onchange="previewImagesSelected('propFile', 'imagePreview')">
+                                <label for="propFile" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>選擇檔案 (Choose Files)</span>
+                                </label>
+                            </div>
+                            <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+                            <div id="uploadStatus" style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>物業特色 (Features)</label>
                             <div class="features-grid">
-                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景">
-                                    海景</label>
-                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適">
-                                    寧靜舒適</label>
-                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵">
-                                    鄰近地鐵</label>
-                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀">
-                                    開揚景觀</label>
-                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修">
-                                    高級裝修</label>
-                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高">
-                                    實用率高</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Sea View"> 🌊 海景</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Quiet"> 🤫 寧靜舒適</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Near MTR"> 🚇 鄰近地鐵</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Open View"> 🏙️ 開揚景觀</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Luxury"> ✨ 高級裝修</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="High Efficiency"> 📏 實用率高</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Garden"> 🌳 園景</label>
+                                <label class="feature-checkbox"><input type="checkbox" name="feature" value="Pool"> 🏊 泳池</label>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">發佈樓盤</button>
+                        <button type="submit" id="addListingBtn" class="btn-primary" style="width: 100%; margin-top: 10px;">發佈樓盤</button>
                     </form>
                 </div>
 
@@ -486,10 +707,18 @@
                 <h3><i class="fas fa-user-cog"></i> 個人設定</h3>
                 <div class="profile-settings-grid" style="margin-top: 30px;">
                     <div class="avatar-section">
-                        <img id="profileAvatarLarge"
-                            src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" class="avatar-large"
-                            alt="Avatar">
-                        <p style="font-size: 0.8rem; color: #94a3b8;">系統根據您的姓名自動生成頭像</p>
+                        <!-- Hidden file input -->
+                        <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                        <!-- Clicking avatar opens file picker -->
+                        <div style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('avatarFileInput').click()" title="Click to upload photo">
+                            <img id="profileAvatarLarge"
+                                src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" class="avatar-large"
+                                alt="Avatar" style="display:block;">
+                            <div style="position:absolute;bottom:0;right:0;background:#7232f2;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:2px solid #1e293b;">
+                                <i class="fas fa-camera" style="font-size:0.8rem;color:#fff;"></i>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-top:8px;">點擊頭像可上載照片</p>
                     </div>
                     <div>
                         <form onsubmit="updateProfile(event)">
@@ -521,15 +750,19 @@
             showToast("系統錯誤: " + msg + " (行: " + line + ")");
         };
 
+
         let currentMode = 'login'; // 'login', 'signup', 'forgot', 'reset'
         let currentUser = null;
 
         let userListings = [];
         let userInquiries = [];
 
+        console.log("Login initialized. API_BASE:", API_BASE);
+
         async function loadUserListings() {
+            if (!currentUser || !currentUser.id) return;
             try {
-                const response = await fetch(API_BASE + '/api/properties');
+                const response = await fetch(API_BASE + `/api/properties?user_id=${currentUser.id}`);
                 if (response.ok) {
                     userListings = await response.json();
                     document.getElementById('statListings').textContent = userListings.length;
@@ -569,68 +802,9 @@
             updateUIForMode();
         }
 
-        function updateUIForMode() {
-            const formTitle = document.getElementById('formTitle');
-            const formDesc = document.getElementById('formDesc');
-            const nameGroup = document.getElementById('nameGroup');
-            const tokenGroup = document.getElementById('tokenGroup');
-            const actionBtn = document.getElementById('actionBtn');
-            const toggleText = document.getElementById('toggleText');
-            const toggleLink = document.getElementById('toggleLink');
-            const passInput = document.getElementById('passwordInput');
-            const forgotLink = document.getElementById('forgotPasswordLink');
-
-            nameGroup.style.display = 'none';
-            tokenGroup.style.display = 'none';
-            passInput.parentElement.style.display = 'block';
-            forgotLink.style.display = 'block';
-            actionBtn.style.background = ""; // Reset style
-            actionBtn.style.height = ""; // Reset height
-
-            if (currentMode === 'login') {
-                formTitle.textContent = "歡迎回來";
-                formDesc.textContent = "登入以管理您的物業及刊登資訊。";
-                actionBtn.textContent = "登入";
-                toggleText.textContent = "還沒有帳戶？ ";
-                toggleLink.textContent = "立即註冊";
-                passInput.required = true;
-            } else if (currentMode === 'signup') {
-                formTitle.textContent = "建立新帳戶";
-                formDesc.textContent = "加入我們以開始刊登您的物業。";
-                nameGroup.style.display = 'block';
-                actionBtn.textContent = "註冊";
-                toggleText.textContent = "已有帳戶？ ";
-                toggleLink.textContent = "立即登入";
-                forgotLink.style.display = 'none';
-                passInput.required = true;
-            } else if (currentMode === 'forgot') {
-                formTitle.textContent = "【忘記密碼】模式";
-                formDesc.textContent = "請輸入您的 Email 地址，系統將會發送重設驗證碼。";
-                passInput.parentElement.style.display = 'none';
-                passInput.required = false; 
-                actionBtn.textContent = "【點擊這裡】立即發送重設請求";
-                actionBtn.style.background = "linear-gradient(135deg, #ff4d4d, #b30000)"; 
-                actionBtn.style.height = "65px";
-                actionBtn.style.fontSize = "1.3rem";
-                toggleText.textContent = "";
-                toggleLink.textContent = "返回登入頁面";
-                forgotLink.style.display = 'none';
-            } else if (currentMode === 'reset') {
-                formTitle.textContent = "設置新密碼";
-                formDesc.textContent = "驗證碼已發送，請設置您的新登入密碼。";
-                tokenGroup.style.display = 'block';
-                actionBtn.textContent = "確認更新密碼";
-                toggleText.textContent = "";
-                toggleLink.textContent = "放棄並返回登入";
-                forgotLink.style.display = 'none';
-                passInput.required = true;
-            }
-        }
 
         async function handleAuth(e) {
             if (e) e.preventDefault();
-            console.log("handleAuth triggered in mode:", currentMode);
-            alert("正在啟動伺服器請求... (模式: " + currentMode + ")");
             
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passwordInput').value;
@@ -638,7 +812,6 @@
             const token = document.getElementById('tokenInput').value;
 
             if (!email) { showToast("請輸入電子郵件"); return; }
-            alert("正在傳送電子郵件：" + email);
 
             try {
                 if (currentMode === 'signup') {
@@ -711,12 +884,25 @@
         function loginSuccess() {
             document.getElementById('userNameDisplay').textContent = currentUser.name;
             document.getElementById('editName').value = currentUser.name;
-            document.getElementById('profileAvatarLarge').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=7232f2&color=fff`;
+            // Restore bio if saved
+            if (document.getElementById('editBio') && currentUser.bio) {
+                document.getElementById('editBio').value = currentUser.bio;
+            }
+            // Restore custom uploaded photo if exists
+            const savedAvatar = localStorage.getItem('property_avatar');
+            document.getElementById('profileAvatarLarge').src = savedAvatar
+                ? savedAvatar
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=7232f2&color=fff`;
             document.getElementById('authView').style.display = 'none';
             document.getElementById('dashboardView').style.display = 'block';
             loadUserListings();
             loadFavorites();
-            showToast("登入成功！");
+            if (!pickerMap) {
+                setTimeout(() => initMapPicker(), 100);
+            } else {
+                setTimeout(() => pickerMap.invalidateSize(), 100);
+            }
+            showToast('登入成功！');
         }
 
         function logout() {
@@ -727,7 +913,208 @@
             document.getElementById('authView').style.display = 'flex';
             currentMode = 'login';
             updateUIForMode();
+            // Restore social buttons
+            document.getElementById('socialLoginSection').style.display = 'flex';
+            document.getElementById('orDivider').style.display = 'flex';
             showToast("已登出。");
+        }
+
+        function switchTab(evt, tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Show the selected tab and button
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.style.display = 'block';
+            }
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
+
+            // Load data if needed
+            if (tabId === 'listingsTab' && typeof loadUserListings === 'function') loadUserListings();
+            if (tabId === 'favoritesTab' && typeof loadFavorites === 'function') loadFavorites();
+            if (tabId === 'inquiriesTab' && typeof loadInquiries === 'function') loadInquiries();
+        }
+
+        function changeLanguage(lang) {
+            if (lang === 'en') window.location.href = '/usa.html';
+            else if (lang === 'cn') window.location.href = '/cn.html';
+            else if (lang === 'jp') window.location.href = '/jp.html';
+            else window.location.href = '/index.html';
+        }
+
+        /* ── Social Login Handlers ────────────────────────────────── */
+
+        // Shared: call our backend with the provider token
+        async function handleSocialLogin(provider, token, btnId) {
+            const tokenDOM = document.getElementById('tokenDOM');
+            const dashboardTokenDOM = document.getElementById('dashboardTokenDOM');
+            if (tokenDOM) {
+                tokenDOM.style.display = 'block';
+                tokenDOM.textContent = provider.toUpperCase() + ' Token: ' + token;
+            }
+            if (dashboardTokenDOM) {
+                dashboardTokenDOM.style.display = 'block';
+                dashboardTokenDOM.textContent = provider.toUpperCase() + ' Token: ' + token;
+            }
+            
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('loading');
+            try {
+                const res = await fetch(API_BASE + '/api/auth/social', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, token })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    currentUser = data.user;
+                    localStorage.setItem('property_user', JSON.stringify(currentUser));
+                    // If Google/FB returned a photo, cache it
+                    if (data.user.picture) {
+                        localStorage.setItem('property_avatar', data.user.picture);
+                    }
+                    loginSuccess();
+                } else {
+                    showToast(data.message || '社交登入失敗，請稍後重試。');
+                }
+            } catch(e) {
+                console.error('Social login error:', e);
+                showToast('連線失敗，請檢查網絡後重試。');
+            } finally {
+                if (btn) btn.classList.remove('loading');
+            }
+        }
+
+        // ── Google ──
+        // REPLACE 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com' with your real Client ID
+        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+        function loginWithGoogle() {
+            if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+                showToast('Google Client ID 未設定，使用測試模式登入...');
+                const mockToken = 'mock_google_token_' + Math.random().toString(36).substr(2, 9);
+                setTimeout(() => handleSocialLogin('google', mockToken, 'googleBtn'), 1000);
+                return;
+            }
+
+            if (typeof google === 'undefined' || !google.accounts) {
+                showToast('Google SDK 尚未載入，請稍候再試。');
+                return;
+            }
+            const client = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: 'openid email profile',
+                callback: async (resp) => {
+                    if (resp.error) { showToast('Google 登入取消或失敗'); return; }
+                    // For token-based flow, use access_token
+                    await handleSocialLogin('google', resp.access_token, 'googleBtn');
+                }
+            });
+            client.requestAccessToken();
+        }
+
+        // ── Facebook ──
+        // REPLACE '1234567890' in the FB.init() call above with your real Facebook App ID
+        function loginWithFacebook() {
+            if (typeof FB === 'undefined') {
+                showToast('Facebook SDK 未載入，使用測試模式登入...');
+                const mockToken = 'mock_fb_token_' + Math.random().toString(36).substr(2, 9);
+                setTimeout(() => handleSocialLogin('facebook', mockToken, 'facebookBtn'), 1000);
+                return;
+            }
+            document.getElementById('facebookBtn').classList.add('loading');
+            FB.login((response) => {
+                if (response.authResponse) {
+                    handleSocialLogin('facebook', response.authResponse.accessToken, 'facebookBtn');
+                } else {
+                    document.getElementById('facebookBtn').classList.remove('loading');
+                    showToast('Facebook 授權失敗，使用測試模式登入...');
+                    const mockToken = 'mock_fb_token_' + Math.random().toString(36).substr(2, 9);
+                    setTimeout(() => handleSocialLogin('facebook', mockToken, 'facebookBtn'), 1000);
+                }
+            }, { scope: 'email' });
+        }
+
+        // ── Apple ──
+        function loginWithApple() {
+            showToast('Apple 登入需要 Apple Developer 帳戶設定，請聯絡管理員。');
+        }
+
+        // Hide social buttons in forgot/reset mode
+        function updateUIForMode() {
+            const formTitle = document.getElementById('formTitle');
+            const formDesc = document.getElementById('formDesc');
+            const nameGroup = document.getElementById('nameGroup');
+            const tokenGroup = document.getElementById('tokenGroup');
+            const actionBtn = document.getElementById('actionBtn');
+            const toggleText = document.getElementById('toggleText');
+            const toggleLink = document.getElementById('toggleLink');
+            const passInput = document.getElementById('passwordInput');
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const socialSection = document.getElementById('socialLoginSection');
+            const orDivider = document.getElementById('orDivider');
+
+            nameGroup.style.display = 'none';
+            tokenGroup.style.display = 'none';
+            passInput.parentElement.style.display = 'block';
+            forgotLink.style.display = 'block';
+            actionBtn.style.background = "";
+            actionBtn.style.height = "";
+            actionBtn.style.fontSize = "";
+            if (socialSection) socialSection.style.display = 'flex';
+            if (orDivider) orDivider.style.display = 'flex';
+
+            if (currentMode === 'login') {
+                formTitle.textContent = "歡迎回來";
+                formDesc.textContent = "登入以管理您的物業及刊登資訊。";
+                actionBtn.textContent = "登入";
+                toggleText.textContent = "還沒有帳戶？ ";
+                toggleLink.textContent = "立即註冊";
+                passInput.required = true;
+            } else if (currentMode === 'signup') {
+                formTitle.textContent = "建立新帳戶";
+                formDesc.textContent = "加入我們以開始刊登您的物業。";
+                nameGroup.style.display = 'block';
+                actionBtn.textContent = "註冊";
+                toggleText.textContent = "已有帳戶？ ";
+                toggleLink.textContent = "立即登入";
+                forgotLink.style.display = 'none';
+                passInput.required = true;
+            } else if (currentMode === 'forgot') {
+                formTitle.textContent = "【忘記密碼】模式";
+                formDesc.textContent = "請輸入您的 Email 地址，系統將會發送重設驗證碼。";
+                passInput.parentElement.style.display = 'none';
+                passInput.required = false;
+                actionBtn.textContent = "【點擊這裡】立即發送重設請求";
+                actionBtn.style.background = "linear-gradient(135deg, #ff4d4d, #b30000)";
+                actionBtn.style.height = "65px";
+                actionBtn.style.fontSize = "1.3rem";
+                toggleText.textContent = "";
+                toggleLink.textContent = "返回登入頁面";
+                forgotLink.style.display = 'none';
+                if (socialSection) socialSection.style.display = 'none';
+                if (orDivider) orDivider.style.display = 'none';
+            } else if (currentMode === 'reset') {
+                formTitle.textContent = "設置新密碼";
+                formDesc.textContent = "驗證碼已發送，請設置您的新登入密碼。";
+                tokenGroup.style.display = 'block';
+                actionBtn.textContent = "確認更新密碼";
+                toggleText.textContent = "";
+                toggleLink.textContent = "放棄並返回登入";
+                forgotLink.style.display = 'none';
+                passInput.required = true;
+                if (socialSection) socialSection.style.display = 'none';
+                if (orDivider) orDivider.style.display = 'none';
+            }
         }
 
         // Check for existing session or URL parameters
@@ -758,7 +1145,15 @@
             e.currentTarget.classList.add('active');
             document.getElementById(tabId).classList.add('active');
 
-            if (tabId === 'listingsTab') await loadUserListings();
+            if (tabId === 'listingsTab') {
+                await loadUserListings();
+                // Initialize map if not already done, or invalidate size if it was hidden
+                if (!pickerMap) {
+                    initMapPicker();
+                } else {
+                    setTimeout(() => pickerMap.invalidateSize(), 100);
+                }
+            }
             if (tabId === 'favoritesTab') await loadFavorites(); 
             if (tabId === 'inquiriesTab') await loadInquiries();
         }
@@ -801,14 +1196,38 @@
                 </div>
             `).join('');
         }
+        function handleAvatarUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const dataUrl = ev.target.result;
+                document.getElementById('profileAvatarLarge').src = dataUrl;
+                // Also update the small nav avatar if it exists
+                const navAvatar = document.querySelector('.user-profile .avatar, .nav-avatar');
+                if (navAvatar) navAvatar.src = dataUrl;
+                // Save to localStorage so it persists
+                localStorage.setItem('property_avatar', dataUrl);
+                showToast('頭像已更新！');
+            };
+            reader.readAsDataURL(file);
+        }
+
         function updateProfile(e) {
             e.preventDefault();
-            const newName = document.getElementById('editName').value;
+            const newName = document.getElementById('editName').value.trim();
+            const newBio = document.getElementById('editBio').value.trim();
+            if (!newName) { showToast('請輸入用戶姓名'); return; }
             currentUser.name = newName;
+            currentUser.bio = newBio;
             localStorage.setItem('property_user', JSON.stringify(currentUser));
             document.getElementById('userNameDisplay').textContent = newName;
-            document.getElementById('profileAvatarLarge').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=7232f2&color=fff`;
-            showToast("個人資料已更新");
+            // Keep custom photo if set, otherwise generate from name
+            const savedAvatar = localStorage.getItem('property_avatar');
+            if (!savedAvatar) {
+                document.getElementById('profileAvatarLarge').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=7232f2&color=fff`;
+            }
+            showToast('個人資料已儲存 ✓');
         }
 
         async function loadFavorites() {
@@ -848,13 +1267,187 @@
                     </div>
                     <h4 style="margin-bottom: 5px; font-size: 1rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</h4>
                     <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 10px;"><i class="fas fa-map-marker-alt"></i> ${loc}</p>
-                    <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 5px;">
                         <span style="color: var(--accent-hover); font-weight: bold; font-size: 0.95rem;">${p.price}</span>
-                        <button class="btn-outline" style="padding: 5px 12px; font-size: 0.75rem;" onclick="window.location.href='index.html?id=${p.id}'">查看</button>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="window.location.href='/map.html?id=${p.id}'"><i class="fas fa-map-marked-alt"></i> 地圖</button>
+                            <button class="btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="window.location.href='/property.html?id=${p.id}'">查看</button>
+                        </div>
                     </div>
                 </div>
             `;
         }
+
+        // Map Picker Initialization
+        let pickerMap, pickerMarker;
+        
+        function initMapPicker() {
+            const mapEl = document.getElementById('mapPicker');
+            if (!mapEl) return;
+            
+            const defaultPos = [22.3193, 114.1694]; // HK center
+            pickerMap = L.map('mapPicker').setView(defaultPos, 13);
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(pickerMap);
+
+            pickerMarker = L.marker(defaultPos, {
+                draggable: true
+            }).addTo(pickerMap);
+
+            pickerMarker.on('dragend', function(e) {
+                const pos = pickerMarker.getLatLng();
+                updateCoords(pos.lat, pos.lng, true);
+                reverseGeocode(pos.lat, pos.lng);
+            });
+
+            pickerMap.on('click', function(e) {
+                pickerMarker.setLatLng(e.latlng);
+                updateCoords(e.latlng.lat, e.latlng.lng, true);
+                reverseGeocode(e.latlng.lat, e.latlng.lng);
+            });
+            
+            updateCoords(defaultPos[0], defaultPos[1], true);
+            setTimeout(() => pickerMap.invalidateSize(), 500);
+
+            initAddressSuggestions();
+        }
+
+        function updateCoords(lat, lng, updateInputs = true) {
+            if (updateInputs) {
+                document.getElementById('propLat').value = parseFloat(lat).toFixed(6);
+                document.getElementById('propLng').value = parseFloat(lng).toFixed(6);
+            }
+        }
+
+        async function lookupAddress() {
+            const area = document.getElementById('propArea').value;
+            const location = document.getElementById('propLocation').value;
+            if (!location) return showToast("請先輸入地點");
+
+            const query = `${location}, ${area === 'HK' ? 'Hong Kong' : area}`;
+            showToast("正在定位...");
+
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    pickerMap.setView([lat, lon], 16);
+                    pickerMarker.setLatLng([lat, lon]);
+                    updateCoords(lat, lon);
+                    showToast("定位成功！");
+                } else {
+                    showToast("找不到該地點，請手動在地圖上選取。");
+                }
+            } catch (err) {
+                showToast("定位服務出錯。");
+            }
+        }
+
+        async function reverseGeocode(lat, lng) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                const data = await res.json();
+                if (data && data.display_name) {
+                    let shortAddr = data.display_name.split(',').slice(0, 3).join(',').trim();
+                    document.getElementById('propLocation').value = shortAddr;
+                }
+            } catch (e) { console.error("Reverse geocode failed", e); }
+        }
+
+        function initAddressSuggestions() {
+            const locInput = document.getElementById('propLocation');
+            const suggContainer = document.getElementById('addressSuggestions');
+            if (!locInput || !suggContainer) return;
+
+            let suggestionTimeout = null;
+            locInput.addEventListener('input', function(e) {
+                const val = e.target.value.trim();
+                clearTimeout(suggestionTimeout);
+                if (val.length < 3) {
+                    suggContainer.style.display = 'none';
+                    return;
+                }
+
+                suggestionTimeout = setTimeout(async () => {
+                    const area = document.getElementById('propArea').value;
+                    const query = `${val}, ${area === 'HK' ? 'Hong Kong' : area}`;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`, {
+                            headers: { 'Accept-Language': 'zh-HK,zh;q=0.9,en;q=0.8' }
+                        });
+                        const data = await res.json();
+                        if (data && data.length > 0) {
+                            suggContainer.innerHTML = data.map(item => `
+                                <div class="suggestion-item" onclick="selectSuggestion('${item.display_name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lon})">
+                                    <i class="fas fa-map-marker-alt" style="margin-right: 5px; color: var(--accent-color);"></i>
+                                    ${item.display_name}
+                                </div>
+                            `).join('');
+                            suggContainer.style.display = 'block';
+                        } else {
+                            suggContainer.innerHTML = `<div class="suggestion-item" style="color: #ef4444; cursor: default;">找不到相符的地點，請嘗試其他關鍵字。 (No results found)</div>`;
+                            suggContainer.style.display = 'block';
+                        }
+                    } catch (e) {
+                        suggContainer.innerHTML = `<div class="suggestion-item" style="color: #ef4444; cursor: default;">搜尋出錯，請稍後再試。 (Search Error)</div>`;
+                        suggContainer.style.display = 'block';
+                    }
+                }, 800);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.form-group')) {
+                    suggContainer.style.display = 'none';
+                }
+            });
+        }
+
+        function selectSuggestion(displayName, lat, lng) {
+            document.getElementById('propLocation').value = displayName.split(',').slice(0, 3).join(',').trim();
+            document.getElementById('addressSuggestions').style.display = 'none';
+            if (pickerMap) {
+                pickerMap.setView([lat, lng], 16);
+                pickerMarker.setLatLng([lat, lng]);
+                updateCoords(lat, lng);
+            }
+        }
+
+        // Dynamic Label Updates based on Region
+        document.getElementById('propArea')?.addEventListener('change', (e) => {
+            const region = e.target.value;
+            const titleLbl = document.getElementById('lblTitle');
+            const locLbl = document.getElementById('lblLocation');
+            const titleInput = document.getElementById('propTitle');
+            const locInput = document.getElementById('propLocation');
+
+            if (region === 'JP') {
+                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - JP)";
+                if (locLbl) locLbl.innerText = "地點 (Location - JP)";
+                if (titleInput) titleInput.placeholder = "例：東京 渋谷区 高級マンション";
+                if (locInput) locInput.placeholder = "例：東京都渋谷区...";
+            } else if (region === 'USA') {
+                if (titleLbl) titleLbl.innerText = "Property Title (English)";
+                if (locLbl) locLbl.innerText = "Location (English)";
+                if (titleInput) titleInput.placeholder = "e.g. Luxury Apartment in Manhattan";
+                if (locInput) locInput.placeholder = "e.g. 5th Ave, New York";
+            } else if (region === 'China') {
+                if (titleLbl) titleLbl.innerText = "物业名称 (Property Title - CN)";
+                if (locLbl) locLbl.innerText = "地点 (Location - CN)";
+                if (titleInput) titleInput.placeholder = "例如：上海 浦东新区 豪宅";
+                if (locInput) locInput.placeholder = "例如：上海市浦东新区...";
+            } else {
+                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - HK)";
+                if (locLbl) locLbl.innerText = "地點 (Location - HK)";
+                if (titleInput) titleInput.placeholder = "例如：西九龍 凱旋門 高層單位";
+                if (locInput) locInput.placeholder = "例如：尖沙咀 柯士甸道";
+            }
+        });
 
         async function addListing(e) {
             e.preventDefault();
@@ -893,20 +1486,34 @@
             }
 
             const titleValue = document.getElementById('propTitle').value;
+            const titleCN = document.getElementById('propTitleCN').value || titleValue;
+            const titleEN = document.getElementById('propTitleEN').value || titleValue;
+            const titleJP = document.getElementById('propTitleJP').value || titleValue;
+
             const locValue = document.getElementById('propLocation').value;
+            const locCN = document.getElementById('propLocationCN').value || locValue;
+            const locEN = document.getElementById('propLocationEN').value || locValue;
+            const locJP = document.getElementById('propLocationJP').value || locValue;
+
             const typeValue = document.getElementById('propType').value;
+
+            const areaValue = document.getElementById('propArea').value;
+            let currency = "HK$ ";
+            if (areaValue === 'JP') currency = "¥ ";
+            else if (areaValue === 'USA') currency = "$ ";
+            else if (areaValue === 'China') currency = "¥ ";
 
             const priceInput = document.getElementById('propPrice').value;
             let finalPrice = priceInput;
-            if (!priceInput.includes('HK$')) {
-                finalPrice = "HK$ " + priceInput + (typeValue === 'rent' ? '/mo' : '');
+            if (!priceInput.includes('$') && !priceInput.includes('¥')) {
+                finalPrice = currency + priceInput + (typeValue === 'rent' ? '/mo' : '');
             }
 
             const selectedFeatures = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => cb.value).join(',');
 
             const newListing = {
-                title: { en: titleValue, zh: titleValue },
-                location: { en: locValue, zh: locValue },
+                title: { en: titleEN, zh: titleValue, cn: titleCN, jp: titleJP },
+                location: { en: locEN, zh: locValue, cn: locCN, jp: locJP },
                 price: finalPrice,
                 type: typeValue,
                 beds: parseInt(document.getElementById('propBeds').value) || 0,
@@ -914,9 +1521,12 @@
                 sqft: parseInt(document.getElementById('propSqft').value) || 0,
                 image: imageUrl,
                 images: galleryUrls,
-                video: document.getElementById('propVideo').value,
+                video: document.getElementById('propVideo').value || "",
                 area: document.getElementById('propArea').value,
-                features: selectedFeatures
+                features: selectedFeatures,
+                lat: parseFloat(document.getElementById('propLat').value) || 0,
+                lng: parseFloat(document.getElementById('propLng').value) || 0,
+                user_id: currentUser.id
             };
 
             try {
@@ -951,24 +1561,30 @@
                 const titleStr = typeof listing.title === 'object' ? listing.title.zh : listing.title;
                 const locStr = typeof listing.location === 'object' ? listing.location.zh : listing.location;
                 return `
-                <div class="listing-item">
+                <div class="listing-item" onclick="window.location.href='/property.html?id=${listing.id}'">
                     <img src="${listing.image}" alt="Property" style="${listing.is_premium ? 'border: 2px solid #ffd700;' : ''}">
                     <div class="listing-info">
                         <h3>${titleStr}</h3>
-                        <p style="color: #94a3b8; font-size: 0.9rem;">${locStr}</p>
+                        <p><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> ${locStr}</p>
                         <p style="color: var(--accent-hover); font-weight: bold; margin-top: 5px;">${listing.price} <span style="font-size: 0.8rem; font-weight: normal; color: #fff; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; margin-left: 5px;">${listing.type === 'rent' ? '租' : '售'}</span></p>
                     </div>
-                    <div class="listing-actions" style="display: flex; gap: 10px; align-items: center;">
+                    <div class="listing-actions" style="display: flex; gap: 10px; align-items: center;" onclick="event.stopPropagation()">
+                        <a href="/property.html?id=${listing.id}" class="btn-sm btn-view-live" title="View Live Site">
+                            <i class="fas fa-external-link-alt"></i> 預覽
+                        </a>
+                        <a href="/map.html?id=${listing.id}" class="btn-sm btn-outline" style="text-decoration: none;">
+                            <i class="fas fa-map-marked-alt"></i> 地圖
+                        </a>
                         ${!listing.is_premium ? `
-                            <button class="btn-outline" style="border-color: #ffd700; color: #ffd700; font-size: 0.8rem; padding: 5px 10px; display: inline-flex; align-items: center; gap: 5px;" onclick="goToPayment(${listing.id})">
+                            <button class="btn-sm" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; border: 1px solid #ffd700;" onclick="goToPayment(${listing.id})">
                                 <i class="fas fa-arrow-up"></i> 升級
                             </button>
-                        ` : '<span style="color: #ffd700; font-size: 0.75rem; font-weight: bold;">(已置頂)</span>'}
-                        <a href="edit.html?id=${listing.id}" class="btn-icon" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; text-decoration: none;" title="Edit Listing">
-                            <i class="fas fa-edit" style="color: var(--accent-color);"></i>
+                        ` : '<span style="color: #ffd700; font-size: 0.75rem; font-weight: bold;">(置頂中)</span>'}
+                        <a href="/edit.html?id=${listing.id}" class="btn-sm btn-outline" style="text-decoration: none;">
+                            <i class="fas fa-edit"></i> 編輯
                         </a>
-                        <button class="btn-icon" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer;" onclick="deleteListing(${listing.id})" title="Delete Listing">
-                            <i class="fas fa-trash-alt" style="color: #ff4d4d;"></i>
+                        <button class="btn-sm" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d;" onclick="deleteListing(${listing.id})">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 </div>`;
@@ -977,7 +1593,7 @@
 
         function goToPayment(id) {
             console.log("Navigating to payment for property:", id);
-            window.location.href = `payment.html?id=${id}`;
+            window.location.href = `/payment.html?id=${id}`;
         }
 
         async function deleteListing(id) {

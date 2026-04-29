@@ -1,17 +1,8 @@
 // API_BASE resolution:
-// - On PythonAnywhere directly → relative '' works fine
-// - On 88loft.com via Wix iframe → MUST use absolute URL so requests go to PythonAnywhere, not Wix origin
-// - On Capacitor mobile app → use local network IP
-const _host = window.location.hostname;
-const API_BASE = (() => {
-    if (_host.includes('pythonanywhere.com') || _host === 'localhost' || _host === '127.0.0.1') {
-        return ''; // Relative URLs work fine here
-    }
-    if (_host.includes('88loft.com') || _host.includes('wix.com') || _host.includes('wixsite.com') || _host.includes('editorx.com')) {
-        return 'https://hkproperty.pythonanywhere.com'; // Absolute URL required for Wix embed
-    }
-    return 'http://10.101.9.151:8000'; // Capacitor mobile app fallback
-})();
+// Auto-detect: use absolute URL when embedded in 88loft.com, else use relative path.
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000' : '';
+
 async function uploadImage(file, currentCount, totalCount) {
     const uploadStatus = document.getElementById('uploadStatus');
     if (uploadStatus) {

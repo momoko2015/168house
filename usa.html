@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>88loft USA - Properties in United States</title>
+    <meta name="description" content="88loft 為您提供全港最齊全的租屋及買樓資訊。無論是特色天台屋、海景別墅、還是交通方便的市中心單位，我們都能助您輕鬆搵屋。">
+    <meta name="keywords" content="香港樓盤, 租屋, 買樓, 88loft, 地產代理, 網上搵屋">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <meta name="theme-color" content="#7232f2">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://168house.hk/">
+    <meta property="og:title" content="88loft - 搵屋租屋首選">
+    <meta property="og:description" content="即時搜尋全港優質盤源，海量實拍相片及影片，搵屋快人一步。">
+    <meta property="og:image" content="/logo.png">
+
+    <link rel="stylesheet" href="/style.css?v=3">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/utils.js?v=9"></script>
+    <script src="/app.js?v=2" defer></script>
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar glass">
+        <div class="top-bar-content">
+            <div class="top-bar-left">
+                <div class="live-ticker-wrap">
+                    <div class="live-ticker">
+                        <span>🚀 <strong data-i18n="ticker-hot">最新熱話:</strong> 尖沙咀海景盤查詢量上升 15%</span>
+                        <span>🔥 <strong data-i18n="ticker-rate">目前利率:</strong> H + 1.3% (最優惠利率 5.875%)</span>
+                        <span>💎 <strong data-i18n="ticker-new">新盤推介:</strong> 啟德特色天台屋現已開始預約看房</span>
+                        <span>📈 <strong data-i18n="ticker-trend">市場走勢:</strong> 市中心盤源供應緊張，建議及早預約</span>
+                    </div>
+                </div>
+            </div>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="logo-container" style="display: flex; align-items: center;">
+            <img src="/logo.png" alt="88loft logo" style="height: 40px; margin-right: 12px; border-radius: 8px;">
+            <div class="logo" data-i18n="logo" style="display: none;">88loft</div>
+            <span
+                style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(45deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">88loft</span>
+        </div>
+        <div class="nav-actions">
+            <button id="themeToggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+            <div class="region-switcher-container">
+                <div class="region-pills">
+                    <a href="/index.html" class="region-pill" title="Hong Kong">HK</a>
+                    <a href="/jp.html" class="region-pill" title="Japan">JP</a>
+                    <a href="/usa.html" class="region-pill active" title="USA">USA</a>
+                    <a href="/cn.html" class="region-pill" title="China">CN</a>
+                </div>
+            </div>
+            <a href="/wishlist.html" class="icon-btn" style="position:relative; text-decoration:none;">
+                <i class="fas fa-heart"></i>
+                <span id="navWishlistBadge" class="wishlist-badge" style="display:none;">0</span>
+            </a>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" alt="User" class="avatar">
+                <div class="dropdown-menu">
+                    <a href="/login.html"><i class="fas fa-sign-in-alt"></i> 登入 / 註冊</a>
+                    <a href="/login.html"><i class="fas fa-home"></i> 刊登物業</a>
+                    <a href="/admin.html"
+                        style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 5px; padding-top: 10px; color: #ffd700;"><i
+                            class="fas fa-user-shield"></i> 管理員後台</a>
+                </div>
+            </div>
+        </div>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="#home" class="active" data-i18n="nav-home">主頁</a></li>
+            <li><a href="/map.html" style="color: var(--accent-hover);"><i class="fas fa-map-marked-alt"></i> 地圖搵樓
+                    (Map)</a></li>
+            <li><a href="#featured" data-i18n="nav-rent">租盤</a></li>
+            <li><a href="#featured" data-i18n="nav-buy">售盤</a></li>
+            <li><a href="#services">減價盤</a></li>
+            <li><a href="#calculator">按揭計算</a></li>
+            <li><a href="#contact" class="btn-primary" data-i18n="nav-contact" style="margin-left: 10px;">聯絡我們</a></li>
+        </ul>
+    </nav>
+
+    <div class="mobile-selection-bar">
+        <div class="selection-pills">
+            <span class="active" data-type="all" onclick="filterByCategory('all')">全部 (All)</span>
+            <span data-type="rent" onclick="filterByCategory('rent')">租屋 (Rent)</span>
+            <span data-type="sale" onclick="filterByCategory('sale')">買樓 (Buy)</span>
+            <span data-type="commercial" onclick="filterByCategory('commercial')">商業 (Comm)</span>
+        </div>
+    </div>
+
+    <!-- Market Stats Bar -->
+    <div class="market-stats-bar" id="marketStatsBar">
+        <div class="market-stat-item">
+            <i class="fas fa-building"></i>
+            <span>全港盤源</span>
+            <span class="stat-val" id="msStat-total">...</span>
+            <span class="stat-change up">↑ 今日新增</span>
+        </div>
+        <div class="market-stat-divider"></div>
+        <div class="market-stat-item">
+            <i class="fas fa-tag"></i>
+            <span>租盤中位數</span>
+            <span class="stat-val" id="msStat-rent">計算中</span>
+        </div>
+        <div class="market-stat-divider"></div>
+        <div class="market-stat-item">
+            <i class="fas fa-home"></i>
+            <span>售盤中位數</span>
+            <span class="stat-val" id="msStat-sale">計算中</span>
+        </div>
+        <div class="market-stat-divider"></div>
+        <div class="market-stat-item">
+            <i class="fas fa-fire"></i>
+            <span>熱門地區</span>
+            <span class="stat-val">尖沙咀</span>
+            <span class="stat-change up">🔥</span>
+        </div>
+    </div>
+
+    <!-- Advanced Filter Drawer Overlay -->
+    <div class="filter-drawer-overlay" id="filterOverlay" onclick="closeFilterDrawer()"></div>
+
+    <!-- Advanced Filter Drawer -->
+    <div class="filter-drawer" id="filterDrawer">
+        <div class="filter-drawer-header">
+            <h3>🎛️ 進階篩選</h3>
+            <button class="filter-close-btn" onclick="closeFilterDrawer()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-section-label">房間數目</div>
+            <div class="filter-chips" id="filterBeds">
+                <span class="filter-chip active" data-val="any">任何</span>
+                <span class="filter-chip" data-val="1">1 房</span>
+                <span class="filter-chip" data-val="2">2 房</span>
+                <span class="filter-chip" data-val="3">3 房</span>
+                <span class="filter-chip" data-val="4">4+</span>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-section-label">廁所數目</div>
+            <div class="filter-chips" id="filterBaths">
+                <span class="filter-chip active" data-val="any">任何</span>
+                <span class="filter-chip" data-val="1">1 廁</span>
+                <span class="filter-chip" data-val="2">2 廁</span>
+                <span class="filter-chip" data-val="3">3+</span>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-section-label">物業類型</div>
+            <div class="filter-chips" id="filterType">
+                <span class="filter-chip active" data-val="any">全部</span>
+                <span class="filter-chip" data-val="rent">租盤</span>
+                <span class="filter-chip" data-val="sale">售盤</span>
+                <span class="filter-chip" data-val="commercial">商業</span>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-section-label">預算範圍 (Budget Range)</div>
+            <div class="histogram-range-wrapper">
+                <div class="histogram-title" id="histogramTitle">範圍 0萬 - 10.8億</div>
+                <div class="histogram-container" id="priceHistogram">
+                    <!-- Histogram bars will be injected here -->
+                </div>
+                <div class="multi-range-container histogram-slider">
+                    <div class="range-slider">
+                        <div class="track" id="priceTrack"></div>
+                        <input type="range" id="priceMin" min="0" max="100000" step="100" value="0">
+                        <input type="range" id="priceMax" min="0" max="100000" step="100" value="100000">
+                    </div>
+                </div>
+                <div class="price-inputs">
+                    <div class="price-input-box">
+                        <input type="number" id="priceMinInput" value="0">
+                    </div>
+                    <span>至</span>
+                    <div class="price-input-box">
+                        <input type="number" id="priceMaxInput" value="100000">
+                    </div>
+                    <span class="unit">萬</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-section-label">面積 (平方呎)</div>
+            <div class="range-slider-container">
+                <div class="range-labels">最小: <span id="sqftMinLabel">0</span> &nbsp;—&nbsp; 最大: <span
+                        id="sqftMaxLabel">10,000+</span></div>
+                <input type="range" class="filter-range" id="sqftMin" min="0" max="10000" step="100" value="0"
+                    oninput="document.getElementById('sqftMinLabel').textContent=this.value>9900?'10,000+':Number(this.value).toLocaleString()">
+                <input type="range" class="filter-range" id="sqftMax" min="0" max="10000" step="100" value="10000"
+                    oninput="document.getElementById('sqftMaxLabel').textContent=this.value>9900?'10,000+':Number(this.value).toLocaleString()"
+                    style="margin-top:10px;">
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-section-label">特色標籤</div>
+            <div class="filter-chips" id="filterFeatures">
+                <span class="filter-chip" data-val="海景">🌊 海景</span>
+                <span class="filter-chip" data-val="地鐵">🚇 地鐵</span>
+                <span class="filter-chip" data-val="泳池">🏊 泳池</span>
+                <span class="filter-chip" data-val="停車場">🚗 停車場</span>
+                <span class="filter-chip" data-val="露台">🌿 露台</span>
+                <span class="filter-chip" data-val="寵物">🐾 寵物</span>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn-filter-reset" onclick="resetAdvancedFilters()">重置</button>
+            <button class="btn-filter-apply" onclick="applyAdvancedFilters()">🔍 顯示結果</button>
+        </div>
+    </div>
+
+    <!-- Floating Action Button (WhatsApp / Call) -->
+    <div class="quick-contact-fab" id="quickFab">
+        <div class="fab-expand-group" id="fabGroup">
+            <div class="fab-item">
+                <span class="fab-label">WhatsApp 聯絡</span>
+                <a href="https://wa.me/85294301551?text=你好，我在88loft見到一個樓盤，想了解更多。" target="_blank"
+                    class="fab-main-btn fab-whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+            <div class="fab-item">
+                <span class="fab-label">電話致電</span>
+                <a href="tel:+85294301551" class="fab-main-btn fab-phone" title="Call"><i
+                        class="fas fa-phone-alt"></i></a>
+            </div>
+        </div>
+        <button class="fab-toggle-btn" id="fabToggleBtn" onclick="toggleFab()" title="聯絡我們">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="hero" id="home">
+        <div class="hero-content glass-dark">
+            <h1 data-i18n="hero-title">Find Your Dream Home</h1>
+            <p data-i18n="hero-desc" style="margin-bottom: 30px;">Premium properties for rent and sale in prime
+                locations.</p>
+            <div class="hero-action-buttons">
+                <a href="/login.html" class="btn-primary"><i class="fas fa-plus-circle"></i> 刊登物業 (Post Property)</a>
+                <a href="#featured" class="btn-secondary"><i class="fas fa-search"></i> 即刻搜尋</a>
+            </div>
+
+            <div class="advanced-search-container glass">
+                <div class="search-tabs">
+                    <button class="search-tab active" data-type="all" data-i18n="tab-all">全部</button>
+                    <button class="search-tab" data-type="rent" data-i18n="tab-rent">租屋</button>
+                    <button class="search-tab" data-type="sale" data-i18n="tab-buy">買樓</button>
+                    <button class="search-tab" data-type="commercial" data-i18n="tab-comm">商業</button>
+                </div>
+                <div class="search-bar-modern">
+                    <div class="search-field-modern main-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="打屋苑名、邊區或者關鍵字">
+                    </div>
+                    <div class="search-field-modern">
+                        <i class="fas fa-home"></i>
+                        <select id="typeFilter">
+                            <option value="all">全部種類</option>
+                            <option value="apartment">住宅</option>
+                            <option value="commercial">工商</option>
+                            <option value="carpark">車位</option>
+                        </select>
+                    </div>
+                    <div class="search-field-modern">
+                        <i class="fas fa-globe"></i>
+                        <select id="areaFilter">
+                            <option value="all">All States</option>
+                            <optgroup label="States">
+                                <option value="AL">Alabama</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="DE">Delaware</option>
+                                <option value="FL">Florida</option>
+                                <option value="GA">Georgia</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="IL">Illinois</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IA">Iowa</option>
+                                <option value="KS">Kansas</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="ME">Maine</option>
+                                <option value="MD">Maryland</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="MI">Michigan</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="MO">Missouri</option>
+                                <option value="MT">Montana</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="NY">New York</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OH">Ohio</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="OR">Oregon</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="TX">Texas</option>
+                                <option value="UT">Utah</option>
+                                <option value="VT">Vermont</option>
+                                <option value="VA">Virginia</option>
+                                <option value="WA">Washington</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="WY">Wyoming</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="search-field-modern no-border" onclick="openFilterDrawer()">
+                        <i class="fas fa-dollar-sign"></i>
+                        <div class="price-range-summary" id="priceRangeSummary">任何價錢 (Any Price)</div>
+                    </div>
+                    <button class="btn-settings" onclick="openFilterDrawer()" title="進階篩選" style="position:relative;">
+                        <i class="fas fa-sliders-h"></i>
+                        <span id="filterActiveBadge" class="filter-badge" style="display:none;">0</span>
+                    </button>
+                    <button id="searchBtn" class="btn-search-modern">即刻搵</button>
+                </div>
+            </div>
+
+            <!-- Save Search Row -->
+            <div class="save-search-row" id="saveSearchRow" style="position:relative;">
+                <span id="saveSearchSummary">🔍 目前搜尋：全部樓盤</span>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="btn-save-search" id="savedSearchesBtn" onclick="toggleSavedSearches(event)"><i
+                            class="fas fa-bell"></i> 已儲存搜尋</button>
+                    <button class="btn-save-search" id="saveSearchBtn" onclick="saveCurrentSearch()"><i
+                            class="fas fa-bookmark"></i> 儲存搜尋</button>
+                </div>
+                <div class="saved-searches-dropdown" id="savedSearchesDropdown"></div>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Map View Toggle -->
+    <div class="view-toggles container">
+        <span class="view-label" data-i18n="view-as">View As:</span>
+        <button class="view-toggle-btn active" id="gridViewBtn"><i class="fas fa-th-large"></i> <span
+                data-i18n="grid">Grid</span></button>
+        <button class="view-toggle-btn" id="listViewBtn"><i class="fas fa-list"></i> <span
+                data-i18n="list">List</span></button>
+        <a href="/map.html" class="view-toggle-btn"
+            style="background: rgba(114, 50, 242, 0.1); color: var(--accent-hover); border: 1px dashed var(--accent-hover); margin-left: auto;">
+            <i class="fas fa-map-marked-alt"></i> <span data-i18n="full-map">Interactive Map 互動地圖</span>
+        </a>
+    </div>
+
+    <!-- Properties Grid -->
+    <section class="properties container" id="featured">
+        <div class="section-header">
+            <div>
+                <span class="sub-title">Discover</span>
+                <h2 class="section-title" data-i18n="section-featured">Featured Properties</h2>
+            </div>
+        </div>
+
+        <div class="property-grid" id="propertyGrid">
+            <!-- Properties will be injected here by JS -->
+        </div>
+
+        <div id="loadMoreContainer" style="text-align: center; margin-top: 40px; display: none;">
+            <button id="loadMoreBtn" class="btn-primary" style="padding: 12px 30px; border-radius: 25px;">
+                <i class="fas fa-spinner fa-spin" style="display: none; margin-right: 8px;"></i>
+                <span data-i18n="load-more">Load More Items</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Live Activity Hub -->
+    <div id="liveActivityHub" class="live-activity-hub"></div>
+
+
+    <!-- How It Works Section -->
+    <section class="how-it-works glass-section" id="services">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="sub-title">Simple Process</span>
+                <h2 class="section-title" data-i18n="services-title">How It Works</h2>
+                <p class="section-desc" data-i18n="services-desc">Finding your dream home has never been easier with our
+                    streamlined 3-step
+                    process.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div class="step-icon"><i class="fas fa-search-location"></i></div>
+                    <h3 data-i18n="step-1-title">Search Properties</h3>
+                    <p data-i18n="step-1-desc">Use our advanced search filters to find the perfect property that matches
+                        all your criteria.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <div class="step-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3 data-i18n="step-2-title">Create and Login to your profile</h3>
+                    <p data-i18n="step-2-desc">Contact with the buyer or the seller</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <div class="step-icon"><i class="fas fa-key"></i></div>
+                    <h3 data-i18n="step-3-title">Visit the site</h3>
+                    <p data-i18n="step-3-desc">Get your lovely house</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mortgage Calculator Section -->
+    <section class="calculator-section container" id="calculator">
+        <div class="calculator-grid">
+            <div class="calc-text">
+                <span class="sub-title">Finance Tools</span>
+                <h2 class="section-title" data-i18n="mortgage-calc">Mortgage Calculator</h2>
+                <p data-i18n="mortgage-desc">Estimate your monthly payments, including principal and interest, taxes,
+                    insurance, and HOA fees.</p>
+                <ul class="calc-features">
+                    <li><i class="fas fa-check-circle"></i> Real-time estimations</li>
+                    <li><i class="fas fa-check-circle"></i> Amortization schedule</li>
+                    <li><i class="fas fa-check-circle"></i> Compare interest rates</li>
+                </ul>
+            </div>
+            <div class="calc-card glass">
+                <div class="calc-input-group">
+                    <label data-i18n="loan-amount">Property Price ($)</label>
+                    <input type="number" id="calcPrice" value="5000000">
+                </div>
+                <div class="calc-input-group">
+                    <label data-i18n="down-payment-label">Down Payment (%)</label>
+                    <input type="number" id="calcDown" value="10" min="0" max="100">
+                </div>
+                <div class="calc-input-group">
+                    <label data-i18n="interest-rate">Interest Rate (%)</label>
+                    <input type="number" id="calcRate" value="4.1" step="0.1">
+                </div>
+                <div class="calc-input-group">
+                    <label data-i18n="loan-term">Loan Term (Years)</label>
+                    <select id="calcTerm">
+                        <option value="15">15 Years</option>
+                        <option value="20">20 Years</option>
+                        <option value="30" selected>30 Years</option>
+                    </select>
+                </div>
+                <button class="btn-primary w-100" id="calculateBtn" data-i18n="calculate">Calculate Payment</button>
+                <div class="calc-result" id="calcResult" style="display: none;">
+                    <h3 data-i18n="monthly-payment">Estimated Monthly Payment</h3>
+                    <div class="price" id="monthlyPrice">$0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Newsletter -->
+    <section class="newsletter glass">
+        <div class="container text-center">
+            <h2 data-i18n="newsletter-title">Subscribe to Our Newsletter</h2>
+            <p data-i18n="newsletter-desc">Get the latest properties and market trends delivered directly to your inbox.
+            </p>
+            <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed!');">
+                <input type="email" placeholder="Enter your email address" required>
+                <button type="submit" class="btn-primary" data-i18n="subscribe">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+
+    <!-- Property Modal -->
+    <div class="modal" id="propertyModal">
+        <div class="modal-content glass">
+            <span class="close-modal"><i class="fas fa-times"></i></span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+
+    <script src="/utils.js?v=11"></script>
+    <script src="/app.js?v=11"></script>
+</body>
+
+</html>

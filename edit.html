@@ -1,16 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>編輯樓盤 - 88Loft精選樓盤</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="utils.js?v=9"></script>
+    <script src="/utils.js?v=11"></script>
     <style>
         body {
             background: #0f172a;
@@ -98,7 +98,7 @@
     <nav class="navbar glass">
         <div class="logo">28精選樓盤</div>
         <ul class="nav-links" style="margin-left: auto;">
-            <li><a href="login.html">返回控制台</a></li>
+            <li><a href="/login.html">返回控制台</a></li>
         </ul>
     </nav>
 
@@ -109,57 +109,73 @@
 
             <form id="editForm">
                 <div class="form-group">
-                    <label>物業名稱</label>
-                    <input type="text" id="propTitle" required>
+                    <label>區域 (Country/Region)</label>
+                    <select id="propArea" required style="border: 2px solid var(--accent-color); background: rgba(114, 50, 242, 0.1);">
+                        <option value="HK">香港 (Hong Kong)</option>
+                        <option value="JP">日本 (Japan)</option>
+                        <option value="USA">美國 (USA)</option>
+                        <option value="China">中國內地 (China)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>物業名稱 (Property Title)</label>
+                    <input type="text" id="propTitle" placeholder="例如：西九龍 凱旋門 高層單位" required>
+                    <input type="hidden" id="propTitleCN">
+                    <input type="hidden" id="propTitleEN">
+                    <input type="hidden" id="propTitleJP">
+                </div>
+
+                <div class="form-group">
+                    <label>地點 (Location)</label>
+                    <input type="text" id="propLocation" placeholder="例如：尖沙咀 柯士甸道" required>
+                    <input type="hidden" id="propLocationCN">
+                    <input type="hidden" id="propLocationEN">
+                    <input type="hidden" id="propLocationJP">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
-                        <label>種類</label>
+                        <label>種類 (Type)</label>
                         <select id="propType" required>
-                            <option value="rent">租盤</option>
-                            <option value="sale">售盤</option>
+                            <option value="rent">租盤 (Rent)</option>
+                            <option value="sale">售盤 (Sale)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>價格 (HK$)</label>
+                        <label>價格 (Price)</label>
                         <input type="text" id="propPrice" required>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>地點</label>
-                    <input type="text" id="propLocation" required>
-                </div>
-
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div class="form-group">
-                        <label>房間</label>
+                        <label>房間 (Beds)</label>
                         <input type="number" id="propBeds" min="0" required>
                     </div>
                     <div class="form-group">
-                        <label>廁所</label>
+                        <label>廁所 (Baths)</label>
                         <input type="number" id="propBaths" min="0" required>
                     </div>
                     <div class="form-group">
-                        <label>呎數</label>
+                        <label>呎數 (Sqft)</label>
                         <input type="number" id="propSqft" min="0" required>
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
-                        <label>圖片網址</label>
+                        <label>圖片網址 (Image URL)</label>
                         <input type="url" id="propImage">
                     </div>
                     <div class="form-group">
-                        <label>影片網址</label>
+                        <label>影片網址 (Video URL)</label>
                         <input type="url" id="propVideo">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>上載新相片 (將取代現有相片欄位，留空則保持不變)</label>
+                    <label>上載新相片 (Upload New Photos)</label>
                     <input type="file" id="propFile" accept="image/*" multiple style="padding: 8px;"
                         onchange="previewImagesSelected('propFile', 'imagePreview')">
                     <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
@@ -168,11 +184,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label>區域</label>
-                    <select id="propArea" required>
-                        <option value="HK">香港 (HK)</option>
-                        <option value="China">中國內地 (China)</option>
-                    </select>
+                    <label>物業特色 (Features)</label>
+                    <div class="features-grid">
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景"> 海景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適"> 寧靜舒適</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵"> 鄰近地鐵</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀"> 開揚景觀</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修"> 高級裝修</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高"> 實用率高</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -200,7 +220,7 @@
             </div>
             <button type="button" class="btn-primary"
                 style="width: 100%; margin-top: 15px; background: #ffd700; color: #1a1a2e; font-weight: bold; border: none;"
-                onclick="window.location.href='payment.html?id=' + propId">
+                onclick="window.location.href='/payment.html?id=' + propId">
                 立即升級
             </button>
             <style>
@@ -217,7 +237,7 @@
         </div>
 
         <div class="btn-grid">
-            <button type="button" class="btn-outline" onclick="window.location.href='login.html'">取消</button>
+            <button type="button" class="btn-outline" onclick="window.location.href='/login.html'">取消</button>
             <button type="submit" class="btn-primary">儲存更變</button>
         </div>
         </form>
@@ -232,7 +252,7 @@
         const propId = urlParams.get('id');
 
         if (!propId) {
-            window.location.href = 'login.html';
+            window.location.href = '/login.html';
         }
 
         async function loadProperty() {
@@ -243,8 +263,15 @@
                     const prop = properties.find(p => p.id == propId);
 
                     if (prop) {
-                        document.getElementById('propTitle').value = typeof prop.title === 'object' ? prop.title.zh : prop.title;
-                        document.getElementById('propLocation').value = typeof prop.location === 'object' ? prop.location.zh : prop.location;
+                        document.getElementById('propTitle').value = prop.title.zh || prop.title;
+                        document.getElementById('propTitleEN').value = prop.title.en || '';
+                        document.getElementById('propTitleCN').value = prop.title.cn || '';
+                        document.getElementById('propTitleJP').value = prop.title.jp || '';
+
+                        document.getElementById('propLocation').value = prop.location.zh || prop.location;
+                        document.getElementById('propLocationEN').value = prop.location.en || '';
+                        document.getElementById('propLocationCN').value = prop.location.cn || '';
+                        document.getElementById('propLocationJP').value = prop.location.jp || '';
 
                         let cleanedPrice = prop.price.replace('HK$ ', '').replace('/mo', '').replace(/,/g, '');
                         document.getElementById('propPrice').value = cleanedPrice;
@@ -270,17 +297,52 @@
                             document.getElementById('premiumPromo').style.display = 'block';
                         }
 
-                        // Keep track of current gallery
                         window.currentGallery = prop.images || [];
+                        
+                        // Update labels based on loaded area
+                        updateFormLabels(prop.area || 'HK');
                     } else {
                         alert("找不到該物業");
-                        window.location.href = 'login.html';
+                        window.location.href = '/login.html';
                     }
                 }
             } catch (e) {
                 console.error(e);
             }
         }
+
+        function updateFormLabels(region) {
+            const titleLbl = document.getElementById('lblTitle');
+            const locLbl = document.getElementById('lblLocation');
+            const titleInput = document.getElementById('propTitle');
+            const locInput = document.getElementById('propLocation');
+
+            if (region === 'JP') {
+                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - JP)";
+                if (locLbl) locLbl.innerText = "地點 (Location - JP)";
+                if (titleInput) titleInput.placeholder = "例：東京 渋谷区 高級マンション";
+                if (locInput) locInput.placeholder = "例：東京都渋谷区...";
+            } else if (region === 'USA') {
+                if (titleLbl) titleLbl.innerText = "Property Title (English)";
+                if (locLbl) locLbl.innerText = "Location (English)";
+                if (titleInput) titleInput.placeholder = "e.g. Luxury Apartment in Manhattan";
+                if (locInput) locInput.placeholder = "e.g. 5th Ave, New York";
+            } else if (region === 'China') {
+                if (titleLbl) titleLbl.innerText = "物业名称 (Property Title - CN)";
+                if (locLbl) locLbl.innerText = "地点 (Location - CN)";
+                if (titleInput) titleInput.placeholder = "例如：上海 浦东新区 豪宅";
+                if (locInput) locInput.placeholder = "例如：上海市浦东新区...";
+            } else {
+                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - HK)";
+                if (locLbl) locLbl.innerText = "地點 (Location - HK)";
+                if (titleInput) titleInput.placeholder = "例如：西九龍 凱旋門 高層單位";
+                if (locInput) locInput.placeholder = "例如：尖沙咀 柯士甸道";
+            }
+        }
+
+        document.getElementById('propArea')?.addEventListener('change', (e) => {
+            updateFormLabels(e.target.value);
+        });
 
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -311,17 +373,33 @@
             }
 
             const typeValue = document.getElementById('propType').value;
+            const areaValue = document.getElementById('propArea').value;
+            let currency = "HK$ ";
+            if (areaValue === 'JP') currency = "¥ ";
+            else if (areaValue === 'USA') currency = "$ ";
+            else if (areaValue === 'China') currency = "¥ ";
+
             const priceInput = document.getElementById('propPrice').value;
             let finalPrice = priceInput;
-            if (!priceInput.includes('HK$')) {
-                finalPrice = "HK$ " + priceInput + (typeValue === 'rent' ? '/mo' : '');
+            if (!priceInput.includes('$') && !priceInput.includes('¥')) {
+                finalPrice = currency + priceInput + (typeValue === 'rent' ? '/mo' : '');
             }
 
             const selectedFeatures = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => cb.value).join(',');
 
             const updatedListing = {
-                title: { en: document.getElementById('propTitle').value, zh: document.getElementById('propTitle').value },
-                location: { en: document.getElementById('propLocation').value, zh: document.getElementById('propLocation').value },
+                title: { 
+                    en: document.getElementById('propTitleEN').value || document.getElementById('propTitle').value, 
+                    zh: document.getElementById('propTitle').value,
+                    cn: document.getElementById('propTitleCN').value || document.getElementById('propTitle').value,
+                    jp: document.getElementById('propTitleJP').value || document.getElementById('propTitle').value
+                },
+                location: { 
+                    en: document.getElementById('propLocationEN').value || document.getElementById('propLocation').value, 
+                    zh: document.getElementById('propLocation').value,
+                    cn: document.getElementById('propLocationCN').value || document.getElementById('propLocation').value,
+                    jp: document.getElementById('propLocationJP').value || document.getElementById('propLocation').value
+                },
                 price: finalPrice,
                 type: typeValue,
                 beds: parseInt(document.getElementById('propBeds').value) || 0,
@@ -342,7 +420,7 @@
                 });
                 if (res.ok) {
                     showToast("更新成功！正在返回...");
-                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                    setTimeout(() => { window.location.href = '/login.html'; }, 1500);
                 } else {
                     showToast("更新失敗。");
                 }

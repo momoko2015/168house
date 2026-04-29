@@ -3,15 +3,15 @@ import sqlite3
 import os
 import uuid
 import base64
-from flask import Flask, request, jsonify, send_from_directory, abort
+from flask import Flask, request, jsonify, send_from_directory, abort, redirect
 from datetime import datetime
 import time
 
 # Initialize Flask app to serve static files from the current directory
 app = Flask(__name__, static_folder='.', static_url_path='')
 
-DB_FILE = os.path.join(app.root_path, 'properties.db')
-UPLOAD_DIR = os.path.join(app.root_path, 'uploads')
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'properties.db')
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
@@ -83,6 +83,13 @@ def init_db():
     if 'walk_score' not in columns: c.execute("ALTER TABLE properties ADD COLUMN walk_score INTEGER DEFAULT 80")
     if 'transit_score' not in columns: c.execute("ALTER TABLE properties ADD COLUMN transit_score INTEGER DEFAULT 75")
     if 'price_history' not in columns: c.execute("ALTER TABLE properties ADD COLUMN price_history TEXT") # JSON list
+    if 'user_id' not in columns: c.execute("ALTER TABLE properties ADD COLUMN user_id INTEGER DEFAULT 1")
+    
+    # Multilingual Support
+    if 'title_cn' not in columns: c.execute("ALTER TABLE properties ADD COLUMN title_cn TEXT")
+    if 'title_jp' not in columns: c.execute("ALTER TABLE properties ADD COLUMN title_jp TEXT")
+    if 'location_cn' not in columns: c.execute("ALTER TABLE properties ADD COLUMN location_cn TEXT")
+    if 'location_jp' not in columns: c.execute("ALTER TABLE properties ADD COLUMN location_jp TEXT")
     
     conn.commit()
     conn.close()
@@ -114,10 +121,11 @@ def after_request(response):
         response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Vary'] = 'Origin'
     else:
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Origin'] = origin if origin else '*'
+    
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
     response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    # Removed strict Access-Control-Allow-Credentials to avoid browser enforcement issues with Wix domains
     # Allow the app to be embedded in Wix iframes from 88loft.com
     response.headers['X-Frame-Options'] = 'ALLOWALL'
     response.headers['Content-Security-Policy'] = (
@@ -129,6 +137,7 @@ def after_request(response):
 # Handle OPTIONS preflight requests globally via after_request; no separate route needed.
 # serve_static below handles OPTIONS for static files via methods=['GET','HEAD','OPTIONS'].
 
+# Removed WWW Redirect as it intercepts traffic and sends to broken Wix domain
 # Standard Pages
 @app.route('/')
 def index():
@@ -159,7 +168,7 @@ def login():
     if user:
         return jsonify({
             "status": "success",
-            "user": {"email": user['email'], "name": user['name'], "bio": user['bio']}
+            "user": {"id": user['id'], "email": user['email'], "name": user['name'], "bio": user['bio']}
         })
     return jsonify({"status": "error", "message": "Invalid email or password"}), 401
 
@@ -180,7 +189,7 @@ def send_reset_email(to_email, reset_token):
     msg['To'] = to_email
     msg['Subject'] = "重設您的 88 精選樓盤 帳戶密碼"
 
-    reset_url = f"{request.url_root}login.html?token={reset_token}&email={to_email}"
+    reset_url = f"{request.url_root}reset.html?token={reset_token}&email={to_email}"
     
     html = f"""
     <html>
@@ -206,7 +215,7 @@ def send_reset_email(to_email, reset_token):
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
         server.login(SMTP_USER, SMTP_PASS)
-        server.send_raw_message(msg)
+        server.sendmail(SMTP_USER, to_email, msg.as_string())
         server.quit()
         return True
     except Exception as e:
@@ -255,6 +264,70 @@ def reset_password():
     conn.close()
     return jsonify({"status": "error", "message": "無效的重設代碼"}), 404
 
+# ── Social Login (Google + Facebook) ──────────────────────────────────────────
+import urllib.request
+
+@app.route('/api/auth/social', methods=['POST', 'OPTIONS'])
+def social_login():
+    if request.method == 'OPTIONS':
+        return '', 204
+    data = request.json
+    provider = data.get('provider')   # 'google' or 'facebook'
+    token    = data.get('token')      # credential / access_token from the SDK
+
+    if not provider or not token:
+        return jsonify({"status": "error", "message": "Missing provider or token"}), 400
+
+    email = name = picture = None
+
+    try:
+        if provider == 'google':
+            url = f"https://oauth2.googleapis.com/tokeninfo?id_token={token}"
+            with urllib.request.urlopen(url, timeout=6) as resp:
+                info = json.loads(resp.read().decode())
+            email   = info.get('email')
+            name    = info.get('name') or (info.get('email','').split('@')[0])
+            picture = info.get('picture', '')
+
+        elif provider == 'facebook':
+            url = f"https://graph.facebook.com/me?fields=id,name,email,picture&access_token={token}"
+            with urllib.request.urlopen(url, timeout=6) as resp:
+                info = json.loads(resp.read().decode())
+            email   = info.get('email') or f"fb_{info['id']}@facebook.local"
+            name    = info.get('name', 'Facebook User')
+            picture = info.get('picture', {}).get('data', {}).get('url', '')
+
+        else:
+            return jsonify({"status": "error", "message": "Unknown provider"}), 400
+
+    except Exception as e:
+        print(f"Social verify error ({provider}): {e}")
+        return jsonify({"status": "error", "message": "Token verification failed. Please try again."}), 401
+
+    if not email:
+        return jsonify({"status": "error", "message": "Could not retrieve email from provider"}), 400
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    if not user:
+        conn.execute('INSERT INTO users (email, password, name) VALUES (?, ?, ?)',
+                     (email, f'__social_{provider}__', name))
+        conn.commit()
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    conn.close()
+
+    return jsonify({
+        "status": "success",
+        "user": {
+            "id":       user['id'],
+            "email":    user['email'],
+            "name":     user['name'] or name,
+            "bio":      user['bio'],
+            "picture":  picture,
+            "provider": provider
+        }
+    })
+
 # APIS
 @app.route('/api/properties/count', methods=['GET'])
 def get_properties_count():
@@ -267,18 +340,24 @@ def get_properties_count():
 def get_properties():
     limit = int(request.args.get('limit', 10000))
     offset = int(request.args.get('offset', 0))
+    user_id = request.args.get('user_id')  # Filter by user for dashboard
     
     conn = get_db_connection()
     c = conn.cursor()
-    
-    # Auto-delete expired listings: Free (14 days), Premium/Paid (90 days)
-    c.execute('''DELETE FROM property_images WHERE property_id IN (
-        SELECT id FROM properties WHERE (is_premium = 0 AND created_at < datetime('now', '-14 days')) OR (is_premium = 1 AND created_at < datetime('now', '-90 days'))
-    )''')
-    c.execute('''DELETE FROM properties WHERE (is_premium = 0 AND created_at < datetime('now', '-14 days')) OR (is_premium = 1 AND created_at < datetime('now', '-90 days'))''')
-    conn.commit()
 
-    rows = conn.execute('SELECT * FROM properties ORDER BY is_premium DESC, id DESC LIMIT ? OFFSET ?', (limit, offset)).fetchall()
+    if user_id:
+        rows = conn.execute('''SELECT properties.*, users.name as poster_name, users.email as poster_email 
+                              FROM properties 
+                              LEFT JOIN users ON properties.user_id = users.id 
+                              WHERE properties.user_id = ?
+                              ORDER BY is_premium DESC, properties.id DESC 
+                              LIMIT ? OFFSET ?''', (user_id, limit, offset)).fetchall()
+    else:
+        rows = conn.execute('''SELECT properties.*, users.name as poster_name, users.email as poster_email 
+                              FROM properties 
+                              LEFT JOIN users ON properties.user_id = users.id 
+                              ORDER BY is_premium DESC, properties.id DESC 
+                              LIMIT ? OFFSET ?''', (limit, offset)).fetchall()
     
     prop_ids = [row['id'] for row in rows]
     images_by_prop = {}
@@ -293,8 +372,18 @@ def get_properties():
         row_dict = dict(row)
         properties.append({
             'id': row_dict['id'],
-            'title': {'en': row_dict['title_en'], 'zh': row_dict['title_zh']},
-            'location': {'en': row_dict['location_en'], 'zh': row_dict['location_zh']},
+            'title': {
+                'en': row_dict['title_en'], 
+                'zh': row_dict['title_zh'],
+                'cn': row_dict.get('title_cn') or row_dict['title_zh'],
+                'jp': row_dict.get('title_jp') or row_dict['title_en']
+            },
+            'location': {
+                'en': row_dict['location_en'], 
+                'zh': row_dict['location_zh'],
+                'cn': row_dict.get('location_cn') or row_dict['location_zh'],
+                'jp': row_dict.get('location_jp') or row_dict['location_en']
+            },
             'price': row_dict['price'],
             'type': row_dict['type'],
             'beds': row_dict['beds'],
@@ -311,11 +400,14 @@ def get_properties():
             'views': row_dict['views'],
             'rating': row_dict['rating'],
             'comments_count': row_dict['comments_count'],
+            'poster_name': row_dict['poster_name'] or 'System Admin',
+            'poster_email': row_dict['poster_email'] or 'admin@88loft.com',
             'year_built': row_dict.get('year_built', 2022),
             'tax_annual': row_dict.get('tax_annual', 5000),
             'walk_score': row_dict.get('walk_score', 85),
             'transit_score': row_dict.get('transit_score', 78),
-            'price_history': row_dict.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]')
+            'price_history': row_dict.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]'),
+            'created_at': row_dict.get('created_at', '')
         })
     conn.close()
     return jsonify(properties)
@@ -326,13 +418,13 @@ def add_property():
     conn = get_db_connection()
     c = conn.cursor()
     c.execute('''INSERT INTO properties 
-                 (title_en, title_zh, location_en, location_zh, price, type, beds, baths, sqft, image, features, video, area, lat, lng)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-              (data['title']['en'], data['title']['zh'], 
-               data['location']['en'], data['location']['zh'],
+                 (title_en, title_zh, title_cn, title_jp, location_en, location_zh, location_cn, location_jp, price, type, beds, baths, sqft, image, features, video, area, lat, lng, user_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+              (data['title']['en'], data['title']['zh'], data['title'].get('cn'), data['title'].get('jp'),
+               data['location']['en'], data['location']['zh'], data['location'].get('cn'), data['location'].get('jp'),
                data['price'], data['type'], data['beds'], data['baths'], data['sqft'], data['image'],
                data.get('features', ''), data.get('video', ''), data.get('area', 'HK'), 
-               data.get('lat'), data.get('lng')))
+               data.get('lat'), data.get('lng'), data.get('user_id', 1)))
     last_id = c.lastrowid
     
     if 'images' in data and isinstance(data['images'], list):
@@ -343,18 +435,61 @@ def add_property():
     conn.close()
     return jsonify({"status": "success", "id": last_id}), 201
 
+@app.route('/api/properties/<int:prop_id>', methods=['GET'])
+def get_single_property(prop_id):
+    conn = get_db_connection()
+    row = conn.execute('''SELECT properties.*, users.name as poster_name, users.email as poster_email
+                          FROM properties
+                          LEFT JOIN users ON properties.user_id = users.id
+                          WHERE properties.id = ?''', (prop_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({'error': 'Not found'}), 404
+    img_rows = conn.execute('SELECT image_path FROM property_images WHERE property_id = ?', (prop_id,)).fetchall()
+    conn.close()
+    row_dict = dict(row)
+    return jsonify({
+        'id': row_dict['id'],
+        'title': {
+            'en': row_dict['title_en'], 
+            'zh': row_dict['title_zh'],
+            'cn': row_dict.get('title_cn') or row_dict['title_zh'],
+            'jp': row_dict.get('title_jp') or row_dict['title_en']
+        },
+        'location': {
+            'en': row_dict['location_en'], 
+            'zh': row_dict['location_zh'],
+            'cn': row_dict.get('location_cn') or row_dict['location_zh'],
+            'jp': row_dict.get('location_jp') or row_dict['location_en']
+        },
+        'price': row_dict['price'], 'type': row_dict['type'],
+        'beds': row_dict['beds'], 'baths': row_dict['baths'], 'sqft': row_dict['sqft'],
+        'image': row_dict['image'], 'images': [r['image_path'] for r in img_rows],
+        'features': row_dict['features'], 'video': row_dict['video'],
+        'area': row_dict['area'], 'lat': row_dict['lat'], 'lng': row_dict['lng'],
+        'is_premium': row_dict['is_premium'], 'views': row_dict['views'],
+        'rating': row_dict['rating'], 'comments_count': row_dict['comments_count'],
+        'poster_name': row_dict['poster_name'] or 'System Admin',
+        'poster_email': row_dict['poster_email'] or 'admin@88loft.com',
+        'year_built': row_dict.get('year_built', 2022),
+        'walk_score': row_dict.get('walk_score', 85),
+        'transit_score': row_dict.get('transit_score', 78),
+        'created_at': row_dict.get('created_at', '')
+    })
+
 @app.route('/api/properties/<int:prop_id>', methods=['PUT'])
 def edit_property(prop_id):
     data = request.json
     conn = get_db_connection()
     c = conn.cursor()
     c.execute('''UPDATE properties 
-                 SET title_en = ?, title_zh = ?, location_en = ?, location_zh = ?, 
+                 SET title_en = ?, title_zh = ?, title_cn = ?, title_jp = ?, 
+                     location_en = ?, location_zh = ?, location_cn = ?, location_jp = ?, 
                      price = ?, type = ?, beds = ?, baths = ?, sqft = ?, image = ?,
                      features = ?, video = ?, area = ?, lat = ?, lng = ?
                  WHERE id = ?''',
-              (data['title']['en'], data['title']['zh'], 
-               data['location']['en'], data['location']['zh'],
+              (data['title']['en'], data['title']['zh'], data['title'].get('cn'), data['title'].get('jp'),
+               data['location']['en'], data['location']['zh'], data['location'].get('cn'), data['location'].get('jp'),
                data['price'], data['type'], data['beds'], data['baths'], data['sqft'], data['image'],
                data.get('features', ''), data.get('video', ''), data.get('area', 'HK'),
                data.get('lat'), data.get('lng'), prop_id))
@@ -446,18 +581,96 @@ def update_inquiry(inq_id):
     conn.close()
     return jsonify({"status": "success"})
 
+# ── Admin System Management ──────────────────────────────────────────────────
+@app.route('/api/admin/bulk-delete', methods=['DELETE'])
+def admin_bulk_delete():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM property_images')
+    c.execute('DELETE FROM properties')
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success", "message": "All properties deleted"})
+
+@app.route('/api/admin/download-db', methods=['GET'])
+def download_db():
+    from flask import send_file
+    return send_file(DB_FILE, as_attachment=True, download_name=f"properties_backup_{datetime.now().strftime('%Y%m%d')}.db")
+
+@app.route('/api/admin/upload-db', methods=['POST'])
+def upload_db():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file:
+        # Save a backup of the current one just in case
+        import shutil
+        shutil.copy2(DB_FILE, DB_FILE + '.bak')
+        file.save(DB_FILE)
+        return jsonify({"status": "success", "message": "Database restored successfully!"})
+
+@app.route('/api/admin/backup', methods=['GET'])
+def admin_backup():
+    # Reuse existing get_properties logic but return EVERYTHING
+    conn = get_db_connection()
+    rows = conn.execute('SELECT * FROM properties').fetchall()
+    
+    # Get all images
+    img_rows = conn.execute('SELECT * FROM property_images').fetchall()
+    images_map = {}
+    for r in img_rows:
+        images_map.setdefault(r['property_id'], []).append(r['image_path'])
+        
+    backup = []
+    for row in rows:
+        p = serialize_property(row)
+        p['images'] = images_map.get(row['id'], [])
+        backup.append(p)
+        
+    conn.close()
+    return jsonify(backup)
+
+@app.route('/api/admin/restore', methods=['POST'])
+def admin_restore():
+    data = request.json # List of property objects
+    if not isinstance(data, list):
+        return jsonify({"error": "Invalid format"}), 400
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    # Optional: Clear existing first? User might want to append or replace.
+    # We'll just append for safety, but check if user wants to clear.
+    clear_first = request.args.get('clear', '0') == '1'
+    if clear_first:
+        c.execute('DELETE FROM property_images')
+        c.execute('DELETE FROM properties')
+        
+    for p in data:
+        c.execute('''INSERT INTO properties 
+                     (title_en, title_zh, title_cn, title_jp, location_en, location_zh, location_cn, location_jp, price, type, beds, baths, sqft, image, features, video, area, lat, lng, is_premium, views, rating, comments_count, year_built, tax_annual, walk_score, transit_score)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                  (p['title'].get('en'), p['title'].get('zh'), p['title'].get('cn'), p['title'].get('jp'),
+                   p['location'].get('en'), p['location'].get('zh'), p['location'].get('cn'), p['location'].get('jp'),
+                   p['price'], p['type'], p['beds'], p['baths'], p['sqft'], p['image'],
+                   p.get('features', ''), p.get('video', ''), p.get('area', 'HK'),
+                   p.get('lat'), p.get('lng'), p.get('is_premium', 0), p.get('views', 0),
+                   p.get('rating', 0), p.get('comments_count', 0), p.get('year_built', 2000),
+                   p.get('tax_annual', 0.0), p.get('walk_score', 80), p.get('transit_score', 75)))
+        
+        last_id = c.lastrowid
+        if 'images' in p and isinstance(p['images'], list):
+            for img in p['images']:
+                c.execute('INSERT INTO property_images (property_id, image_path) VALUES (?, ?)', (last_id, img))
+                
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success", "count": len(data)})
+
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
     try:
-        # Support multipart form upload
-        if request.files and 'file' in request.files:
-            f = request.files['file']
-            ext = os.path.splitext(f.filename)[1] if f.filename else '.png'
-            filename = str(uuid.uuid4()) + ext
-            save_path = os.path.join(UPLOAD_DIR, filename)
-            f.save(save_path)
-            return jsonify({"url": "/uploads/" + filename})
-
         # Fallback: support base64 JSON upload
         data = request.get_json(force=True)
         if not data or 'image' not in data:
@@ -482,13 +695,33 @@ def upload_file():
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT id, email, name, created_at FROM users ORDER BY id DESC')
+    rows = c.fetchall()
+    users = [dict(row) for row in rows]
+    conn.close()
+    return jsonify(users)
+
 # Helper to serialize a property row to a dict
 def serialize_property(row):
     row_dict = dict(row)
     return {
         'id': row_dict['id'],
-        'title': {'en': row_dict.get('title_en', ''), 'zh': row_dict.get('title_zh', '')},
-        'location': {'en': row_dict.get('location_en', ''), 'zh': row_dict.get('location_zh', '')},
+        'title': {
+            'en': row_dict.get('title_en', ''), 
+            'zh': row_dict.get('title_zh', ''),
+            'cn': row_dict.get('title_cn', ''),
+            'jp': row_dict.get('title_jp', '')
+        },
+        'location': {
+            'en': row_dict.get('location_en', ''), 
+            'zh': row_dict.get('location_zh', ''),
+            'cn': row_dict.get('location_cn', ''),
+            'jp': row_dict.get('location_jp', '')
+        },
         'price': row_dict.get('price', ''),
         'type': row_dict.get('type', ''),
         'beds': row_dict.get('beds', 0),
@@ -508,7 +741,8 @@ def serialize_property(row):
         'tax_annual': row_dict.get('tax_annual', 0.0),
         'walk_score': row_dict.get('walk_score', 80),
         'transit_score': row_dict.get('transit_score', 75),
-        'price_history': row_dict.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]')
+        'price_history': row_dict.get('price_history', '[{"date": "2023-01-01", "price": "4,500,000"}]'),
+        'created_at': row_dict.get('created_at', '')
     }
 
 # NEW ENRICHED BACKEND FUNCTIONS
@@ -553,12 +787,30 @@ def get_stats_summary():
         "by_type": {c['type']: c['count'] for c in counts}
     })
 
+# --- Regional Routes ---
+@app.route('/jp/')
+@app.route('/jp/<path:path>')
+def serve_jp(path='index.html'):
+    return send_from_directory('jp', path)
+
+@app.route('/usa/')
+@app.route('/usa/<path:path>')
+def serve_usa(path='index.html'):
+    return send_from_directory('usa', path)
+
+@app.route('/cn/')
+@app.route('/cn/<path:path>')
+def serve_cn(path='index.html'):
+    return send_from_directory('cn', path)
+
 @app.route('/<path:path>', methods=['GET', 'HEAD', 'OPTIONS'])
 def serve_static(path):
     if request.method == 'OPTIONS':
         return app.make_default_options_response()
-    if os.path.exists(os.path.join(app.root_path, path)):
-        return send_from_directory('.', path)
+    
+    file_path = os.path.join(app.root_path, path)
+    if os.path.exists(file_path):
+        return send_from_directory(app.root_path, path)
     return abort(404)
 
 if __name__ == '__main__':

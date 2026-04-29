@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-HK">
 
 <head>
@@ -11,8 +11,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="utils.js?v=9"></script>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/utils.js?v=9"></script>
     <style>
         .payment-page {
             min-height: 100vh;
@@ -158,7 +158,7 @@
         <div class="glow glow-2"></div>
     </div>
 
-    <a href="login.html" class="back-btn">
+    <a href="/login.html" class="back-btn">
         <i class="fas fa-arrow-left"></i> 返回控制台
     </a>
 
@@ -256,7 +256,7 @@
 
         async function initPage() {
             if (!propId) {
-                window.location.href = 'login.html';
+                window.location.href = '/login.html';
                 return;
             }
 
@@ -288,7 +288,7 @@
                     if (res.ok) {
                         document.getElementById('successOverlay').style.display = 'flex';
                         setTimeout(() => {
-                            window.location.href = 'login.html';
+                            window.location.href = '/login.html';
                         }, 3500);
                     } else {
                         alert("推廣失敗，請稍後再試。");
