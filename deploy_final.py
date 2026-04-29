@@ -18,6 +18,7 @@ FILES_TO_UPLOAD = [
     "flask_app.py",
     "utils.js",
     "index.html",
+    "hk.html",
     "login.html",
     "admin.html",
     "add.html",

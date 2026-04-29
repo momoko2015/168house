@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>88loft Japan - Find Your Dream Home in Japan</title>
+    <title>88loft - 香港最齊、最快、最準樓盤資訊平台</title>
     <meta name="description" content="88loft 為您提供全港最齊全的租屋及買樓資訊。無論是特色天台屋、海景別墅、還是交通方便的市中心單位，我們都能助您輕鬆搵屋。">
     <meta name="keywords" content="香港樓盤, 租屋, 買樓, 88loft, 地產代理, 網上搵屋">
     <link rel="manifest" href="/manifest.json">
@@ -46,10 +46,10 @@
                 </div>
             </div>
             <div class="social-icons">
-                <a href="/hk.html" class="country-link">HK</a>
-            <a href="/jp.html" class="country-link active">JP</a>
-            <a href="/usa.html" class="country-link">USA</a>
-            <a href="/cn.html" class="country-link">CN</a>
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
             </div>
         </div>
     </div>
@@ -66,8 +66,8 @@
             <button id="themeToggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
             <div class="region-switcher-container">
                 <div class="region-pills">
-                    <a href="/hk.html" class="region-pill" title="Hong Kong">HK</a>
-                    <a href="/jp.html" class="region-pill active" title="Japan">JP</a>
+                    <a href="/hk.html" class="region-pill active" title="Hong Kong">HK</a>
+                    <a href="/jp.html" class="region-pill" title="Japan">JP</a>
                     <a href="/usa.html" class="region-pill" title="USA">USA</a>
                     <a href="/cn.html" class="region-pill" title="China">CN</a>
                 </div>
@@ -98,10 +98,10 @@
             <li><a href="#calculator">按揭計算</a></li>
             <li style="margin-top: 10px; margin-bottom: 10px;">
                 <select style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 8px; font-size: 0.9rem; cursor: pointer; outline: none;" onchange="changeLanguage(this.value)">
-                    <option value="ja" style="color: black;">🌐 日本語 (JP)</option>
                     <option value="zh" style="color: black;">🌐 繁體中文 (HK)</option>
                     <option value="cn" style="color: black;">🌐 简体中文 (CN)</option>
                     <option value="en" style="color: black;">🌐 English (US)</option>
+                    <option value="ja" style="color: black;">🌐 日本語 (JP)</option>
                 </select>
             </li>
             <li><a href="https://www.88loft.com/login.html" class="btn-primary" data-i18n="nav-contact" style="margin-left: 10px; margin-top: 5px;">聯絡我們</a></li>
@@ -159,10 +159,10 @@
         <div class="filter-section">
             <div class="filter-section-label">語言 / Language</div>
             <select id="sidebarLangSelector" style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; padding: 10px; font-size: 1rem; cursor: pointer; outline: none;" onchange="changeLanguage(this.value)">
-                <option value="ja" style="color: black;">日本語</option>
                 <option value="zh" style="color: black;">繁體中文</option>
                 <option value="cn" style="color: black;">简体中文</option>
                 <option value="en" style="color: black;">English</option>
+                <option value="ja" style="color: black;">日本語</option>
             </select>
         </div>
 
@@ -309,31 +309,30 @@
                     <div class="search-field-modern">
                         <i class="fas fa-globe"></i>
                         <select id="areaFilter">
-                            <option value="all">全国 (All Districts)</option>
-                            <optgroup label="東京23区 (Tokyo 23 Wards)">
-                                <option value="千代田区">千代田区 (Chiyoda)</option>
-                                <option value="中央区">中央区 (Chuo)</option>
-                                <option value="港区">港区 (Minato)</option>
-                                <option value="新宿区">新宿区 (Shinjuku)</option>
-                                <option value="文京区">文京区 (Bunkyo)</option>
-                                <option value="台東区">台東区 (Taito)</option>
-                                <option value="墨田区">墨田区 (Sumida)</option>
-                                <option value="江東区">江東区 (Koto)</option>
-                                <option value="品川区">品川区 (Shinagawa)</option>
-                                <option value="目黒区">目黒区 (Meguro)</option>
-                                <option value="大田区">大田区 (Ota)</option>
-                                <option value="世田谷区">世田谷区 (Setagaya)</option>
-                                <option value="渋谷区">渋谷区 (Shibuya)</option>
-                                <option value="中野区">中野区 (Nakano)</option>
-                                <option value="杉並区">杉並区 (Suginami)</option>
-                                <option value="豊島区">豊島区 (Toshima)</option>
-                                <option value="北区">北区 (Kita)</option>
-                                <option value="荒川区">荒川区 (Arakawa)</option>
-                                <option value="板橋区">板橋区 (Itabashi)</option>
-                                <option value="練馬区">練馬区 (Nerima)</option>
-                                <option value="足立区">足立区 (Adachi)</option>
-                                <option value="葛飾区">葛飾区 (Katsushika)</option>
-                                <option value="江戸川区">江戸川区 (Edogawa)</option>
+                            <option value="all">全部地區 (All Districts)</option>
+                            <optgroup label="香港島 (HK Island)">
+                                <option value="中西區">中西區 (Central & Western)</option>
+                                <option value="灣仔區">灣仔區 (Wan Chai)</option>
+                                <option value="東區">東區 (Eastern)</option>
+                                <option value="南區">南區 (Southern)</option>
+                            </optgroup>
+                            <optgroup label="九龍 (Kowloon)">
+                                <option value="油尖旺區">油尖旺區 (Yau Tsim Mong)</option>
+                                <option value="深水埗區">深水埗區 (Sham Shui Po)</option>
+                                <option value="九龍城區">九龍城區 (Kowloon City)</option>
+                                <option value="黃大仙區">黃大仙區 (Wong Tai Sin)</option>
+                                <option value="觀塘區">觀塘區 (Kwun Tong)</option>
+                            </optgroup>
+                            <optgroup label="新界 (New Territories)">
+                                <option value="葵青區">葵青區 (Kwai Tsing)</option>
+                                <option value="荃灣區">荃灣區 (Tsuen Wan)</option>
+                                <option value="屯門區">屯門區 (Tuen Mun)</option>
+                                <option value="元朗區">元朗區 (Yuen Long)</option>
+                                <option value="北區">北區 (North District)</option>
+                                <option value="大埔區">大埔區 (Tai Po)</option>
+                                <option value="沙田區">沙田區 (Sha Tin)</option>
+                                <option value="西貢區">西貢區 (Sai Kung)</option>
+                                <option value="離島區">離島區 (Islands)</option>
                             </optgroup>
                         </select>
                     </div>

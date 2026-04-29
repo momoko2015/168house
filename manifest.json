@@ -2,7 +2,7 @@
   "name": "168HOUSE - Premium HK Real Estate",
   "short_name": "168HOUSE",
   "description": "Premium properties for rent and sale in Hong Kong.",
-  "start_url": "/index.html",
+  "start_url": "/hk.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#7232f2",
