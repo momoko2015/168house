@@ -1,5 +1,7 @@
 let currentLang = 'zh';
 let currentView = 'grid'; // grid, list, map
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000' : '';
 
 const i18n = {
     en: {
@@ -607,7 +609,7 @@ let filteredResults = [];
 async function fetchPropertiesFromDB() {
     try {
         // Fetch all properties for instant visibility
-        const response = await fetch(API_BASE + '/api/properties?limit=10000');
+        const response = await fetch(API_BASE + '/api/properties?limit=1000');
         if (response.ok) {
             const dbProps = await response.json();
 
@@ -1890,3 +1892,115 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+
+// ---- Missing Features Extensions ----
+
+// 1. Advanced Filters State
+const advFilters = { beds: 'any', baths: 'any', type: 'any', sqftMin: 0, sqftMax: 10000, features: [] };
+
+function openFilterDrawer() {
+    const d = document.getElementById('filterDrawer');
+    const o = document.getElementById('filterOverlay');
+    if (d && o) {
+        d.classList.add('open');
+        o.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeFilterDrawer() {
+    const d = document.getElementById('filterDrawer');
+    const o = document.getElementById('filterOverlay');
+    if (d && o) {
+        d.classList.remove('open');
+        o.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
+
+// 2. Market Stats
+async function loadMarketStats() {
+    try {
+        const res = await fetch(API_BASE + '/api/stats/summary');
+        if (!res.ok) return;
+        const data = await res.json();
+        const totalEl = document.getElementById('msStat-total');
+        if (totalEl) totalEl.textContent = (data.total || 0).toLocaleString() + ' 個';
+
+        // Compute median-ish values from loaded properties  
+        const rentPrices = properties.filter(p => p.type === 'rent').map(p => parseCurrency(p.price)).filter(v => v > 0).sort((a,b)=>a-b);
+        const salePrices = properties.filter(p => p.type === 'sale').map(p => parseCurrency(p.price)).filter(v => v > 0).sort((a,b)=>a-b);
+        const median = arr => arr.length ? arr[Math.floor(arr.length/2)] : 0;
+        
+        const rentMed = document.getElementById('msStat-rent');
+        const saleMed = document.getElementById('msStat-sale');
+        if (rentMed && rentPrices.length) rentMed.textContent = 'HK$' + Math.round(median(rentPrices)/1000) + 'K';
+        if (saleMed && salePrices.length) saleMed.textContent = 'HK$' + (median(salePrices)/1e6).toFixed(1) + 'M';
+    } catch(e) { console.error("Stats load failed", e); }
+}
+
+// 3. Wishlist Badge
+function updateWishlistBadge() {
+    const favs = JSON.parse(localStorage.getItem('property_favorites') || '[]');
+    const badge = document.getElementById('navWishlistBadge');
+    if (!badge) return;
+    if (favs.length > 0) {
+        badge.textContent = favs.length;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// 4. Region Awareness
+function initRegion() {
+    const path = window.location.pathname;
+    let region = 'hk';
+    if (path.includes('jp.html')) region = 'jp';
+    else if (path.includes('cn.html')) region = 'cn';
+    else if (path.includes('usa.html')) region = 'usa';
+    else if (path.includes('hk.html')) region = 'hk';
+    else {
+        region = localStorage.getItem('88loft_region') || 'hk';
+    }
+    localStorage.setItem('88loft_region', region);
+}
+
+// 5. Saved Search
+function saveCurrentSearch() {
+    const query = document.getElementById('keywordSearch')?.value || '';
+    const area = document.getElementById('areaFilter')?.value || 'all';
+    const type = document.getElementById('typeFilter')?.value || 'all';
+    
+    const search = { query, area, type, timestamp: new Date().getTime() };
+    const saved = JSON.parse(localStorage.getItem('88loft_saved_searches') || '[]');
+    saved.unshift(search);
+    if (saved.length > 10) saved.pop();
+    localStorage.setItem('88loft_saved_searches', JSON.stringify(saved));
+    showToast(currentLang === 'en' ? 'Search saved!' : '搜尋已儲存！');
+}
+
+// 6. Compare Feature
+let compareList = JSON.parse(localStorage.getItem('88loft_compare') || '[]');
+function addToCompare(propId) {
+    if (compareList.includes(propId)) {
+        compareList = compareList.filter(id => id !== propId);
+        showToast('Removed from comparison');
+    } else {
+        if (compareList.length >= 3) {
+            showToast('Max 3 properties for comparison');
+            return;
+        }
+        compareList.push(propId);
+        showToast('Added to comparison');
+    }
+    localStorage.setItem('88loft_compare', JSON.stringify(compareList));
+}
+
+// Initialize everything on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    updateWishlistBadge();
+    initRegion();
+    setTimeout(loadMarketStats, 2000);
+});
