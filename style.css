@@ -103,7 +103,7 @@ select:focus {
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 30px;
+    gap: 15px;
     align-items: center;
 }
 
