@@ -850,8 +850,6 @@ def delete_room_wanted(wanted_id):
     conn.commit()
     conn.close()
     return jsonify({"status": "success"})
-        print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/users', methods=['GET'])
 def get_users():
