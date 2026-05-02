@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>88loft - Room Wanted | 搵樓中</title>
+    <link rel="stylesheet" href="/style.css?v=12">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .wanted-page { padding: 120px 5% 80px; max-width: 1400px; margin: 0 auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; }
+        .wanted-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        
+        .wanted-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .wanted-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-color);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        .wanted-card .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .wanted-card .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-color); }
+        .wanted-card .user-meta h4 { margin: 0; font-size: 1.1rem; }
+        .wanted-card .user-meta span { font-size: 0.8rem; color: #94a3b8; }
+        
+        .wanted-card h3 { font-size: 1.4rem; margin-bottom: 12px; color: #fff; }
+        .wanted-card .description { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .wanted-card .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .wanted-card .tag { background: rgba(114, 50, 242, 0.1); color: var(--accent-hover); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(114, 50, 242, 0.2); }
+        
+        .wanted-card .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .wanted-card .budget { font-size: 1.2rem; font-weight: 800; color: #4ade80; }
+        .wanted-card .btn-contact { background: var(--accent-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .wanted-card .btn-contact:hover { background: var(--accent-hover); }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #0d0f17; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; width: 90%; max-width: 600px; padding: 35px; position: relative; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-header { margin-bottom: 25px; }
+        .modal-header h2 { font-size: 1.8rem; margin-bottom: 5px; }
+        .modal-header p { color: #94a3b8; font-size: 0.9rem; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; color: #cbd5e1; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 15px; color: white; font-family: inherit; font-size: 1rem; outline: none; transition: 0.3s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-color); background: rgba(255,255,255,0.08); }
+        
+        .btn-submit { width: 100%; background: var(--accent-color); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background: var(--accent-hover); transform: translateY(-2px); }
+        
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; color: #94a3b8; cursor: pointer; transition: 0.3s; }
+        .close-modal:hover { color: white; }
+
+        .empty-state { text-align: center; padding: 100px 20px; grid-column: 1 / -1; }
+        .empty-state i { font-size: 4rem; color: rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .empty-state h3 { font-size: 1.5rem; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="logo-container" style="display: flex; align-items: center;">
+            <a href="/hk.html" style="text-decoration: none; display: flex; align-items: center;">
+                <img src="/logo.png" alt="88loft logo" style="height: 44px; margin-right: 12px; border-radius: 8px; object-fit: contain;">
+                <span style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(45deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">88loft</span>
+            </a>
+        </div>
+        <div class="nav-actions">
+            <button id="themeToggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+            <div class="region-switcher-container">
+                <div class="region-pills">
+                    <a href="/hk.html" class="region-pill active" title="Hong Kong">HK</a>
+                    <a href="/jp.html" class="region-pill" title="Japan">JP</a>
+                    <a href="/usa.html" class="region-pill" title="USA">USA</a>
+                    <a href="/cn.html" class="region-pill" title="China">CN</a>
+                </div>
+            </div>
+            <a href="/wishlist.html" class="icon-btn" style="position:relative; text-decoration:none;">
+                <i class="fas fa-heart"></i>
+                <span id="navWishlistBadge" class="wishlist-badge" style="display:none;">0</span>
+            </a>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=User&background=7232f2&color=fff" alt="User" class="avatar">
+                <div class="dropdown-menu">
+                    <a href="/login.html"><i class="fas fa-sign-in-alt"></i> 登入 / 註冊</a>
+                    <a href="/login.html"><i class="fas fa-home"></i> 刊登物業</a>
+                    <a href="/admin.html" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 5px; padding-top: 10px; color: #ffd700;"><i class="fas fa-user-shield"></i> 管理員後台</a>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="openModal()" style="margin-left: 15px;"><i class="fas fa-plus"></i> 發布需求</button>
+        </div>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="/hk.html">主頁</a></li>
+            <li><a href="/map.html" style="color: var(--accent-hover);"><i class="fas fa-map-marked-alt"></i> 地圖搵樓</a></li>
+            <li><a href="/wanted.html" class="active">搵樓中 (Wanted)</a></li>
+        </ul>
+    </nav>
+
+    <div class="wanted-page">
+        <div class="page-header">
+            <div>
+                <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;">Room Wanted <span style="color: var(--accent-hover);">搵樓中</span></h1>
+                <p style="color: #94a3b8;">在這裡發布您的搵樓需求，讓合適的業主或代理主動聯絡您。</p>
+            </div>
+            <div class="filters" style="display: flex; gap: 15px;">
+                <select id="areaFilter" class="glass" style="padding: 10px 20px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none;">
+                    <option value="all" style="background: #0d0f17;">全香港 (All Areas)</option>
+                    <option value="hk_island" style="background: #0d0f17;">香港島</option>
+                    <option value="kowloon" style="background: #0d0f17;">九龍</option>
+                    <option value="new_territories" style="background: #0d0f17;">新界</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="wanted-grid" id="wantedGrid">
+            <!-- Loading Skeletons -->
+            <div class="wanted-card" style="height: 300px; opacity: 0.5;"></div>
+            <div class="wanted-card" style="height: 300px; opacity: 0.5;"></div>
+            <div class="wanted-card" style="height: 300px; opacity: 0.5;"></div>
+        </div>
+    </div>
+
+    <!-- Post Wanted Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2>發布搵樓需求</h2>
+                <p>填寫您的需求，我們會為您推薦合適的房源。</p>
+            </div>
+            <form id="postForm" onsubmit="handlePostSubmit(event)">
+                <div class="form-group">
+                    <label>標題 (例如：求租尖沙咀套房)</label>
+                    <input type="text" id="title" placeholder="簡單描述您的需求" required>
+                </div>
+                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>心儀地區</label>
+                        <input type="text" id="location" placeholder="地區或屋苑名" required>
+                    </div>
+                    <div class="form-group">
+                        <label>預算 (HK$)</label>
+                        <input type="text" id="budget" placeholder="例如：$8,000" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>詳細描述</label>
+                    <textarea id="description" rows="4" placeholder="介紹一下您自己，以及對房間的要求 (例如：需要煮食、養寵物、起租期等)" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>聯絡方式 (WhatsApp/電話/Email)</label>
+                    <input type="text" id="contact" placeholder="方便大家聯絡您的方法" required>
+                </div>
+                <button type="submit" class="btn-submit">立即發布</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let wantedPosts = [];
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8000' : '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchWantedPosts();
+        });
+
+        async function fetchWantedPosts() {
+            try {
+                const res = await fetch(`${API_BASE}/api/wanted`);
+                wantedPosts = await res.json();
+                renderPosts();
+            } catch (err) {
+                console.error('Failed to fetch wanted posts:', err);
+                const grid = document.getElementById('wantedGrid');
+                grid.innerHTML = '<div class="empty-state"><h3>無法連線到伺服器</h3></div>';
+            }
+        }
+
+        function renderPosts() {
+            const grid = document.getElementById('wantedGrid');
+            if (!wantedPosts || wantedPosts.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search-plus"></i>
+                        <h3>目前還沒有人發布需求，成為第一個吧！</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = wantedPosts.map(post => `
+                <div class="wanted-card">
+                    <div class="user-info">
+                        <img src="https://ui-avatars.com/api/?name=${post.user_name || 'Guest'}&background=7232f2&color=fff" class="avatar">
+                        <div class="user-meta">
+                            <h4>${post.user_name || '匿名用戶'}</h4>
+                            <span>發布於 ${new Date(post.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    <h3>${post.title}</h3>
+                    <p class="description">${post.description}</p>
+                    <div class="tags">
+                        <span class="tag"><i class="fas fa-map-marker-alt"></i> ${post.location}</span>
+                        <span class="tag"><i class="fas fa-money-bill-wave"></i> ${post.budget}</span>
+                    </div>
+                    <div class="footer">
+                        <div class="budget">${post.budget}</div>
+                        <button class="btn-contact" onclick="contactPoster('${post.contact_info}', '${post.title}')">
+                            <i class="fas fa-paper-plane"></i> 聯絡他
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal() {
+            document.getElementById('postModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('postModal').style.display = 'none';
+        }
+
+        async function handlePostSubmit(e) {
+            e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            const data = {
+                user_id: user.id || 1,
+                title: document.getElementById('title').value,
+                location: document.getElementById('location').value,
+                budget: document.getElementById('budget').value,
+                description: document.getElementById('description').value,
+                contact_info: document.getElementById('contact').value
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/api/wanted`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    alert('需求發布成功！');
+                    closeModal();
+                    fetchWantedPosts();
+                } else {
+                    alert('發布失敗：' + (await res.json()).message);
+                }
+            } catch (err) {
+                alert('發布失敗，請稍後再試。');
+            }
+        }
+
+        function contactPoster(contact, title) {
+            alert(`聯絡方式：${contact}\n\n請告知對方您在 88loft 看到他的需求：「${title}」`);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('postModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

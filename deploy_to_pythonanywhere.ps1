@@ -1,9 +1,6 @@
 # ============================================================
 # 88Loft Deploy Script — PythonAnywhere API Upload
 # ============================================================
-# USAGE: Run this script in PowerShell from the property_app directory
-# It will upload all changed files and reload www.88loft.com
-
 param(
     [Parameter(Mandatory=$true)]
     [string]$ApiToken
@@ -11,15 +8,15 @@ param(
 
 $USERNAME  = "hkproperty"
 $DOMAIN    = "www.88loft.com"
-$SITE_DIR  = "/home/hkproperty/mysite"
+$SITE_DIR  = "/home/hkproperty/88loft"
 $BASE_URL  = "https://www.pythonanywhere.com/api/v0/user/$USERNAME"
 $HEADERS   = @{ Authorization = "Token $ApiToken" }
 $LOCAL_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Files to deploy
 $FILES = @(
     "flask_app.py",
     "utils.js",
+    "districts.js",
     "map.html",
     "index.html",
     "login.html",
@@ -28,27 +25,29 @@ $FILES = @(
     "add.html",
     "payment.html",
     "style.css",
-    "app.js"
+    "app.js",
+    "hk.html",
+    "jp.html",
+    "usa.html",
+    "cn.html",
+    "wanted.html",
+    "404.html",
+    "sw.js",
+    "compare.html"
 )
 
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "  88Loft Deploy to PythonAnywhere" -ForegroundColor Cyan
-Write-Host "========================================`n" -ForegroundColor Cyan
-
-# --- STEP 1: Upload each file ---
-Write-Host "[1/2] Uploading files..." -ForegroundColor Yellow
-
+Write-Host "Uploading files..."
 $success = 0
 $failed  = 0
 
-foreach ($file in $FILES) {
-    $localPath = Join-Path $LOCAL_DIR $file
+foreach ($f in $FILES) {
+    $localPath = Join-Path $LOCAL_DIR $f
     if (-not (Test-Path $localPath)) {
-        Write-Host "  SKIP (not found): $file" -ForegroundColor DarkGray
+        Write-Host "  SKIP: $f"
         continue
     }
 
-    $remotePath = "$SITE_DIR/$file"
+    $remotePath = "$SITE_DIR/$f"
     $uploadUrl  = "$BASE_URL/files/path$remotePath"
 
     try {
@@ -58,7 +57,7 @@ foreach ($file in $FILES) {
 
         $bodyLines = (
             "--$boundary",
-            "Content-Disposition: form-data; name=`"content`"; filename=`"$file`"",
+            "Content-Disposition: form-data; name=`"content`"; filename=`"$f`"",
             "Content-Type: application/octet-stream",
             "",
             [System.Text.Encoding]::UTF8.GetString($bytes),
@@ -68,46 +67,23 @@ foreach ($file in $FILES) {
         $uploadHeaders = $HEADERS.Clone()
         $uploadHeaders["Content-Type"] = "multipart/form-data; boundary=$boundary"
 
-        $response = Invoke-WebRequest -Uri $uploadUrl `
-            -Method POST `
-            -Headers $uploadHeaders `
-            -Body $bodyLines `
-            -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $uploadUrl -Method POST -Headers $uploadHeaders -Body $bodyLines -ErrorAction Stop
 
         if ($response.StatusCode -in 200, 201) {
-            Write-Host "  OK  $file" -ForegroundColor Green
+            Write-Host "  OK  $f"
             $success++
-        } else {
-            Write-Host "  WARN $file — HTTP $($response.StatusCode)" -ForegroundColor Yellow
         }
     } catch {
-        Write-Host "  FAIL $file — $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "  FAIL $f : $($_.Exception.Message)"
         $failed++
     }
 }
 
-Write-Host "`n  Uploaded: $success files  |  Failed: $failed files" -ForegroundColor Cyan
-
-# --- STEP 2: Reload web app ---
-Write-Host "`n[2/2] Reloading www.88loft.com..." -ForegroundColor Yellow
-
+Write-Host "Reloading..."
 try {
     $reloadUrl = "$BASE_URL/webapps/$DOMAIN/reload/"
-    $response  = Invoke-WebRequest -Uri $reloadUrl `
-        -Method POST `
-        -Headers $HEADERS `
-        -ErrorAction Stop
-
-    if ($response.StatusCode -eq 200) {
-        Write-Host "  Web app reloaded successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "  Reload returned HTTP $($response.StatusCode)" -ForegroundColor Yellow
-    }
+    $response  = Invoke-WebRequest -Uri $reloadUrl -Method POST -Headers $HEADERS -ErrorAction Stop
+    Write-Host "  Reloaded!"
 } catch {
-    Write-Host "  Reload failed: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "  Try manually: Web tab → Reload button" -ForegroundColor Yellow
+    Write-Host "  Reload failed: $($_.Exception.Message)"
 }
-
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "  Deploy complete! Check www.88loft.com" -ForegroundColor Green
-Write-Host "========================================`n" -ForegroundColor Cyan

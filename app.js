@@ -69,7 +69,13 @@ const i18n = {
         "ticker-hot": "Hot Topic:",
         "ticker-rate": "Current Rate:",
         "ticker-new": "Featured:",
-        "ticker-trend": "Market Info:"
+        "ticker-trend": "Market Info:",
+        "badge-commercial": "Commercial",
+        "services-subtitle": "Simple Process",
+        "stat-total-label": "Total Listings",
+        "stat-rent-label": "Median Rent",
+        "stat-sale-label": "Median Price",
+        "stat-hot-label": "Hot Area"
     },
     ja: {
         "logo": "88loft",
@@ -87,6 +93,7 @@ const i18n = {
         "filter-all": "すべてのタイプ",
         "filter-rent": "賃貸",
         "filter-sale": "売買",
+        "badge-commercial": "商業用",
         "btn-search": "今すぐ検索",
         "section-featured": "おすすめ物件",
         "lang-toggle": "English",
@@ -139,7 +146,12 @@ const i18n = {
         "down-payment-label": "頭金 (%)",
         "newsletter-title": "メールマガジン登録",
         "newsletter-desc": "最新の物件情報や市場トレンドを定期的にお届けします。",
-        "subscribe": "購読する"
+        "subscribe": "購読する",
+        "services-subtitle": "簡単なプロセス",
+        "stat-total-label": "総物件数",
+        "stat-rent-label": "家賃中央値",
+        "stat-sale-label": "販売価格中央値",
+        "stat-hot-label": "人気エリア"
     },
     zh: {
         "logo": "88loft精選樓盤",
@@ -181,7 +193,20 @@ const i18n = {
         "ticker-hot": "最新熱話:",
         "ticker-rate": "目前利率:",
         "ticker-new": "新盤推介:",
-        "ticker-trend": "市場走勢:"
+        "ticker-trend": "市場走勢:",
+        "badge-commercial": "商",
+        "services-desc": "助您輕鬆搵屋，只需三步。",
+        "step-1-title": "搜尋樓盤",
+        "step-1-desc": "利用篩選器搵心水筍盤。",
+        "step-2-title": "預約睇樓",
+        "step-2-desc": "聯絡業主或代理睇實位。",
+        "step-3-title": "成交入伙",
+        "step-3-desc": "完成手續，搬入新屋。",
+        "services-subtitle": "簡單流程",
+        "stat-total-label": "全港盤源",
+        "stat-rent-label": "租盤中位數",
+        "stat-sale-label": "售盤中位數",
+        "stat-hot-label": "熱門地區"
     },
     cn: {
         "logo": "88Loft精选楼盘",
@@ -219,107 +244,25 @@ const i18n = {
         "services-title": "服务流程",
         "mortgage-calc": "按揭计算器",
         "newsletter-title": "订阅我们的通讯",
-        "subscribe": "立即订阅"
+        "subscribe": "立即订阅",
+        "services-desc": "助您轻松找房，只需三步。",
+        "step-1-title": "搜索楼盘",
+        "step-1-desc": "利用筛选器找心仪好盘。",
+        "step-2-title": "预约看房",
+        "step-2-desc": "联系业主或代理看实位。",
+        "step-3-title": "成交入伙",
+        "step-3-desc": "完成手续，搬入新家。",
+        "services-subtitle": "简单流程",
+        "stat-total-label": "全境房源",
+        "stat-rent-label": "租金中位数",
+        "stat-sale-label": "售价中位数",
+        "stat-hot-label": "热门地区"
     }
 };;
 
 // Removed redundant uploadImage function (now in utils.js)
 
-let defaultProperties = [
-    {
-        id: 1,
-        title: { en: "Modern Penthouse", zh: "現代頂層特色戶" },
-        location: { en: "Mong Kok, Yau Tsim Mong", zh: "旺角 (油尖旺區)" },
-        price: "HK$ 45,000/mo",
-        type: "rent",
-        beds: 3,
-        baths: 2,
-        sqft: 2100,
-        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-        features: "高級裝修,開揚景觀",
-        area: "HK",
-        lat: 22.3193,
-        lng: 114.1694
-    },
-    {
-        id: 2,
-        title: { en: "Luxury Villa", zh: "淺水灣獨立屋" },
-        location: { en: "Repulse Bay, Southern", zh: "淺水灣 (南區)" },
-        price: "HK$ 85,000,000",
-        type: "sale",
-        beds: 5,
-        baths: 6,
-        sqft: 6500,
-        image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80",
-        features: "海景,寧靜舒適",
-        area: "HK",
-        lat: 22.2368,
-        lng: 114.1970
-    },
-    {
-        id: 3,
-        title: { en: "Skyline Apartment", zh: "高層海景單位" },
-        location: { en: "Tsim Sha Tsui, Yau Tsim Mong", zh: "尖沙咀 (油尖旺區)" },
-        price: "HK$ 32,000/mo",
-        type: "rent",
-        beds: 2,
-        baths: 1,
-        sqft: 950,
-        image: "https://images.unsplash.com/photo-1502672260266-1c1e52504431?auto=format&fit=crop&w=800&q=80",
-        features: "海景,鄰近地鐵",
-        area: "HK",
-        lat: 22.2988,
-        lng: 114.1722
-    },
-    {
-        id: 4,
-        title: { en: "Oceanfront Estate", zh: "西貢海景別墅" },
-        location: { en: "Sai Kung District", zh: "西貢 (西貢區)" },
-        price: "HK$ 120,000,000",
-        type: "sale",
-        beds: 6,
-        baths: 7,
-        sqft: 8200,
-        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-        features: "海景,開揚景觀",
-        area: "HK",
-        lat: 22.3813,
-        lng: 114.2775
-    },
-    {
-        id: 5,
-        title: { en: "Minimalist Loft", zh: "工廈靚裝特色戶" },
-        location: { en: "Kwun Tong District", zh: "觀塘 (觀塘區)" },
-        price: "HK$ 28,000/mo",
-        type: "rent",
-        beds: 1,
-        baths: 1,
-        sqft: 1100,
-        image: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&w=800&q=80",
-        features: "寧靜舒適,開揚景觀",
-        area: "China",
-        lat: 22.3129,
-        lng: 114.2251
-    },
-    {
-        id: 6,
-        title: { en: "Suburban Family Home", zh: "沙田第一城" },
-        location: { en: "Sha Tin", zh: "沙田" },
-        price: "HK$ 6,500,000",
-        type: "sale",
-        beds: 2,
-        baths: 1,
-        sqft: 327,
-        image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80",
-        features: "鄰近地鐵,實用率高",
-        area: "HK",
-        lat: 22.3860,
-        lng: 114.1950,
-        views: 1250,
-        rating: 4.5,
-        comments_count: 12
-    }
-];
+let defaultProperties = [];
 
 // Add default stats to other default properties
 defaultProperties = defaultProperties.map((p, idx) => ({
@@ -672,6 +615,15 @@ async function fetchPropertiesFromDB() {
                 let validP = { ...p };
                 if (typeof validP.title === 'string') validP.title = { en: validP.title, zh: validP.title };
                 if (typeof validP.location === 'string') validP.location = { en: validP.location, zh: validP.location };
+                
+                // Fix image paths
+                if (validP.image && validP.image.startsWith('/uploads/')) {
+                    validP.image = API_BASE + validP.image;
+                }
+                if (validP.images && Array.isArray(validP.images)) {
+                    validP.images = validP.images.map(img => img.startsWith('/uploads/') ? API_BASE + img : img);
+                }
+
                 // Handle stats ensure they are numbers
                 validP.views = parseInt(validP.views) || 0;
                 validP.rating = parseFloat(validP.rating) || 0;
@@ -733,17 +685,40 @@ function animateCounter(counter) {
 function checkProfile() {
     const savedUser = localStorage.getItem('property_user');
     const profileContainer = document.querySelector('.user-profile');
-    if (savedUser && profileContainer) {
+    const loginBtn = document.querySelector('.nav-links .btn-primary[data-i18n="nav-contact"]');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    if (savedUser) {
         const user = JSON.parse(savedUser);
-        const avatar = profileContainer.querySelector('.avatar');
-        if (avatar) avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=7232f2&color=fff`;
+        const savedAvatar = localStorage.getItem('property_avatar');
+        
+        // Update all avatars in the header
+        document.querySelectorAll('.user-profile .avatar').forEach(img => {
+            img.src = savedAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=7232f2&color=fff`;
+        });
 
-        const dropdown = profileContainer.querySelector('.dropdown-menu');
-        if (dropdown) {
-            dropdown.innerHTML = `
-                <a href="/login.html"><i class="fas fa-tachometer-alt"></i> 控制台</a>
-                <a href="#" onclick="handleLogout(event)"><i class="fas fa-sign-out-alt"></i> 登出</a>
-            `;
+        // Reposition profile before theme toggle as requested
+        if (profileContainer && themeToggle && profileContainer.nextSibling !== themeToggle) {
+            themeToggle.parentNode.insertBefore(profileContainer, themeToggle);
+            profileContainer.style.marginRight = "10px";
+        }
+
+        // Hide login button if logged in
+        if (loginBtn) loginBtn.style.display = 'none';
+
+        if (profileContainer) {
+            const dropdown = profileContainer.querySelector('.dropdown-menu');
+            if (dropdown) {
+                dropdown.innerHTML = `
+                    <div style="padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px;">
+                        <div style="font-weight: 700; color: #fff;">${user.name}</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">${user.email}</div>
+                    </div>
+                    <a href="/login.html"><i class="fas fa-tachometer-alt"></i> 控制台 (Dashboard)</a>
+                    <a href="/wishlist.html"><i class="fas fa-heart"></i> 收藏夾</a>
+                    <a href="#" onclick="handleLogout(event)" style="color: #ff4d4d;"><i class="fas fa-sign-out-alt"></i> 登出 (Logout)</a>
+                `;
+            }
         }
     }
 }
@@ -785,6 +760,25 @@ function updateLanguage() {
     // Re-render properties so they use the correct language
     handleSearch();
     checkProfile();
+}
+
+function getTimeAgo(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return `${seconds} 秒前 刊登`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} 分鐘前 刊登`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} 小時前 刊登`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} 天前 刊登`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} 個月前 刊登`;
+    const years = Math.floor(months / 12);
+    return `${years} 年前 刊登`;
 }
 
 function toggleFavorite(e, id) {
@@ -865,7 +859,14 @@ function renderProperties(props, append = false) {
         resultInfo.className = 'result-info';
         resultInfo.id = 'resultInfoCount';
         resultInfo.style.gridColumn = "1/-1";
-        resultInfo.innerHTML = `<span><i class="fas fa-info-circle"></i> ${currentLang === 'zh' ? `顯示 <strong>${Math.min(end, props.length)}</strong> / <strong>${props.length}</strong> 個符合嘅樓盤` : `Showing <strong>${Math.min(end, props.length)}</strong> / <strong>${props.length}</strong> matching properties`}</span>`;
+        resultInfo.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span><i class="fas fa-info-circle"></i> ${currentLang === 'zh' ? `顯示 <strong>${Math.min(end, props.length)}</strong> / <strong>${props.length}</strong> 個符合嘅樓盤` : `Showing <strong>${Math.min(end, props.length)}</strong> / <strong>${props.length}</strong> matching properties`}</span>
+                <button id="saveSearchBtn" class="btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 20px; display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="saveCurrentSearch()">
+                    <i class="fas fa-bookmark"></i> ${currentLang === 'zh' ? '儲存搜尋' : 'Save Search'}
+                </button>
+            </div>
+        `;
         grid.appendChild(resultInfo);
     } else {
         const info = document.getElementById('resultInfoCount');
@@ -903,6 +904,9 @@ function renderProperties(props, append = false) {
                 <div class="info-item" style="color: #cbd5e1; font-size: 0.9rem;"><i class="fas fa-expand-arrows-alt"></i> ${prop.sqft} ${dict["sqft"]}</div>
                 <div class="actions-area" style="display: flex; gap: 8px;">
                      <a href="/property.html?id=${prop.id}" class="btn-outline" style="padding: 5px 12px; font-size: 0.75rem; border-radius: 6px; text-decoration:none;">${currentLang === 'zh' ? '詳情' : 'Details'}</a>
+                     <button class="btn-outline" style="padding: 5px; background:transparent; color: #25D366; border-color: rgba(37, 211, 102, 0.3);" onclick="shareToWhatsApp(${prop.id})" title="Share to WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
                      <button class="favorite-btn ${isFavorited ? 'active' : ''}" data-prop-id="${prop.id}" style="position:static; padding: 5px; background:transparent;" onclick="toggleFavorite(event, ${prop.id})">
                         <i class="fa${isFavorited ? 's' : 'r'} fa-heart"></i>
                     </button>
@@ -910,48 +914,55 @@ function renderProperties(props, append = false) {
             `;
         } else {
             card.className = `property-card ${prop.is_premium ? 'premium' : ''}`;
-            card.innerHTML = `
-                <div class="property-image-container" onclick="window.location.href='/property.html?id=${prop.id}'" style="cursor: zoom-in;">
-                    <img src="${prop.image}" alt="${title}" class="property-image">
-                    
-                    <span class="property-badge">${prop.type === 'rent' ? dict["badge-rent"] : dict["badge-sale"]}</span>
-                    <button class="favorite-btn ${isFavorited ? 'active' : ''}" data-prop-id="${prop.id}" onclick="toggleFavorite(event, ${prop.id})">
-                        <i class="fa${isFavorited ? 's' : 'r'} fa-heart"></i>
-                    </button>
-                    <div class="property-media-actions">
-                        ${prop.video ? `<button class="media-btn" onclick="openVideoModal('${prop.video}', '${title}')"><i class="fas fa-play"></i></button>` : ''}
-                        ${(prop.images && prop.images.length > 0) ? `<button class="media-btn" onclick="openGalleryModal(${prop.id})"><i class="fas fa-images"></i> <span style="font-size: 0.6rem;">+${prop.images.length}</span></button>` : ''}
-                </div>
-                <div class="property-details" onclick="window.location.href='/property.html?id=${prop.id}'" style="cursor: pointer;">
-                    <h3 class="property-title">${title}</h3>
-                    <p style="color: #94a3b8; margin-bottom: 10px; font-size: 0.9rem;"><i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i> ${loc}</p>
-                    <div style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 0.8rem; color: #94a3b8;">
-                        <span><i class="fas fa-star" style="color: #ffd700;"></i> ${prop.rating || 0}</span>
-                        <span><i class="fas fa-eye"></i> ${prop.views || 0}</span>
-                        <span><i class="fas fa-comment"></i> ${prop.comments_count || 0}</span>
-                    </div>
-                    <div class="property-price">${prop.price}</div>
-                    <div class="property-features">
-                        <div class="feature"><i class="fas fa-bed"></i> ${prop.beds} ${dict["beds"]}</div>
-                        <div class="feature"><i class="fas fa-bath"></i> ${prop.baths} ${dict["baths"]}</div>
-                        <div class="feature"><i class="fas fa-expand-arrows-alt"></i> ${prop.sqft} ${dict["sqft"]}</div>
-                    </div>
-                    ${prop.features ? `
-                    <div class="property-tags" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px;">
-                        ${(prop.features.includes('|') ? prop.features.split('|')[currentLang === 'zh' ? 1 : 0] : prop.features)
-                        .split(',').map(f => `<span style="background: rgba(114, 50, 242, 0.1); color: var(--accent-color); font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(114, 50, 242, 0.2);">${f.trim()}</span>`).join('')}
-                    </div>
-                    ` : ''}
-                    <div style="margin-top: 20px; display: flex; gap: 10px;" onclick="event.stopPropagation()">
-                        <a href="/property.html?id=${prop.id}" class="btn-primary" style="flex: 1; height: 43px; font-size: 0.9rem; display:flex; align-items:center; justify-content:center; text-decoration:none; border-radius:8px;">
-                            <i class="fas fa-eye" style="margin-right:6px;"></i> ${currentLang === 'zh' ? '查看詳情' : 'View Details'}
-                        </a>
-                        <button class="btn-outline" style="width: 43px; height: 43px; display: flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openInquiryModal(${prop.id})">
-                            <i class="fas fa-envelope"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
+            const beds = prop.beds || prop.bedrooms || '—';
+            const baths = prop.baths || prop.bathrooms || '—';
+            const sqft = prop.sqft || prop.area || '—';
+            const publishTimeAgo = getTimeAgo(prop.publish_date || prop.date);
+            
+            let priceHTML = '<div style="font-size:1.4rem;font-weight:800;color:var(--accent-hover);margin-bottom:14px;">' + (prop.price || '—') + '</div>';
+            if (prop.discount_price) {
+                priceHTML = '<div style="margin-bottom:14px;">' +
+                    '<span style="font-size:1.4rem;font-weight:800;color:#ff4d4d;margin-right:8px;">' + prop.discount_price + '</span>' +
+                    '<span style="font-size:0.9rem;color:#94a3b8;text-decoration:line-through;">' + prop.price + '</span>' +
+                    (prop.discount_until ? '<div style="font-size:0.75rem;color:#ff4d4d;margin-top:2px;font-weight:600;"><i class="fas fa-clock"></i> 優惠至: ' + prop.discount_until + '</div>' : '') +
+                '</div>';
+            }
+
+            card.innerHTML = [
+                '<div class="property-image-container" onclick="window.location.href=\'/property.html?id=' + prop.id + '\'" style="cursor:zoom-in;">',
+                    '<img src="' + (prop.image || '') + '" alt="' + title + '" class="property-image" onerror="this.src=\'https://via.placeholder.com/400x250?text=88loft\'">',
+                    '<span class="property-badge">' + (prop.type === 'rent' ? dict['badge-rent'] : (prop.type === 'commercial' ? dict['badge-commercial'] : dict['badge-sale'])) + '</span>',
+                    '<button class="favorite-btn ' + (isFavorited ? 'active' : '') + '" data-prop-id="' + prop.id + '" onclick="toggleFavorite(event,' + prop.id + ')">',
+                        '<i class="fa' + (isFavorited ? 's' : 'r') + ' fa-heart"></i>',
+                    '</button>',
+                    '<div class="property-media-actions">',
+                        prop.video ? '<button class="media-btn" onclick="openVideoModal(\'' + prop.video + '\',\'' + title + '\')"><i class="fas fa-play"></i></button>' : '',
+                        (prop.images && prop.images.length > 0) ? '<button class="media-btn" onclick="openGalleryModal(' + prop.id + ')"><i class="fas fa-images"></i> <span style="font-size:0.6rem">+' + prop.images.length + '</span></button>' : '',
+                        '<button class="media-btn" style="color:#25D366;" onclick="shareToWhatsApp(' + prop.id + ')" title="WhatsApp Share"><i class="fab fa-whatsapp"></i></button>',
+                    '</div>',
+                '</div>',
+                '<div class="property-details" onclick="window.location.href=\'/property.html?id=' + prop.id + '\'" style="padding:20px;flex-grow:1;display:flex;flex-direction:column;cursor:pointer;">',
+                    '<h3 style="font-size:1.1rem;margin-bottom:8px;color:#fff;font-weight:700;">' + title + '</h3>',
+                    '<p style="color:#94a3b8;margin-bottom:12px;font-size:0.85rem;"><i class="fas fa-map-marker-alt" style="margin-right:5px;color:var(--accent-color);"></i>' + loc + '</p>',
+                    priceHTML,
+                    '<div style="display:flex;gap:16px;color:#94a3b8;font-size:0.85rem;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;margin-top:auto;">',
+                        '<span><i class="fas fa-bed" style="color:var(--accent-color);margin-right:4px;"></i>' + beds + ' ' + dict['beds'] + '</span>',
+                        '<span><i class="fas fa-bath" style="color:var(--accent-color);margin-right:4px;"></i>' + baths + ' ' + dict['baths'] + '</span>',
+                        '<span><i class="fas fa-expand-arrows-alt" style="color:var(--accent-color);margin-right:4px;"></i>' + sqft + ' ' + dict['sqft'] + '</span>',
+                    '</div>',
+                    '<div style="margin-top:8px;font-size:0.75rem;color:#64748b;display:flex;align-items:center;gap:5px;">',
+                        '<i class="fas fa-history"></i> ' + publishTimeAgo,
+                    '</div>',
+                    '<div style="margin-top:14px;display:flex;gap:10px;" onclick="event.stopPropagation()">',
+                        '<a href="/property.html?id=' + prop.id + '" class="btn-primary" style="flex:1;height:40px;font-size:0.85rem;display:flex;align-items:center;justify-content:center;text-decoration:none;border-radius:8px;">',
+                            '<i class="fas fa-eye" style="margin-right:6px;"></i>' + (currentLang === 'zh' ? '查看詳情' : 'View Details'),
+                        '</a>',
+                        '<button class="btn-outline" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:8px;" onclick="openInquiryModal(' + prop.id + ')">',
+                            '<i class="fas fa-envelope"></i>',
+                        '</button>',
+                    '</div>',
+                '</div>'
+            ].join('');
         }
         grid.appendChild(card);
     });
@@ -1084,19 +1095,40 @@ function handleSearch() {
         // Country filtering based on current page
         const path = window.location.pathname.toLowerCase();
         let matchesCountry = true;
-        if (path.includes('jp.html')) {
-            const jpKw = ['tokyo', 'osaka', 'kyoto', 'japan', '東京', '大阪', '京都', '区', '千代田', '中央', '港区', '新宿', '文京', '台東', '墨田', '江東', '品川', '目黒', '大田', '世田谷', '渋谷', '中野', '杉並', '豊島', '北区', '荒川', '板橋', '練馬', '足立', '葛飾', '江戸川'];
-            matchesCountry = jpKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()) || (prop.area && prop.area.toLowerCase().includes(kw)));
-        } else if (path.includes('usa.html')) {
-            const usaKw = ['usa', 'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new hampshire', 'new jersey', 'new mexico', 'new york', 'north carolina', 'north dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode island', 'south carolina', 'south dakota', 'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington', 'west virginia', 'wisconsin', 'wyoming', ' al', ' ak', ' az', ' ar', ' ca', ' co', ' ct', ' de', ' fl', ' ga', ' hi', ' id', ' il', ' in', ' ia', ' ks', ' ky', ' la', ' me', ' md', ' ma', ' mi', ' mn', ' ms', ' mo', ' mt', ' ne', ' nv', ' nh', ' nj', ' nm', ' ny', ' nc', ' nd', ' oh', ' ok', ' or', ' pa', ' ri', ' sc', ' sd', ' tn', ' tx', ' ut', ' vt', ' va', ' wa', ' wv', ' wi', ' wy'];
-            matchesCountry = usaKw.some(kw => locZh.includes(kw) || locEn.includes(kw) || (prop.area && prop.area.toLowerCase() === kw.trim().toLowerCase()));
-        } else if (path.includes('cn.html')) {
-            const cnKw = ['china', '北京', '上海', '天津', '重庆', '广东', '深圳', '广州', '浙江', '杭州', '江苏', '南京', '四川', '成都', '福建', '厦门', '山东', '湖北', '武汉', '陕西', '西安', 'beijing', 'shanghai', 'shenzhen'];
-            matchesCountry = cnKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()) || (prop.area && prop.area.toLowerCase().includes(kw)));
+        
+        // Determine target area based on page
+        let targetArea = "HK";
+        if (path.includes('jp.html')) targetArea = "JP";
+        else if (path.includes('usa.html')) targetArea = "USA";
+        else if (path.includes('cn.html')) targetArea = "China";
+
+        // If property has an explicit area, it must match
+        if (prop.area) {
+            matchesCountry = (prop.area === targetArea);
         } else {
-            // Assume HK for index.html or anything else
-            const hkKw = ['hong kong', 'hk', '香港', '九龍', '新界', 'kowloon', 'new territories', '中西區', '灣仔', '東區', '南區', '油尖旺', '深水埗', '九龍城', '黃大仙', '觀塘', '葵青', '荃灣', '屯門', '元朗', '北區', '大埔', '沙田', '西貢', '離島'];
-            matchesCountry = hkKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()) || (prop.area && prop.area.toLowerCase().includes(kw))) || (!locZh && !locEn && !prop.area); // Include items without location info
+            // Fallback to keyword matching for legacy or unassigned data
+            if (targetArea === 'JP') {
+                const jpKw = ['tokyo', 'osaka', 'kyoto', 'japan', '東京', '大阪', '京都', '区', '千代田', '中央', '港区', '新宿', '文京', '台東', '墨田', '江東', '品川', '目黒', '大田', '世田谷', '渋谷', '中野', '杉並', '豊島', '北区', '荒川', '板橋', '練馬', '足立', '葛飾', '江戸川'];
+                matchesCountry = jpKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()));
+            } else if (targetArea === 'USA') {
+                const usaKw = ['usa', 'united states', 'new york', 'california', 'texas', 'florida', 'washington', 'chicago', 'los angeles', 'san francisco'];
+                const stateAbbr = ['al', 'ak', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'fl', 'ga', 'hi', 'id', 'il', 'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo', 'mt', 'ne', 'nv', 'nh', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri', 'sc', 'sd', 'tn', 'tx', 'ut', 'vt', 'va', 'wa', 'wv', 'wi', 'wy'];
+                
+                const matchesKw = usaKw.some(kw => locZh.includes(kw) || locEn.includes(kw));
+                // For abbreviations, only match if it's a separate word or at the end
+                const matchesAbbr = stateAbbr.some(abbr => {
+                    const regex = new RegExp(`\\b${abbr}\\b`, 'i');
+                    return regex.test(locEn);
+                });
+                matchesCountry = matchesKw || matchesAbbr;
+            } else if (targetArea === 'China') {
+                const cnKw = ['china', '北京', '上海', '天津', '重庆', '广东', '深圳', '广州', '浙江', '杭州', '江苏', '南京', '四川', '成都', '福建', '厦门', '山东', '湖北', '武汉', '陕西', '西安', 'beijing', 'shanghai', 'shenzhen'];
+                matchesCountry = cnKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase()));
+            } else {
+                // Default to HK
+                const hkKw = ['hong kong', 'hk', '香港', '九龍', '新界', 'kowloon', 'new territories'];
+                matchesCountry = hkKw.some(kw => locZh.includes(kw) || locEn.includes(kw.toLowerCase())) || (!locZh && !locEn);
+            }
         }
 
         // Area filtering
@@ -1228,8 +1260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     startCounters();
 
     // Set a loading state
-    const grid = document.getElementById('propertyGrid');
-    if (grid) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;"><i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--accent-color);"></i><p style="margin-top: 20px; font-weight: 600;">正在智能配對優質樓盤 (Smart Matching Properties...)</p></div>';
+    renderSkeletons();
 
     // Fetch and render
     await fetchPropertiesFromDB();
@@ -1305,7 +1336,188 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentLang = langs[(idx + 1) % langs.length];
         updateLanguage();
     });
+
+    // 3. Continuous Enhancements Init
+    initAutocomplete();
+    initScrollTop();
+    initPWAInstall();
 });
+
+// --- PWA Install Logic ---
+function initPWAInstall() {
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Optionally show a custom install banner after 10 seconds
+        setTimeout(() => {
+            showInstallBanner(deferredPrompt);
+        }, 10000);
+    });
+}
+
+function showInstallBanner(deferredPrompt) {
+    if (document.getElementById('installBanner')) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'installBanner';
+    banner.className = 'glass install-banner';
+    banner.innerHTML = `
+        <div class="banner-content">
+            <img src="/logo.png" alt="88loft">
+            <div>
+                <h4>Install 88Loft App</h4>
+                <p>Add to home screen for faster access & offline search.</p>
+            </div>
+            <button id="installBtn" class="btn-primary">Install</button>
+            <button onclick="this.parentElement.parentElement.remove()" class="close-btn">&times;</button>
+        </div>
+    `;
+    document.body.appendChild(banner);
+
+    document.getElementById('installBtn').addEventListener('click', async () => {
+        banner.remove();
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        deferredPrompt = null;
+    });
+}
+
+// --- Sharing Logic ---
+function shareToWhatsApp(propId) {
+    const prop = properties.find(p => p.id == propId);
+    if (!prop) return;
+
+    const lang = currentLang;
+    const title = prop.title[lang] || prop.title['en'];
+    const price = prop.price;
+    const url = window.location.origin + '/property.html?id=' + propId;
+    
+    const text = encodeURIComponent(`🚀 Check out this property on 88Loft!\n\n🏠 ${title}\n💰 Price: ${price}\n📍 Area: ${prop.area}\n\nView details: ${url}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function initAutocomplete() {
+    const input = document.getElementById('searchInput');
+    if (!input) return;
+
+    // Create dropdown container if not exists
+    let dropdown = document.getElementById('autocompleteDropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = 'autocompleteDropdown';
+        dropdown.className = 'autocomplete-dropdown';
+        input.parentElement.appendChild(dropdown);
+    }
+
+    input.addEventListener('input', (e) => {
+        const term = e.target.value.trim().toLowerCase();
+        if (term.length < 2) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        // Generate suggestions from properties
+        const suggestions = [];
+        const seen = new Set();
+
+        properties.forEach(p => {
+            const titleEn = (p.title?.en || '').toLowerCase();
+            const titleZh = (p.title?.zh || '').toLowerCase();
+            const locEn = (p.location?.en || '').toLowerCase();
+            const locZh = (p.location?.zh || '').toLowerCase();
+
+            // Match Building/Project Name
+            [titleEn, titleZh].forEach(t => {
+                if (t.includes(term) && !seen.has(t)) {
+                    suggestions.push({ text: t, type: 'building', icon: 'fa-building' });
+                    seen.add(t);
+                }
+            });
+
+            // Match Area/Location
+            [locEn, locZh].forEach(l => {
+                if (l.includes(term) && !seen.has(l)) {
+                    suggestions.push({ text: l, type: 'area', icon: 'fa-map-marker-alt' });
+                    seen.add(l);
+                }
+            });
+        });
+
+        // Limit and Render
+        const topSuggestions = suggestions.slice(0, 8);
+        if (topSuggestions.length > 0) {
+            dropdown.innerHTML = topSuggestions.map(s => `
+                <div class="autocomplete-item" onclick="selectAutocomplete('${s.text.replace(/'/g, "\\'")}')">
+                    <i class="fas ${s.icon}"></i>
+                    <span class="item-text">${s.text}</span>
+                    <span class="item-type">${s.type}</span>
+                </div>
+            `).join('');
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+}
+
+function selectAutocomplete(text) {
+    const input = document.getElementById('searchInput');
+    if (input) {
+        input.value = text;
+        document.getElementById('autocompleteDropdown').style.display = 'none';
+        handleSearch();
+    }
+}
+
+function initScrollTop() {
+    let btn = document.getElementById('scrollTopBtn');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'scrollTopBtn';
+        btn.className = 'scroll-top-btn';
+        btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        document.body.appendChild(btn);
+        
+        btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 400) {
+            btn.classList.add('show');
+        } else {
+            btn.classList.remove('show');
+        }
+    });
+}
+
+function renderSkeletons() {
+    const grid = document.getElementById('propertyGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+        const skeleton = document.createElement('div');
+        skeleton.className = 'skeleton-card';
+        skeleton.innerHTML = `
+            <div class="skeleton-image"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text" style="width: 40%"></div>
+            <div class="skeleton-price"></div>
+            <div class="skeleton-footer"></div>
+        `;
+        grid.appendChild(skeleton);
+    }
+}
 
 function changeLanguage(lang) {
     currentLang = lang;
@@ -1997,6 +2209,112 @@ function doCompare() {
     window.location.href = url;
 }
 
+// ---- UI Enhancements: Skeleton, ScrollTop, Autocomplete ----
+
+function renderSkeletons(count = 12) {
+    const grid = document.getElementById('propertyGrid');
+    if (!grid) return;
+    grid.innerHTML = Array(count).fill(0).map(() => `
+        <div class="property-card skeleton">
+            <div class="skeleton skeleton-img"></div>
+            <div style="padding:20px;">
+                <div class="skeleton skeleton-text" style="width:90%"></div>
+                <div class="skeleton skeleton-text" style="width:60%"></div>
+                <div class="skeleton skeleton-price"></div>
+                <div style="display:flex; gap:10px;">
+                    <div class="skeleton skeleton-text" style="width:30%"></div>
+                    <div class="skeleton skeleton-text" style="width:30%"></div>
+                    <div class="skeleton skeleton-text" style="width:30%"></div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function initAutocomplete() {
+    const input = document.getElementById('searchInput');
+    if (!input) return;
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'search-autocomplete';
+    input.parentNode.appendChild(dropdown);
+
+    input.addEventListener('input', (e) => {
+        const val = e.target.value.trim().toLowerCase();
+        if (val.length < 1) { dropdown.classList.remove('active'); return; }
+
+        const matches = [];
+        
+        // 1. Search in Area Mappings
+        Object.keys(areaMappings).forEach(key => {
+            const alias = areaMappings[key];
+            const found = alias.find(a => a.toLowerCase().includes(val));
+            if (found) matches.push({ type: 'location', label: found, icon: 'fa-map-marker-alt' });
+        });
+
+        // 2. Search in Property Titles
+        properties.forEach(p => {
+            const title = (typeof p.title === 'string' ? p.title : (p.title[currentLang] || p.title.en)).toLowerCase();
+            if (title.includes(val)) {
+                matches.push({ type: 'property', label: title, icon: 'fa-home', id: p.id });
+            }
+        });
+
+        // Unique and limited matches
+        const uniqueMatches = [];
+        const seen = new Set();
+        for (const m of matches) {
+            if (!seen.has(m.label)) {
+                seen.add(m.label);
+                uniqueMatches.push(m);
+            }
+            if (uniqueMatches.length >= 10) break;
+        }
+
+        if (uniqueMatches.length > 0) {
+            dropdown.innerHTML = uniqueMatches.map(m => `
+                <div class="autocomplete-item" onclick="${m.type === 'property' ? `window.location.href='/property.html?id=${m.id}'` : `applyAutocomplete('${m.label}')`}">
+                    <i class="fas ${m.icon}"></i>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-size:0.95rem;">${m.label.replace(new RegExp(val, 'gi'), match => `<span class="match">${match}</span>`)}</span>
+                        <span style="font-size:0.7rem; color:#64748b; text-transform:uppercase;">${m.type === 'location' ? '地區 (Area)' : '樓盤 (Property)'}</span>
+                    </div>
+                </div>
+            `).join('');
+            dropdown.classList.add('active');
+        } else {
+            dropdown.classList.remove('active');
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !dropdown.contains(e.target)) dropdown.classList.remove('active');
+    });
+}
+
+function applyAutocomplete(val) {
+    const input = document.getElementById('searchInput');
+    if (input) {
+        input.value = val;
+        document.querySelector('.search-autocomplete')?.classList.remove('active');
+        handleSearch();
+    }
+}
+
+function initScrollTop() {
+    const btn = document.createElement('div');
+    btn.className = 'scroll-top-btn';
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 400) btn.classList.add('show');
+        else btn.classList.remove('show');
+    });
+
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ---- Init on DOMContentLoaded ----
 document.addEventListener('DOMContentLoaded', () => {
     initFilterChips('filterBeds', 'beds');
@@ -2006,10 +2324,28 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWishlistBadge();
     renderSavedSearches();
     renderCompareTray();
+    
+    // New Enhancements
+    initAutocomplete();
+    initScrollTop();
 
     // ESC closes filter drawer
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeFilterDrawer(); document.getElementById('savedSearchesDropdown')?.classList.remove('show'); } });
+    document.addEventListener('keydown', e => { 
+        if (e.key === 'Escape') { 
+            closeFilterDrawer(); 
+            document.getElementById('savedSearchesDropdown')?.classList.remove('show'); 
+            document.querySelector('.search-autocomplete')?.classList.remove('active');
+        } 
+    });
+
+    // Patch fetchPropertiesFromDB to show skeletons
+    const _origFetch = fetchPropertiesFromDB;
+    window.fetchPropertiesFromDB = async function() {
+        renderSkeletons();
+        return _origFetch();
+    };
 });
+
 function filterByCategory(type) {
     console.log("Filtering by category:", type);
     // Update active state in mobile pills
@@ -2083,5 +2419,60 @@ window.LiveActivityManager = {
 
 // Initialize Live manager
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.LiveActivityManager) window.LiveActivityManager.start();
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+        });
+    }
 });
+
+async function handleSubscription(event) {
+    if (event) event.preventDefault();
+    const emailInput = event.target.querySelector('input[type="email"]');
+    const email = emailInput.value;
+    if (!email) return;
+
+    try {
+        const response = await fetch('/api/subscriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert(currentLang === 'en' ? 'Subscribed successfully!' : '訂閱成功！');
+            emailInput.value = '';
+        } else {
+            alert(data.error || 'Subscription failed');
+        }
+    } catch (err) {
+        console.error('Subscription error:', err);
+        alert('Network error');
+    }
+}
+
+// ---- Region Awareness ----
+function initRegion() {
+    const path = window.location.pathname;
+    let region = 'hk';
+    if (path.includes('jp.html')) region = 'jp';
+    else if (path.includes('cn.html')) region = 'cn';
+    else if (path.includes('usa.html')) region = 'usa';
+    else if (path.includes('hk.html')) region = 'hk';
+    else {
+        // If on a sub-page, get from storage
+        region = localStorage.getItem('88loft_region') || 'hk';
+    }
+    
+    localStorage.setItem('88loft_region', region);
+    
+    // Update all back links on the page
+    document.querySelectorAll('a[href="/hk.html"]').forEach(link => {
+        if (!link.classList.contains('logo-link')) { // Keep logo pointing to home or current region
+            link.href = `/${region}.html`;
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initRegion);

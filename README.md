@@ -51,6 +51,7 @@ Congratulations! Your property application is ready for launch.
 ## 🔒 Security
 - Ensure `admin.html` is protected if users sign up.
 - The default Admin PIN is `8888`. Change this in `admin.html` script section if needed.
+- **Emergency Restore**: In the Admin Dashboard (Maintenance tab), use "Restore 2 Props Only" to reset the database to the core listings (AVA 228 & Ocean View).
 
 ---
 **Launched by Antigravity AI**

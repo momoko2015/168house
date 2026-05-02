@@ -260,6 +260,8 @@
                         class="fas fa-envelope"></i> Inquiries</a></li>
             <li class="nav-item"><a href="#" class="nav-link" onclick="showTab('users')"><i
                         class="fas fa-users"></i> Users</a></li>
+            <li class="nav-item"><a href="#" class="nav-link" onclick="showTab('subscriptions')"><i
+                        class="fas fa-bell"></i> Subscriptions</a></li>
             <li class="nav-item"><a href="#" class="nav-link" onclick="showTab('maintenance')"><i
                         class="fas fa-tools"></i> Maintenance</a></li>
         </ul>
@@ -306,6 +308,11 @@
                     <i class="fas fa-bell"></i>
                     <div class="stat-value" id="unreadCount" style="color: #ef4444;">---</div>
                     <div class="stat-label">Unread Messages</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-value" id="totalSubs">---</div>
+                    <div class="stat-label">Newsletter Subs</div>
                 </div>
             </div>
 
@@ -409,6 +416,26 @@
             </div>
         </div>
 
+        <div id="subscriptionsTab" class="admin-tab" style="display: none;">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 style="font-size: 1.3rem;">Newsletter Subscriptions</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email Address</th>
+                            <th>Subscribed Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscriptionsTable">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="maintenanceTab" class="admin-tab" style="display: none;">
             <div class="content-card">
                 <div class="card-header">
@@ -432,6 +459,12 @@
                         <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
                         <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">Wipe all properties and images from the database. This action is **permanent** and cannot be undone.</p>
                         <button class="btn-primary" style="width: 100%; background: #ef4444;" onclick="deleteAllProperties()"><i class="fas fa-trash-alt"></i> Wipe All Data</button>
+                    </div>
+
+                    <div style="background: rgba(114, 50, 242, 0.05); padding: 30px; border-radius: 20px; border: 1px solid rgba(114, 50, 242, 0.1);">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--accent-color);"><i class="fas fa-undo"></i> Emergency Restore</h3>
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">Restore the 2 core properties (AVA 228 and Ocean View) to the live database. This will **WIPE** all other properties.</p>
+                        <button class="btn-primary" style="width: 100%; background: var(--accent-color);" onclick="restoreStandardData()"><i class="fas fa-first-aid"></i> Restore 2 Props Only</button>
                     </div>
                 </div>
             </div>
@@ -490,6 +523,7 @@
             if (tab === 'properties') loadAllProperties();
             if (tab === 'inquiries') loadAllInquiries();
             if (tab === 'users') loadAllUsers();
+            if (tab === 'subscriptions') loadAllSubscriptions();
         }
 
         async function initAdmin() {
@@ -513,6 +547,7 @@
                 document.getElementById('premiumCount').textContent = data.premium_properties;
                 document.getElementById('totalInq').textContent = data.inquiries;
                 document.getElementById('unreadCount').textContent = data.unread_inquiries;
+                document.getElementById('totalSubs').textContent = data.subscriptions || 0;
 
                 // Also load recent inquiries
                 loadRecentInquiries();
@@ -629,6 +664,21 @@
             } catch (err) { console.error(err); }
         }
 
+        async function loadAllSubscriptions() {
+            try {
+                const res = await fetch(API_BASE + '/api/subscriptions');
+                const data = await res.json();
+                const tbody = document.getElementById('subscriptionsTable');
+                tbody.innerHTML = data.map(sub => `
+                    <tr>
+                        <td>#${sub.id}</td>
+                        <td style="font-weight: 600;">${sub.email}</td>
+                        <td style="opacity: 0.7; font-size: 0.85rem;">${new Date(sub.created_at).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
         async function bulkDeleteProps() {
             const checkboxes = document.querySelectorAll('.prop-checkbox:checked');
             if (checkboxes.length === 0) return alert("Please select properties to delete.");
@@ -678,6 +728,22 @@
                     loadAllProperties();
                 }
             } catch (err) { alert("Action failed: " + err); }
+        }
+
+        async function restoreStandardData() {
+            if (!confirm("This will WIPE all properties and restore ONLY AVA 228 and Ocean View. Proceed?")) return;
+            
+            try {
+                const res = await fetch(API_BASE + '/api/admin/restore-standard-data', { method: 'POST' });
+                if (res.ok) {
+                    alert("Emergency restoration successful! 2 properties restored.");
+                    loadStats();
+                    loadAllProperties();
+                } else {
+                    const data = await res.json();
+                    alert("Restoration failed: " + data.message);
+                }
+            } catch (err) { alert("Restoration failed: " + err); }
         }
 
         async function handleDbRestoreUpload(event) {

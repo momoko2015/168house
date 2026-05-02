@@ -84,6 +84,14 @@
     </a>
 </div>
 
+<div class="container" style="margin-top: 20px; max-width: 1300px; margin: 20px auto 0; padding: 0 5%;">
+    <div class="breadcrumbs" style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+        <a href="/hk.html" style="color: #94a3b8; text-decoration: none;">首頁</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <span style="color: white; font-weight: 600;">我的收藏</span>
+    </div>
+</div>
+
 <div class="wishlist-container">
     <div class="wishlist-hero">
         <div>
@@ -112,7 +120,7 @@
 
 <script>
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:8000' : 'https://www.88loft.com';
+    ? 'http://localhost:8000' : '';
 
 function parseCurrency(str) {
     if (!str) return 0;
@@ -178,7 +186,7 @@ function renderWishlist() {
     grid.innerHTML = props.map(p => {
         const title = p.title?.zh || p.title?.en || p.title || '樓盤';
         const loc = p.location?.zh || p.location?.en || p.location || '';
-        const img = p.image || 'https://via.placeholder.com/300x200?text=No+Photo';
+        const img = p.image ? (p.image.startsWith('/uploads/') ? API_BASE + p.image : p.image) : 'https://via.placeholder.com/300x200?text=No+Photo';
         const typeLabel = p.type === 'rent' ? '租盤' : '售盤';
         return `
             <div class="wishlist-card" id="wcard-${p.id}">

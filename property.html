@@ -92,6 +92,16 @@
     <span class="prop-id-badge" id="propIdBadge">Loading...</span>
 </nav>
 
+<div class="container" style="margin-top: 20px;">
+    <div class="breadcrumbs" style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+        <a href="/hk.html" style="color: #94a3b8; text-decoration: none;">首頁</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <span id="breadcrumbArea">...</span>
+        <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <span style="color: white; font-weight: 600;" id="breadcrumbTitle">樓盤詳情</span>
+    </div>
+</div>
+
 <div class="property-page">
     <div id="loadingState" class="loading-spinner">
         <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#7232f2;"></i><br><br>載入樓盤資料...
@@ -233,6 +243,9 @@
     // In-browser LocalStorage key for comments
     const COMMENTS_KEY = `prop_comments_${propId}`;
 
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000' : '';
+
     if (!propId) {
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('errorState').style.display = 'block';
@@ -245,7 +258,7 @@
 
     async function loadProperty() {
         try {
-            const res = await fetch(`/api/properties/${propId}`);
+            const res = await fetch(`${API_BASE}/api/properties/${propId}`);
             if (!res.ok) throw new Error('not found');
             const p = await res.json();
             currentProp = p;
@@ -281,6 +294,10 @@
         document.getElementById('propPoster').textContent = p.poster_name;
         document.getElementById('propPosterEmail').textContent = p.poster_email;
 
+        // Update Breadcrumbs
+        if (document.getElementById('breadcrumbArea')) document.getElementById('breadcrumbArea').textContent = p.area || (p.type === 'rent' ? '租盤' : '售盤');
+        if (document.getElementById('breadcrumbTitle')) document.getElementById('breadcrumbTitle').textContent = title;
+
         // Update Map Links
         const headerMapLink = document.getElementById('headerMapLink');
         if (headerMapLink) headerMapLink.href = `/map.html?id=${p.id}`;
@@ -295,7 +312,9 @@
         }
 
         // Gallery
-        const allImgs = [p.image, ...(p.images || [])].filter(Boolean);
+        let allImgs = [p.image, ...(p.images || [])].filter(Boolean);
+        allImgs = allImgs.map(img => img.startsWith('/uploads/') ? API_BASE + img : img);
+        
         const mainPhoto = document.getElementById('mainPhoto');
         mainPhoto.src = allImgs[0] || 'https://via.placeholder.com/800x420?text=No+Photo';
         mainPhoto.onerror = function(){ this.src='https://via.placeholder.com/800x420?text=No+Photo'; };
@@ -489,7 +508,7 @@
         const msg = document.getElementById('inquiryMsg').value.trim();
         if (!name || !email || !msg) { alert('請填寫所有欄位'); return; }
         try {
-            await fetch('/api/inquiries', {
+            await fetch(`${API_BASE}/api/inquiries`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ property_id: propId, name, email, message: msg })
@@ -511,7 +530,7 @@
     // Load similar properties after main property loads
     async function loadSimilarProperties(propId) {
         try {
-            const res = await fetch(`/api/properties/similar/${propId}`);
+            const res = await fetch(`${API_BASE}/api/properties/similar/${propId}`);
             if (!res.ok) return;
             const similar = await res.json();
             if (!similar || similar.length === 0) return;
@@ -523,7 +542,7 @@
             scroll.innerHTML = similar.map(p => {
                 const title = p.title?.zh || p.title?.en || p.title || '樓盤';
                 const loc = p.location?.zh || p.location?.en || p.location || '';
-                const img = p.image || 'https://via.placeholder.com/240x140?text=No+Photo';
+                const img = p.image ? (p.image.startsWith('/uploads/') ? API_BASE + p.image : p.image) : 'https://via.placeholder.com/240x140?text=No+Photo';
                 return `
                     <a href="/property.html?id=${p.id}" class="similar-prop-card">
                         <img src="${img}" alt="${title}" onerror="this.src='https://via.placeholder.com/240x140?text=No+Photo'">

@@ -10,7 +10,13 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="/utils.js?v=11"></script>
+    <script src="utils.js?v=11"></script>
+    <script src="districts.js"></script>
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- SortableJS for rearranging photos -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         body {
             background: #0f172a;
@@ -29,10 +35,10 @@
         }
 
         .edit-card {
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
             padding: 40px;
-            border-radius: 20px;
+            border-radius: 24px;
         }
 
         .form-group {
@@ -42,53 +48,174 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
             color: #94a3b8;
+            font-size: 0.9rem;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
             outline: none;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus {
             border-color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(114, 50, 242, 0.1);
         }
 
         .btn-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 40px;
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
             margin-top: 10px;
         }
 
         .feature-checkbox {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 0.85rem;
             color: #94a3b8;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feature-checkbox:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
         }
 
         .feature-checkbox input {
             width: auto;
             cursor: pointer;
+        }
+
+        #mapPicker {
+            height: 350px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Gallery Styles */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            min-height: 100px;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: move;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.02);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            transition: background 0.2s;
+        }
+
+        .gallery-item .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        .gallery-item .sort-handle {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            pointer-events: none;
+        }
+
+        .custom-file-upload {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--accent-color);
+            background: rgba(114, 50, 242, 0.05);
+        }
+
+        .file-upload-label i {
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+
+        #propFile {
+            display: none;
         }
     </style>
 </head>
@@ -96,16 +223,19 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar glass">
-        <div class="logo">28精選樓盤</div>
+        <div class="logo-container" style="display: flex; align-items: center; gap: 12px;">
+            <img src="/logo.png" alt="88loft" style="height: 32px; border-radius: 6px;">
+            <span style="font-weight: 800; font-size: 1.2rem;">88loft</span>
+        </div>
         <ul class="nav-links" style="margin-left: auto;">
-            <li><a href="/login.html">返回控制台</a></li>
+            <li><a href="/admin.html" class="btn-outline" style="padding: 8px 15px; font-size: 0.9rem;">返回控制台</a></li>
         </ul>
     </nav>
 
     <div class="edit-container">
         <div class="edit-card glass">
-            <h3><i class="fas fa-edit"></i> 編輯樓盤</h3>
-            <p style="color: #94a3b8; margin-bottom: 30px;">更新您的物業資訊。</p>
+            <h2 style="margin-bottom: 10px;"><i class="fas fa-edit" style="color: var(--accent-color);"></i> 編輯樓盤</h2>
+            <p style="color: #94a3b8; margin-bottom: 35px; font-size: 0.95rem;">更新物業資訊，確保地圖定位準確。</p>
 
             <form id="editForm">
                 <div class="form-group">
@@ -119,7 +249,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>物業名稱 (Property Title)</label>
+                    <label id="lblTitle">物業名稱 (Property Title)</label>
                     <input type="text" id="propTitle" placeholder="例如：西九龍 凱旋門 高層單位" required>
                     <input type="hidden" id="propTitleCN">
                     <input type="hidden" id="propTitleEN">
@@ -127,28 +257,55 @@
                 </div>
 
                 <div class="form-group">
-                    <label>地點 (Location)</label>
+                    <label id="lblDistrict">地區 (District)</label>
+                    <select id="propDistrict" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white;">
+                        <option value="">-- 選擇地區 (Select District) --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="lblLocation">地點 (Location)</label>
                     <input type="text" id="propLocation" placeholder="例如：尖沙咀 柯士甸道" required>
                     <input type="hidden" id="propLocationCN">
                     <input type="hidden" id="propLocationEN">
                     <input type="hidden" id="propLocationJP">
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <!-- Map Section -->
+                <div class="form-group">
+                    <label>地圖定位 (Map Location)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+                        <div>
+                            <span style="font-size: 0.75rem; color: #64748b;">緯度 (Latitude)</span>
+                            <input type="number" id="propLat" step="any" oninput="syncMapFromInputs()">
+                        </div>
+                        <div>
+                            <span style="font-size: 0.75rem; color: #64748b;">經度 (Longitude)</span>
+                            <input type="number" id="propLng" step="any" oninput="syncMapFromInputs()">
+                        </div>
+                    </div>
+                    <button type="button" class="btn-outline" style="width: 100%; padding: 10px; font-size: 0.85rem; margin-bottom: 10px;" onclick="lookupAddress()">
+                        <i class="fas fa-search-location"></i> 根據地點自動定位 (Auto-locate by Address)
+                    </button>
+                    <div id="mapPicker"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group">
                         <label>種類 (Type)</label>
                         <select id="propType" required>
                             <option value="rent">租盤 (Rent)</option>
                             <option value="sale">售盤 (Sale)</option>
+                            <option value="commercial">商業 (Commercial)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>價格 (Price)</label>
-                        <input type="text" id="propPrice" required>
+                        <input type="text" id="propPrice" placeholder="例如: 15,000" required>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                     <div class="form-group">
                         <label>房間 (Beds)</label>
                         <input type="number" id="propBeds" min="0" required>
@@ -163,85 +320,72 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>圖片網址 (Image URL)</label>
-                        <input type="url" id="propImage">
-                    </div>
-                    <div class="form-group">
-                        <label>影片網址 (Video URL)</label>
-                        <input type="url" id="propVideo">
-                    </div>
-                </div>
-
                 <div class="form-group">
-                    <label>上載新相片 (Upload New Photos)</label>
-                    <input type="file" id="propFile" accept="image/*" multiple style="padding: 8px;"
-                        onchange="previewImagesSelected('propFile', 'imagePreview')">
-                    <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
-                    <div id="uploadStatus" style="font-size: 0.8rem; color: var(--accent-color); margin-top: 5px;">
+                    <label>相片管理 (Photo Management)</label>
+                    <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;">拖放相片可調整排序，第一張將作為主圖。</p>
+                    <div id="gallerySortable" class="gallery-container">
+                        <!-- Loaded existing photos here -->
                     </div>
+                    
+                    <div class="custom-file-upload">
+                        <input type="file" id="propFile" accept="image/*" multiple onchange="handleNewPhotos(this)">
+                        <label for="propFile" class="file-upload-label">
+                            <i class="fas fa-plus-circle"></i>
+                            <span style="font-weight: 600;">新增相片 / Add Photos</span>
+                            <span style="font-size: 0.8rem; color: #64748b;">支持多選上傳</span>
+                        </label>
+                    </div>
+                    <div id="uploadStatus" style="font-size: 0.8rem; color: var(--accent-color); margin-top: 10px; text-align: center;"></div>
                 </div>
 
                 <div class="form-group">
                     <label>物業特色 (Features)</label>
                     <div class="features-grid">
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景"> 海景</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適"> 寧靜舒適</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵"> 鄰近地鐵</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀"> 開揚景觀</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修"> 高級裝修</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高"> 實用率高</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景"> 🌊 海景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="山景"> ⛰️ 山景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="園景"> 🌳 園景</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀"> 🏙️ 開揚景觀</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵"> 🚇 鄰近地鐵</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="住客泳池"> 🏊 住客泳池</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="健身設施"> 🏋️ 健身設施</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="停車位"> 🚗 停車位</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="住客會所"> 🏠 住客會所</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修"> ✨ 高級裝修</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高"> 📏 實用率高</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適"> 🤫 寧靜舒適</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="連露台"> 🌿 連露台</label>
+                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寵物友善"> 🐾 寵物友善</label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>物業特色</label>
-                    <div class="features-grid">
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="海景"> 海景</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="寧靜舒適"> 寧靜舒適</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="鄰近地鐵"> 鄰近地鐵</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="開揚景觀"> 開揚景觀</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="高級裝修"> 高級裝修</label>
-                        <label class="feature-checkbox"><input type="checkbox" name="feature" value="實用率高"> 實用率高</label>
+                    <label>影片網址 (Video URL)</label>
+                    <input type="url" id="propVideo" placeholder="https://youtube.com/...">
+                </div>
+
+                <!-- Premium Promotion -->
+                <div id="premiumPromo" style="display: none; background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 16px; padding: 20px; margin-top: 30px;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <div style="width: 50px; height: 50px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-crown" style="color: #ffd700; font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h4 style="color: #ffd700;">升級為精選樓盤</h4>
+                            <p style="font-size: 0.8rem; color: #94a3b8;">置頂曝光、專屬展示標籤，提升 5 倍查詢量。</p>
+                        </div>
                     </div>
+                    <button type="button" class="btn-primary" style="width: 100%; margin-top: 15px; background: #ffd700; color: #000; font-weight: bold; border: none;"
+                        onclick="window.location.href='/payment.html?id=' + propId">
+                        立即升級
+                    </button>
                 </div>
 
-        </div>
-        <!-- Premium Promotion CTA -->
-        <div id="premiumPromo"
-            style="display: none; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1)); border: 1px solid #ffd700; border-radius: 12px; padding: 20px; margin-top: 25px; animation: glow 2s ease-in-out infinite alternate;">
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <i class="fas fa-crown" style="font-size: 2rem; color: #ffd700;"></i>
-                <div>
-                    <h4 style="color: #ffd700; margin-bottom: 5px;">升級為精選樓盤</h4>
-                    <p style="font-size: 0.8rem; color: #cbd5e1;">置頂您的樓盤，獲得優先曝光權以及專屬金邊展示。</p>
+                <div class="btn-grid">
+                    <button type="button" class="btn-outline" onclick="window.location.href='/login.html'">取消</button>
+                    <button type="submit" id="submitBtn" class="btn-primary">儲存所有更改</button>
                 </div>
-            </div>
-            <button type="button" class="btn-primary"
-                style="width: 100%; margin-top: 15px; background: #ffd700; color: #1a1a2e; font-weight: bold; border: none;"
-                onclick="window.location.href='/payment.html?id=' + propId">
-                立即升級
-            </button>
-            <style>
-                @keyframes glow {
-                    from {
-                        box-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
-                    }
-
-                    to {
-                        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-                    }
-                }
-            </style>
+            </form>
         </div>
-
-        <div class="btn-grid">
-            <button type="button" class="btn-outline" onclick="window.location.href='/login.html'">取消</button>
-            <button type="submit" class="btn-primary">儲存更變</button>
-        </div>
-        </form>
-    </div>
     </div>
 
     <!-- Notification Toast -->
@@ -250,65 +394,168 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const propId = urlParams.get('id');
+        let currentProp = null;
+        let galleryItems = []; // Array of image URLs
+        let pickerMap, pickerMarker;
 
-        if (!propId) {
-            window.location.href = '/login.html';
+        if (!propId) window.location.href = '/login.html';
+
+        // Initialize Map
+        function initMap(lat = 22.3193, lng = 114.1694) {
+            if (pickerMap) return;
+            pickerMap = L.map('mapPicker').setView([lat, lng], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(pickerMap);
+
+            pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+            
+            pickerMarker.on('dragend', function() {
+                const pos = pickerMarker.getLatLng();
+                document.getElementById('propLat').value = pos.lat.toFixed(6);
+                document.getElementById('propLng').value = pos.lng.toFixed(6);
+            });
+
+            pickerMap.on('click', function(e) {
+                pickerMarker.setLatLng(e.latlng);
+                document.getElementById('propLat').value = e.latlng.lat.toFixed(6);
+                document.getElementById('propLng').value = e.latlng.lng.toFixed(6);
+            });
+        }
+
+        function syncMapFromInputs() {
+            const lat = parseFloat(document.getElementById('propLat').value);
+            const lng = parseFloat(document.getElementById('propLng').value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                pickerMarker.setLatLng([lat, lng]);
+                pickerMap.setView([lat, lng]);
+            }
+        }
+
+        async function lookupAddress() {
+            const area = document.getElementById('propArea').value;
+            const location = document.getElementById('propLocation').value;
+            if (!location) return showToast("請先輸入地點");
+
+            const query = `${location}, ${area === 'HK' ? 'Hong Kong' : area}`;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    document.getElementById('propLat').value = lat;
+                    document.getElementById('propLng').value = lon;
+                    pickerMap.setView([lat, lon], 16);
+                    pickerMarker.setLatLng([lat, lon]);
+                    showToast("定位成功！");
+                } else {
+                    showToast("找不到地點，請手動標記。");
+                }
+            } catch (err) { showToast("定位出錯。"); }
+        }
+
+        // Gallery Management
+        function renderGallery() {
+            const container = document.getElementById('gallerySortable');
+            container.innerHTML = galleryItems.map((url, index) => `
+                <div class="gallery-item" data-url="${url}">
+                    <img src="${url}" alt="Gallery ${index}">
+                    <button type="button" class="remove-btn" onclick="removeImage(${index})"><i class="fas fa-times"></i></button>
+                    <div class="sort-handle">${index === 0 ? '主圖' : index + 1}</div>
+                </div>
+            `).join('');
+
+            // Init Sortable
+            new Sortable(container, {
+                animation: 150,
+                onEnd: function() {
+                    const newItems = [];
+                    container.querySelectorAll('.gallery-item').forEach(el => {
+                        newItems.push(el.dataset.url);
+                    });
+                    galleryItems = newItems;
+                    renderGallery();
+                }
+            });
+        }
+
+        function removeImage(index) {
+            galleryItems.splice(index, 1);
+            renderGallery();
+        }
+
+        async function handleNewPhotos(input) {
+            if (!input.files.length) return;
+            const status = document.getElementById('uploadStatus');
+            status.textContent = `正在上傳 ${input.files.length} 張相片...`;
+            
+            try {
+                for (let i = 0; i < input.files.length; i++) {
+                    const url = await uploadImage(input.files[i], i + 1, input.files.length);
+                    galleryItems.push(url);
+                }
+                status.textContent = "上傳成功！";
+                renderGallery();
+            } catch (err) {
+                showToast("上傳失敗");
+                status.textContent = "";
+            }
+            input.value = ''; // Reset input
         }
 
         async function loadProperty() {
             try {
-                const response = await fetch(API_BASE + '/api/properties');
+                const response = await fetch(`${API_BASE}/api/properties/${propId}`);
                 if (response.ok) {
-                    const properties = await response.json();
-                    const prop = properties.find(p => p.id == propId);
+                    const prop = await response.json();
+                    currentProp = prop;
 
-                    if (prop) {
-                        document.getElementById('propTitle').value = prop.title.zh || prop.title;
-                        document.getElementById('propTitleEN').value = prop.title.en || '';
-                        document.getElementById('propTitleCN').value = prop.title.cn || '';
-                        document.getElementById('propTitleJP').value = prop.title.jp || '';
+                    // Basic Info
+                    document.getElementById('propTitle').value = prop.title.zh || prop.title;
+                    document.getElementById('propTitleEN').value = prop.title.en || '';
+                    document.getElementById('propTitleCN').value = prop.title.cn || '';
+                    document.getElementById('propTitleJP').value = prop.title.jp || '';
 
-                        document.getElementById('propLocation').value = prop.location.zh || prop.location;
-                        document.getElementById('propLocationEN').value = prop.location.en || '';
-                        document.getElementById('propLocationCN').value = prop.location.cn || '';
-                        document.getElementById('propLocationJP').value = prop.location.jp || '';
+                    document.getElementById('propLocation').value = prop.location.zh || prop.location;
+                    document.getElementById('propLocationEN').value = prop.location.en || '';
+                    document.getElementById('propLocationCN').value = prop.location.cn || '';
+                    document.getElementById('propLocationJP').value = prop.location.jp || '';
 
-                        let cleanedPrice = prop.price.replace('HK$ ', '').replace('/mo', '').replace(/,/g, '');
-                        document.getElementById('propPrice').value = cleanedPrice;
+                    document.getElementById('propArea').value = prop.area || 'HK';
+                    document.getElementById('propType').value = prop.type;
+                    
+                    let cleanedPrice = prop.price.replace('HK$ ', '').replace('¥ ', '').replace('$ ', '').replace('/mo', '').replace(/,/g, '');
+                    document.getElementById('propPrice').value = cleanedPrice;
 
-                        document.getElementById('propType').value = prop.type;
-                        document.getElementById('propBeds').value = prop.beds;
-                        document.getElementById('propBaths').value = prop.baths;
-                        document.getElementById('propSqft').value = prop.sqft;
-                        document.getElementById('propImage').value = prop.image;
-                        document.getElementById('propVideo').value = prop.video || '';
-                        document.getElementById('propArea').value = prop.area || 'HK';
+                    document.getElementById('propBeds').value = prop.beds;
+                    document.getElementById('propBaths').value = prop.baths;
+                    document.getElementById('propSqft').value = prop.sqft;
+                    document.getElementById('propVideo').value = prop.video || '';
 
-                        // Pre-fill features
-                        if (prop.features) {
-                            const featList = prop.features.split(',');
-                            document.querySelectorAll('input[name="feature"]').forEach(cb => {
-                                if (featList.includes(cb.value)) cb.checked = true;
-                            });
-                        }
+                    // Map
+                    const lat = prop.lat || 22.3193;
+                    const lng = prop.lng || 114.1694;
+                    document.getElementById('propLat').value = lat;
+                    document.getElementById('propLng').value = lng;
+                    initMap(lat, lng);
 
-                        // Show/Hide premium promo
-                        if (!prop.is_premium) {
-                            document.getElementById('premiumPromo').style.display = 'block';
-                        }
+                    // Gallery
+                    galleryItems = [prop.image, ...(prop.images || [])].filter(url => url && url.trim() !== '');
+                    renderGallery();
 
-                        window.currentGallery = prop.images || [];
-                        
-                        // Update labels based on loaded area
-                        updateFormLabels(prop.area || 'HK');
-                    } else {
-                        alert("找不到該物業");
-                        window.location.href = '/login.html';
+                    // Features
+                    if (prop.features) {
+                        const featList = prop.features.split(',');
+                        document.querySelectorAll('input[name="feature"]').forEach(cb => {
+                            if (featList.includes(cb.value)) cb.checked = true;
+                        });
                     }
+
+                    if (!prop.is_premium) document.getElementById('premiumPromo').style.display = 'block';
+                    updateFormLabels(prop.area || 'HK');
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function updateFormLabels(region) {
@@ -316,76 +563,91 @@
             const locLbl = document.getElementById('lblLocation');
             const titleInput = document.getElementById('propTitle');
             const locInput = document.getElementById('propLocation');
+            const propDistrict = document.getElementById('propDistrict');
+
+            // Update Districts Dropdown
+            if (propDistrict) {
+                const currentDist = currentProp?.location?.en || '';
+                propDistrict.innerHTML = '<option value="">-- 選擇地區 (Select District) --</option>';
+                const districts = REGIONAL_DISTRICTS[region] || [];
+                districts.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.en;
+                    opt.dataset.zh = d.zh;
+                    opt.dataset.cn = d.cn;
+                    opt.dataset.jp = d.jp;
+                    opt.dataset.en = d.en;
+                    opt.innerText = `${d.zh} (${d.en})`;
+                    if (currentDist.includes(d.en)) opt.selected = true;
+                    propDistrict.appendChild(opt);
+                });
+            }
 
             if (region === 'JP') {
-                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - JP)";
-                if (locLbl) locLbl.innerText = "地點 (Location - JP)";
-                if (titleInput) titleInput.placeholder = "例：東京 渋谷区 高級マンション";
-                if (locInput) locInput.placeholder = "例：東京都渋谷区...";
+                titleLbl.innerText = "物業名稱 (Property Title - JP)";
+                locLbl.innerText = "詳細地點 (Detailed Location - JP)";
+                titleInput.placeholder = "例：東京 渋谷区 高級マンション";
+                locInput.placeholder = "例：1-1-1 Nishi-Shinjuku";
             } else if (region === 'USA') {
-                if (titleLbl) titleLbl.innerText = "Property Title (English)";
-                if (locLbl) locLbl.innerText = "Location (English)";
-                if (titleInput) titleInput.placeholder = "e.g. Luxury Apartment in Manhattan";
-                if (locInput) locInput.placeholder = "e.g. 5th Ave, New York";
+                titleLbl.innerText = "Property Title (English)";
+                locLbl.innerText = "Detailed Location (English)";
+                titleInput.placeholder = "e.g. Luxury Apartment in Manhattan";
+                locInput.placeholder = "e.g. 5th Ave, New York";
             } else if (region === 'China') {
-                if (titleLbl) titleLbl.innerText = "物业名称 (Property Title - CN)";
-                if (locLbl) locLbl.innerText = "地点 (Location - CN)";
-                if (titleInput) titleInput.placeholder = "例如：上海 浦东新区 豪宅";
-                if (locInput) locInput.placeholder = "例如：上海市浦东新区...";
+                titleLbl.innerText = "物业名称 (Property Title - CN)";
+                locLbl.innerText = "详细地点 (Detailed Location - CN)";
+                titleInput.placeholder = "例如：上海 浦东新区 豪宅";
+                locInput.placeholder = "例如：浦东新区 某某路 123号";
             } else {
-                if (titleLbl) titleLbl.innerText = "物業名稱 (Property Title - HK)";
-                if (locLbl) locLbl.innerText = "地點 (Location - HK)";
-                if (titleInput) titleInput.placeholder = "例如：西九龍 凱旋門 高層單位";
-                if (locInput) locInput.placeholder = "例如：尖沙咀 柯士甸道";
+                titleLbl.innerText = "物業名稱 (Property Title - HK)";
+                locLbl.innerText = "詳細地點 (Detailed Location - HK)";
+                titleInput.placeholder = "例如：西九龍 凱旋門 高層單位";
+                locInput.placeholder = "例如：柯士甸道 1 號";
             }
         }
 
-        document.getElementById('propArea')?.addEventListener('change', (e) => {
-            updateFormLabels(e.target.value);
+        document.getElementById('propArea').addEventListener('change', (e) => updateFormLabels(e.target.value));
+
+        document.getElementById('propDistrict').addEventListener('change', (e) => {
+            const opt = e.target.options[e.target.selectedIndex];
+            if (!opt.value) return;
+            // Also set initial value of detail location if empty
+            const locInput = document.getElementById('propLocation');
+            if (!locInput.value || locInput.value === currentProp?.location?.zh) {
+                // If it was just the district name before, or empty, let's reset it to the new district name
+                // so the user can then add the specific street
+                locInput.value = opt.dataset.zh;
+            }
         });
 
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const uploadStatus = document.getElementById('uploadStatus');
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在儲存...';
 
-            let imageUrl = document.getElementById('propImage').value;
-            let galleryUrls = window.currentGallery || [];
-            const fileInput = document.getElementById('propFile');
-
-            if (fileInput.files.length > 0) {
-                submitBtn.disabled = true;
-                try {
-                    let newUploads = [];
-                    for (let i = 0; i < fileInput.files.length; i++) {
-                        const url = await uploadImage(fileInput.files[i], i + 1, fileInput.files.length);
-                        newUploads.push(url);
-                    }
-                    imageUrl = newUploads[0];
-                    galleryUrls = newUploads.slice(1);
-                    uploadStatus.textContent = "所有新相片上傳成功！";
-                } catch (err) {
-                    showToast("相片上傳失敗，請重試。");
-                    uploadStatus.textContent = "";
-                    submitBtn.disabled = false;
-                    return;
-                }
-            }
-
-            const typeValue = document.getElementById('propType').value;
             const areaValue = document.getElementById('propArea').value;
-            let currency = "HK$ ";
-            if (areaValue === 'JP') currency = "¥ ";
-            else if (areaValue === 'USA') currency = "$ ";
-            else if (areaValue === 'China') currency = "¥ ";
-
+            const typeValue = document.getElementById('propType').value;
             const priceInput = document.getElementById('propPrice').value;
-            let finalPrice = priceInput;
-            if (!priceInput.includes('$') && !priceInput.includes('¥')) {
-                finalPrice = currency + priceInput + (typeValue === 'rent' ? '/mo' : '');
-            }
+            
+            let currency = areaValue === 'USA' ? '$ ' : (areaValue === 'HK' ? 'HK$ ' : '¥ ');
+            let finalPrice = currency + priceInput + (typeValue === 'rent' ? '/mo' : '');
 
             const selectedFeatures = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(cb => cb.value).join(',');
+
+            const locValue = document.getElementById('propLocation').value;
+            const distSelect = document.getElementById('propDistrict');
+            const distOpt = distSelect.options[distSelect.selectedIndex];
+            
+            let locObj = { en: locValue, zh: locValue, cn: locValue, jp: locValue };
+            if (distOpt && distOpt.value) {
+                locObj = {
+                    en: `${locValue}, ${distOpt.dataset.en}`,
+                    zh: `${distOpt.dataset.zh} ${locValue}`,
+                    cn: `${distOpt.dataset.cn} ${locValue}`,
+                    jp: `${distOpt.dataset.jp} ${locValue}`
+                };
+            }
 
             const updatedListing = {
                 title: { 
@@ -394,40 +656,38 @@
                     cn: document.getElementById('propTitleCN').value || document.getElementById('propTitle').value,
                     jp: document.getElementById('propTitleJP').value || document.getElementById('propTitle').value
                 },
-                location: { 
-                    en: document.getElementById('propLocationEN').value || document.getElementById('propLocation').value, 
-                    zh: document.getElementById('propLocation').value,
-                    cn: document.getElementById('propLocationCN').value || document.getElementById('propLocation').value,
-                    jp: document.getElementById('propLocationJP').value || document.getElementById('propLocation').value
-                },
+                location: locObj,
                 price: finalPrice,
                 type: typeValue,
                 beds: parseInt(document.getElementById('propBeds').value) || 0,
                 baths: parseInt(document.getElementById('propBaths').value) || 0,
                 sqft: parseInt(document.getElementById('propSqft').value) || 0,
-                image: imageUrl,
-                images: galleryUrls,
+                image: galleryItems[0] || '',
+                images: galleryItems.slice(1),
                 video: document.getElementById('propVideo').value,
-                area: document.getElementById('propArea').value,
-                features: selectedFeatures
+                area: areaValue,
+                features: selectedFeatures,
+                lat: parseFloat(document.getElementById('propLat').value) || 0,
+                lng: parseFloat(document.getElementById('propLng').value) || 0
             };
 
             try {
-                const res = await fetch(API_BASE + `/api/properties/${propId}`, {
+                const res = await fetch(`${API_BASE}/api/properties/${propId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updatedListing)
                 });
                 if (res.ok) {
-                    showToast("更新成功！正在返回...");
-                    setTimeout(() => { window.location.href = '/login.html'; }, 1500);
+                    showToast("更新成功！");
+                    setTimeout(() => window.location.href = '/login.html', 1500);
                 } else {
-                    showToast("更新失敗。");
+                    showToast("更新失敗");
                 }
-            } catch (e) {
-                showToast("連線錯誤。");
+            } catch (err) {
+                showToast("連線錯誤");
             } finally {
                 submitBtn.disabled = false;
+                submitBtn.innerText = '儲存所有更改';
             }
         };
 

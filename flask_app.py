@@ -16,6 +16,55 @@ UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
+STANDARD_PROPERTIES = [
+    {
+        "title_en": "AVA 228 - Sham Shui Po",
+        "title_zh": "AVA 228 - 深水埗",
+        "title_cn": "AVA 228 - 深水埗",
+        "title_jp": "AVA 228 - 深水埗",
+        "location_en": "228 Sham Shui Po, Kowloon",
+        "location_zh": "深水埗區 深水埗 228 號",
+        "location_cn": "深水埗区 深水埗 228 号",
+        "location_jp": "深水埗区 深水埗 228 号",
+        "price": "HK$ 4,500,000",
+        "type": "sale",
+        "beds": 1,
+        "baths": 1,
+        "sqft": 250,
+        "image": "/uploads/ava 1.jpeg",
+        "features": "住宅, 近地鐵, 全新裝修",
+        "area": "HK",
+        "lat": 22.3308,
+        "lng": 114.1622,
+        "is_premium": 1,
+        "user_id": 1,
+        "gallery": ["/uploads/ava 1.jpeg", "/uploads/ava 2.jpeg", "/uploads/ava 3.jpeg", "/uploads/ava 4.jpeg", "/uploads/ava 5.jpeg"]
+    },
+    {
+        "title_en": "Ocean View - Luxury Sea View Villa",
+        "title_zh": "太平洋山莊 - 豪華海景別墅",
+        "title_cn": "太平洋山庄 - 豪华海景别墅",
+        "title_jp": "太平洋山荘 - 豪華海景別荘",
+        "location_en": "1 Tai Shui Hang, Sha Tin",
+        "location_zh": "沙田區 沙田 大水坑 1 號",
+        "location_cn": "沙田区 沙田 大水坑 1 号",
+        "location_jp": "沙田区 沙田 大水坑 1 号",
+        "price": "HK$ 15,000,000",
+        "type": "sale",
+        "beds": 3,
+        "baths": 2,
+        "sqft": 1200,
+        "image": "/uploads/IMG_7121.jpeg",
+        "features": "住宅, 無敵海景, 豪華裝修, 連車位",
+        "area": "HK",
+        "lat": 22.4056,
+        "lng": 114.2070,
+        "is_premium": 1,
+        "user_id": 1,
+        "gallery": ["/uploads/IMG_7121.jpeg", "/uploads/IMG_7122.jpeg"]
+    }
+]
+
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -53,6 +102,11 @@ def init_db():
                   reset_expiry INTEGER,
                   created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
     
+    c.execute('''CREATE TABLE IF NOT EXISTS subscriptions
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  email TEXT UNIQUE,
+                  created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
+    
     # Ensure reset_code column exists for older DBs
     c.execute("PRAGMA table_info(users)")
     user_columns = [row[1] for row in c.fetchall()]
@@ -85,14 +139,41 @@ def init_db():
     if 'price_history' not in columns: c.execute("ALTER TABLE properties ADD COLUMN price_history TEXT") # JSON list
     if 'user_id' not in columns: c.execute("ALTER TABLE properties ADD COLUMN user_id INTEGER DEFAULT 1")
     
+    c.execute('''CREATE TABLE IF NOT EXISTS room_wanted
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  user_id INTEGER,
+                  title TEXT,
+                  location TEXT,
+                  budget TEXT,
+                  description TEXT,
+                  contact_info TEXT,
+                  move_in_date TEXT,
+                  duration TEXT,
+                  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY(user_id) REFERENCES users(id))''')
+    
     # Multilingual Support
     if 'title_cn' not in columns: c.execute("ALTER TABLE properties ADD COLUMN title_cn TEXT")
     if 'title_jp' not in columns: c.execute("ALTER TABLE properties ADD COLUMN title_jp TEXT")
     if 'location_cn' not in columns: c.execute("ALTER TABLE properties ADD COLUMN location_cn TEXT")
     if 'location_jp' not in columns: c.execute("ALTER TABLE properties ADD COLUMN location_jp TEXT")
     
+    # Auto-restore if empty
+    count = c.execute("SELECT COUNT(*) FROM properties").fetchone()[0]
+    if count == 0:
+        for p in STANDARD_PROPERTIES:
+            res = c.execute('''INSERT INTO properties 
+                        (title_en, title_zh, title_cn, title_jp, location_en, location_zh, location_cn, location_jp, price, type, beds, baths, sqft, image, features, area, lat, lng, is_premium, user_id, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))''', 
+                        (p['title_en'], p['title_zh'], p.get('title_cn'), p.get('title_jp'), p['location_en'], p['location_zh'], p.get('location_cn'), p.get('location_jp'), p['price'], p['type'], p['beds'], p['baths'], p['sqft'], p['image'], p['features'], p['area'], p['lat'], p['lng'], p['is_premium'], p['user_id']))
+            prop_id = res.lastrowid
+            for img in p.get('gallery', []):
+                c.execute('INSERT INTO property_images (property_id, image_path) VALUES (?, ?)', (prop_id, img))
+    
     conn.commit()
     conn.close()
+
+
 
 # Initialize Database on Start
 init_db()
@@ -121,11 +202,11 @@ def after_request(response):
         response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Vary'] = 'Origin'
     else:
-        response.headers['Access-Control-Allow-Origin'] = origin if origin else '*'
+        response.headers['Access-Control-Allow-Origin'] = '*'
     
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
     response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-    # Removed strict Access-Control-Allow-Credentials to avoid browser enforcement issues with Wix domains
+    response.headers['Access-Control-Max-Age'] = '86400'
     # Allow the app to be embedded in Wix iframes from 88loft.com
     response.headers['X-Frame-Options'] = 'ALLOWALL'
     response.headers['Content-Security-Policy'] = (
@@ -134,7 +215,18 @@ def after_request(response):
     )
     return response
 
-# Handle OPTIONS preflight requests globally via after_request; no separate route needed.
+# Handle OPTIONS preflight for all /api/* routes
+@app.route('/api/', defaults={'path': ''}, methods=['OPTIONS'])
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+def handle_options(path=''):
+    from flask import make_response
+    resp = make_response('', 200)
+    origin = request.headers.get('Origin', '*')
+    resp.headers['Access-Control-Allow-Origin'] = origin if origin else '*'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization,X-Requested-With'
+    resp.headers['Access-Control-Max-Age'] = '86400'
+    return resp
 # serve_static below handles OPTIONS for static files via methods=['GET','HEAD','OPTIONS'].
 
 # Removed WWW Redirect as it intercepts traffic and sends to broken Wix domain
@@ -528,13 +620,40 @@ def get_admin_stats():
     inq_count = conn.execute('SELECT COUNT(*) FROM inquiries').fetchone()[0]
     unread_inq = conn.execute('SELECT COUNT(*) FROM inquiries WHERE is_read = 0').fetchone()[0]
     premium_count = conn.execute('SELECT COUNT(*) FROM properties WHERE is_premium = 1').fetchone()[0]
+    sub_count = conn.execute('SELECT COUNT(*) FROM subscriptions').fetchone()[0]
     conn.close()
     return jsonify({
         'properties': prop_count,
         'inquiries': inq_count,
         'unread_inquiries': unread_inq,
-        'premium_properties': premium_count
+        'premium_properties': premium_count,
+        'subscriptions': sub_count
     })
+
+@app.route('/api/subscriptions', methods=['GET'])
+def get_subscriptions():
+    conn = get_db_connection()
+    rows = conn.execute('SELECT * FROM subscriptions ORDER BY id DESC').fetchall()
+    subs = [dict(row) for row in rows]
+    conn.close()
+    return jsonify(subs)
+
+@app.route('/api/subscriptions', methods=['POST'])
+def add_subscription():
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+    
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO subscriptions (email) VALUES (?)', (email,))
+        conn.commit()
+        return jsonify({"status": "success", "message": "Subscribed successfully"}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({"status": "success", "message": "Already subscribed"}), 200
+    finally:
+        conn.close()
 
 @app.route('/api/inquiries', methods=['GET'])
 def get_inquiries():
@@ -692,6 +811,45 @@ def upload_file():
         return jsonify({"url": "/uploads/" + filename})
     except Exception as e:
         import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+# ── Room Wanted APIs ────────────────────────────────────────────────────────
+@app.route('/api/wanted', methods=['GET'])
+def get_room_wanted():
+    conn = get_db_connection()
+    rows = conn.execute('''SELECT room_wanted.*, users.name as user_name, users.email as user_email 
+                          FROM room_wanted 
+                          LEFT JOIN users ON room_wanted.user_id = users.id 
+                          ORDER BY room_wanted.id DESC''').fetchall()
+    wanted = [dict(row) for row in rows]
+    conn.close()
+    return jsonify(wanted)
+
+@app.route('/api/wanted', methods=['POST'])
+def add_room_wanted():
+    data = request.json
+    conn = get_db_connection()
+    try:
+        conn.execute('''INSERT INTO room_wanted 
+                     (user_id, title, location, budget, description, contact_info, move_in_date, duration) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                     (data.get('user_id'), data['title'], data['location'], data['budget'], 
+                      data['description'], data['contact_info'], data.get('move_in_date'), data.get('duration')))
+        conn.commit()
+        return jsonify({"status": "success"}), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/wanted/<int:wanted_id>', methods=['DELETE'])
+def delete_room_wanted(wanted_id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM room_wanted WHERE id = ?', (wanted_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success"})
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
@@ -811,7 +969,39 @@ def serve_static(path):
     file_path = os.path.join(app.root_path, path)
     if os.path.exists(file_path):
         return send_from_directory(app.root_path, path)
-    return abort(404)
+    return render_404(404)
+
+@app.errorhandler(404)
+def render_404(e):
+    return send_from_directory(app.root_path, '404.html'), 404
+
+@app.route('/api/admin/restore-standard-data', methods=['POST'])
+def restore_standard_data():
+    conn = get_db_connection()
+    try:
+        # Clear existing data
+        conn.execute('DELETE FROM property_images')
+        conn.execute('DELETE FROM properties')
+        
+        for p in STANDARD_PROPERTIES:
+            # Insert property
+            res = conn.execute('''INSERT INTO properties 
+                        (title_en, title_zh, title_cn, title_jp, location_en, location_zh, location_cn, location_jp, price, type, beds, baths, sqft, image, features, area, lat, lng, is_premium, user_id, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))''', 
+                        (p['title_en'], p['title_zh'], p.get('title_cn'), p.get('title_jp'), p['location_en'], p['location_zh'], p.get('location_cn'), p.get('location_jp'), p['price'], p['type'], p['beds'], p['baths'], p['sqft'], p['image'], p['features'], p['area'], p['lat'], p['lng'], p['is_premium'], p['user_id']))
+            
+            prop_id = res.lastrowid
+            
+            # Insert gallery
+            for img in p.get('gallery', []):
+                conn.execute('INSERT INTO property_images (property_id, image_path) VALUES (?, ?)', (prop_id, img))
+        
+        conn.commit()
+        return jsonify({"status": "success", "message": "Restored 2 standard properties"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
